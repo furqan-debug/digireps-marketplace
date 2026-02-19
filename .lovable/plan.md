@@ -1,156 +1,122 @@
 
+# UI/UX Design Redesign — TopTier Marketplace
 
-# Curated Freelance Marketplace MVP
+## What's Being Improved
 
-## Overview
-A controlled, quality-first freelance marketplace where clients are matched with vetted freelancers through a service-first discovery flow. No open search, no external contact sharing — all communication and payments stay on-platform.
-
----
-
-## Phase 1: Foundation — Auth, Roles & Profiles
-
-### Authentication & Roles
-- Email/password signup and login for all users
-- Three roles: **Client**, **Freelancer**, **Admin**
-- Role assigned at signup (client vs freelancer application) with admin role managed separately
-- Role-based route protection throughout the app
-
-### Client Profile
-- Name, company (optional), country/timezone
-- Simple onboarding after signup
-
-### Freelancer Application & Profile
-- Freelancers apply with: name/alias, country/timezone, skills, years of experience, a short bio
-- Status: **pending → approved / rejected** (admin decides)
-- Once approved, freelancer completes profile visible to clients:
-  - First name or alias only
-  - Country/timezone, skills, experience years
-  - Verified badge + level (verified/pro/elite)
-  - Rating display
-
-### Admin Panel (Users)
-- View all freelancer applications
-- Approve or reject freelancers
-- Suspend any user (client or freelancer)
+After reviewing all 14 pages and components, the current UI is functional but flat and utilitarian. The improvements target visual hierarchy, empty states, spatial rhythm, interactive feedback, and the overall premium feel that matches the "top 1% freelancers" brand positioning.
 
 ---
 
-## Phase 2: Services, Discovery & Portfolio
+## Core Design Principles Applied
 
-### Service Categories
-- 5 preset categories: **Web Development, UI/UX Design, Video Editing, Copywriting, Mobile Development**
-- Seeded in the database, not editable in MVP
-
-### Portfolio System
-- Freelancers upload portfolio images to platform storage (Supabase Storage)
-- No external links allowed — images hosted on-platform only
-- Portfolio images displayed on freelancer's limited profile
-
-### Client Discovery Flow
-- Client selects a **service category**
-- Optionally sets **budget range** and **timeline**
-- System returns **top 5–10 approved freelancers** for that service, sorted by level and rating
-- No search bar, no browsing — service-first only
-- Client sees the limited profile (no email, phone, links)
+- **Depth & Surface**: Cards gain proper shadow tokens, gradient accents, and subtle glassmorphism in the header.
+- **Visual Hierarchy**: Every page gets a stronger hero/header section with stat pills and descriptive context.
+- **Status Communication**: Color-coded status badges become pill-shaped with icon prefixes throughout.
+- **Empty States**: Replace blank "No items found" cards with illustrated, action-oriented empty states.
+- **Spacing & Rhythm**: Consistent vertical rhythm via `space-y-8` on pages, tighter card internal spacing.
+- **Motion**: Framer Motion stagger animations on list items and page-level fade-ins.
+- **Level Badges**: Verified/Pro/Elite get distinct icon treatment (shield/star/crown).
 
 ---
 
-## Phase 3: Project Briefs & Orders
+## Files to Change
 
-### Project Brief Submission
-- Client selects a freelancer and submits a project brief:
-  - Title, description, budget (minimum $100), deadline
-- Brief sent to freelancer as a project invitation
+### 1. `src/index.css` — Global token enhancements
+- Add a `.gradient-text` utility class for the primary→accent gradient.
+- Add `.card-glass` utility for the frosted glass card variant.
+- Improve scrollbar styling for the chat window.
 
-### Order Lifecycle
-- **Statuses**: pending → accepted → in_progress → delivered → completed / disputed
-- Freelancer accepts or declines the brief
-- On acceptance, client "pays" → simulated escrow (money held status in DB)
-- Freelancer marks as delivered
-- Client approves → escrow released (simulated), order completed
-- Platform commission percentage tracked in the order record
+### 2. `src/pages/Index.tsx` — Landing page
+- Hero section: Add a large background gradient orb behind the headline, a "How it works" 3-step section, and a social proof row (e.g., "500+ vetted freelancers").
+- Navigation: Add a subtle gradient underline on hover for nav links.
+- Service cards: Become taller tiles with gradient icon containers and a hover lift effect.
+- Footer: Expand with two columns (Company, Product links).
 
-### Refund Rules (Simulated)
-- Admin can trigger refund if freelancer fails to deliver or misses deadline
-- Refund status tracked in orders table
+### 3. `src/pages/Auth.tsx` — Login / Signup
+- Split layout: Left panel shows the brand logo, tagline, and 3 bullet trust points. Right panel has the form.
+- Role selector cards get larger with icons (Search for client, Briefcase for freelancer).
+- Add a subtle animated gradient to the left panel background.
+
+### 4. `src/pages/ClientDashboard.tsx` — Client home
+- Add a greeting banner with a gradient background pill showing the user's name.
+- Quick stats row: Total orders, active orders, completed — fetched live.
+- Cards become larger with richer descriptions and icon containers that use gradient backgrounds.
+
+### 5. `src/pages/FreelancerDashboard.tsx` — Freelancer home
+- Status alert becomes a prominent banner (pending = amber gradient, rejected = red, suspended = red).
+- Level card shows a visual progress bar (placeholder) with the level icon (crown for elite, star for pro, shield for verified).
+- Quick stats: total jobs, avg rating (if approved).
+
+### 6. `src/pages/AdminDashboard.tsx` — Admin home
+- Stat cards become large metric cards with trend indicators and colored left borders.
+- Add a "Platform Health" section header.
+
+### 7. `src/pages/client/Discover.tsx` — Find talent
+- Category selector: Larger tiles in a responsive grid with gradient icon backgrounds.
+- Active category gets a filled gradient pill style.
+- Freelancer result cards: Avatar initials get a gradient ring. Level badge uses icon (crown/star/shield). Add an experience bar showing years. Animate cards in with stagger.
+
+### 8. `src/pages/client/FreelancerProfile.tsx` — Freelancer detail
+- Hero card: Full-width gradient header band, avatar with gradient border ring, level badge is prominent.
+- Stats row: Rating, experience, reviews count as pill chips.
+- Portfolio grid: Larger aspect ratio, image hover reveals title overlay with fade.
+- Reviews: Each review card shows a mini star row + time ago formatting.
+- CTA button: Full-width gradient "Hire [Name]" button pinned at bottom of hero.
+
+### 9. `src/pages/client/SubmitBrief.tsx` — Submit brief
+- Two-column layout on desktop: form left, summary panel right showing freelancer info and a checklist of what happens next.
+- Budget input gets a proper currency prefix inline styling.
+- Progress indicator (Step 1 of 1) for future multi-step expansion.
+
+### 10. `src/pages/Orders.tsx` — My Orders (shared)
+- Filter tabs: All / Active / Completed / Disputed.
+- Each order card gets a colored left border based on status color.
+- Escrow status shown as a secondary pill next to order status.
+- Empty state has an action button (Find Talent for client, Edit Profile for freelancer).
+
+### 11. `src/pages/OrderDetail.tsx` — Order + Chat
+- Order header: Split into a left info column and right status/actions column.
+- Action buttons grouped into a contextual action panel with clear step labels ("Step: Confirm payment", "Step: Awaiting delivery").
+- Chat window: Messages get sender initials avatar, timestamps formatted as "10:30 AM". Violation warning is a dismissible toast-style banner.
+- Rating form: Becomes a modal-style overlay panel with animated star selection.
+
+### 12. `src/pages/freelancer/EditProfile.tsx` — Edit profile
+- Two-column layout: form fields left, live preview card right showing what clients will see.
+- Portfolio upload area becomes a dashed drop-zone with upload icon.
+- Skills input shows a count badge ("8 skills").
+
+### 13. `src/pages/admin/Applications.tsx` — Freelancer applications
+- Add a summary bar: "X pending, Y approved, Z rejected" count chips.
+- Each applicant card gets a prominent avatar with gradient background.
+- Approve/Reject are separated with clear visual distinction (green outline / red filled).
+
+### 14. `src/pages/admin/AdminUsers.tsx` — Users
+- Replace the flat card list with a proper table layout using the existing `table.tsx` component.
+- Role badge colors: Client = blue, Freelancer = purple, Admin = orange.
+- Suspended users get a muted row with a visual indicator.
+
+### 15. `src/pages/admin/AdminOrders.tsx` — Orders
+- Status filter tabs above the list.
+- Each order row shows escrow status as a secondary badge.
+- Refund button requires a confirmation click (double-click pattern or inline confirm prompt).
+
+### 16. `src/pages/admin/Violations.tsx` — Violations log
+- Add a severity header: Users with 2+ violations highlighted in amber, 3+ in red.
+- Each violation card gets a red left border and a monospace code block for the blocked content.
+- "Already suspended" badge shown if user is suspended.
+
+### 17. `src/components/AppShell.tsx` — Navigation shell
+- Header: Add a subtle gradient underline on the active nav link.
+- Add a user avatar circle (initials) next to the sign-out button.
+- Mobile: Improve the icon-only nav with tooltips.
 
 ---
 
-## Phase 4: Real-Time Chat with Anti-Bypass
+## Technical Approach
 
-### Chat System
-- Real-time messaging between client and freelancer per project/order
-- Built on Supabase Realtime subscriptions
-- Messages stored in database with sender, timestamp, content
-
-### Anti-Bypass Rules (enforced server-side via Edge Function)
-- Before saving a message, scan content for:
-  - Email patterns
-  - Phone number patterns
-  - URLs
-  - Blocked words: gmail, whatsapp, telegram, instagram, skype, discord, etc.
-- If violation detected:
-  - Message is **blocked** (not sent)
-  - Warning shown: *"Sharing contact info is against platform rules."*
-  - Violation logged in a violations table
-- **3 violations → automatic account suspension**
-
----
-
-## Phase 5: Ratings & Freelancer Levels
-
-### Rating System
-- After order completion, both client and freelancer leave a rating (1–5 stars) and optional review text
-- Ratings displayed on freelancer profile
-- Average rating calculated and shown
-
-### Freelancer Levels
-- **Verified** (default on approval)
-- **Pro** — after 5+ completed jobs, 4.5+ avg rating, no violations
-- **Elite** — after 15+ completed jobs, 4.8+ avg rating, fast response time, no violations
-- Level upgrades managed by admin in MVP (not auto-calculated)
-
----
-
-## Phase 6: Admin Panel (Full)
-
-### Admin Dashboard
-- **Freelancer management**: approve/reject applications, suspend users, upgrade levels
-- **Order oversight**: view all orders, trigger refunds
-- **Violation log**: view all chat violations, see user violation counts
-- **Service categories**: view active categories
-- **User list**: view all clients and freelancers, suspension controls
-
----
-
-## Security & Access Rules
-
-- **Freelancer profiles**: clients never see email, phone, external links, or social media
-- **Chat messages**: validated server-side before storage; violations blocked
-- **Row-Level Security**: every table has RLS policies ensuring users only access their own data; admins access everything via a secure role-check function
-- **Freelancer visibility**: only approved freelancers appear in discovery
-- **Budget minimum**: $100 enforced on project brief submission
-
----
-
-## Pages Summary
-
-| Page | Who sees it |
-|------|------------|
-| Landing / Home | Everyone |
-| Login / Signup | Everyone |
-| Client Dashboard | Client |
-| Service Selection + Freelancer Results | Client |
-| Freelancer Profile (limited view) | Client |
-| Submit Project Brief | Client |
-| My Orders | Client & Freelancer |
-| Order Detail + Chat | Client & Freelancer |
-| Freelancer Dashboard | Freelancer |
-| Freelancer Application | Freelancer (pre-approval) |
-| Edit My Profile + Portfolio | Freelancer |
-| Admin Dashboard | Admin |
-| Admin: Freelancer Applications | Admin |
-| Admin: Users | Admin |
-| Admin: Orders | Admin |
-| Admin: Violations | Admin |
-
+- No new dependencies are needed — framer-motion is already installed.
+- All changes are pure CSS/Tailwind/TSX — no schema or backend changes.
+- Existing Supabase data fetching logic is preserved exactly. Only presentation layers change.
+- `framer-motion` `AnimatePresence` + `motion.div` used for list stagger effects.
+- Shared badge/status color maps are moved to a central helper to avoid duplication.
+- The `AppShell` navigation improvement works alongside the existing role detection logic.
