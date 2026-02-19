@@ -7,19 +7,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Briefcase, User, Star, ArrowRight, Clock, Crown, Shield, AlertCircle } from "lucide-react";
+import { Briefcase, User, Star, ArrowRight, Clock, Crown, Shield, AlertCircle, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 const STATUS_CONFIG = {
-  pending:  { label: "Under Review",  className: "bg-warning/15 text-warning border-warning/30" },
-  approved: { label: "Approved",      className: "bg-success/15 text-success border-success/30" },
-  rejected: { label: "Rejected",      className: "bg-destructive/10 text-destructive border-destructive/30" },
+  pending: { label: "Under Review", className: "bg-warning/15 text-warning border-warning/30" },
+  approved: { label: "Approved", className: "bg-success/15 text-success border-success/30" },
+  rejected: { label: "Rejected", className: "bg-destructive/10 text-destructive border-destructive/30" },
+  onboarding: { label: "Incomplete", className: "bg-muted text-muted-foreground border-border" },
 };
 
 const LEVEL_CONFIG = {
-  verified: { icon: Shield,  label: "Verified",  progress: 33,  color: "text-muted-foreground",  bg: "bg-secondary" },
-  pro:      { icon: Star,    label: "Pro",       progress: 66,  color: "text-primary",            bg: "bg-primary/10" },
-  elite:    { icon: Crown,   label: "Elite",     progress: 100, color: "text-warning",            bg: "bg-warning/15" },
+  verified: { icon: Shield, label: "Verified", progress: 33, color: "text-muted-foreground", bg: "bg-secondary" },
+  pro: { icon: Star, label: "Pro", progress: 66, color: "text-primary", bg: "bg-primary/10" },
+  elite: { icon: Crown, label: "Elite", progress: 100, color: "text-warning", bg: "bg-warning/15" },
 };
 
 const containerVariants = {
@@ -37,7 +38,7 @@ const FreelancerDashboard = () => {
   const [stats, setStats] = useState({ totalJobs: 0, avgRating: null as number | null });
 
   const status = profile?.application_status as keyof typeof STATUS_CONFIG | null;
-  const statusCfg = status ? STATUS_CONFIG[status] : STATUS_CONFIG.pending;
+  const statusCfg = status ? STATUS_CONFIG[status] : STATUS_CONFIG.onboarding;
   const isApproved = status === "approved" && !profile?.is_suspended;
   const level = profile?.freelancer_level ?? "verified";
   const levelCfg = LEVEL_CONFIG[level];
@@ -59,150 +60,174 @@ const FreelancerDashboard = () => {
 
   return (
     <AppShell>
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-12">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1 className="font-display text-3xl sm:text-4xl font-bold">
-                Welcome, {profile?.display_name?.split(" ")[0] || "Freelancer"} 👋
+          <div className="flex flex-wrap items-end justify-between gap-6 pb-2 border-b border-border/40">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 border border-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary mb-2">
+                <Sparkles className="h-3 w-3" /> Freelancer Center
+              </div>
+              <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight">
+                Welcome, <span className="gradient-text">{profile?.display_name?.split(" ")[0] || "Elite Partner"}</span>
               </h1>
-              <p className="text-muted-foreground mt-1.5">Manage your profile and incoming projects.</p>
+              <p className="text-muted-foreground text-base max-w-lg">Execute projects, manage your elite profile, and track your commercial performance.</p>
             </div>
-            <Badge className={`${statusCfg.className} border text-sm px-3 py-1`}>{statusCfg.label}</Badge>
+            <Badge className={`${statusCfg.className} rounded-xl border px-4 py-1.5 text-xs font-bold uppercase tracking-wider`}>{statusCfg.label}</Badge>
           </div>
         </motion.div>
 
         {/* Status banners */}
-        {(!status || status === "pending") && (
+        {!status && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-            <div className="rounded-xl border border-warning/30 bg-gradient-to-r from-warning/10 to-warning/5 p-5">
-              <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-warning/20">
-                  <Clock className="h-4 w-4 text-warning" />
+            <div className="rounded-[2.5rem] border-2 border-dashed border-primary/20 bg-primary/5 p-10 text-center space-y-6">
+              <div className="flex h-20 w-20 items-center justify-center rounded-[2rem] bg-background border border-primary/20 shadow-sm mx-auto">
+                <User className="h-10 w-10 text-primary" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="font-display text-3xl font-bold tracking-tight text-foreground">Complete Your Identity</h2>
+                <p className="text-muted-foreground text-sm max-w-lg mx-auto leading-relaxed">
+                  Your profile is the first step to joining our elite network. Complete your bio, skills, and categories to submit your application for review.
+                </p>
+              </div>
+              <Button
+                onClick={() => navigate("/freelancer/profile")}
+                className="rounded-2xl h-14 px-10 gap-3 bg-primary text-primary-foreground shadow-elegant hover:scale-[1.02] transition-transform font-bold"
+              >
+                Finalize Profile <ArrowRight className="h-5 w-5" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {status === "pending" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+            <div className="rounded-[2.5rem] border border-warning/20 bg-gradient-to-br from-warning/10 to-transparent p-10 shadow-sm">
+              <div className="flex items-start gap-6">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-warning/10 border border-warning/20">
+                  <Clock className="h-7 w-7 text-warning" />
                 </div>
-                <div>
-                  <p className="font-semibold text-warning">Application Under Review</p>
-                  <p className="text-muted-foreground mt-0.5 text-sm">
-                    An admin will review your profile and approve or reject it. Keep your profile complete to improve your chances.
+                <div className="space-y-2">
+                  <p className="text-2xl font-display font-bold text-warning">Application Under Review</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl">
+                    Our compliance team is currently verifying your credentials. Maintaining an elite network requires rigorous vetting. You will be notified via email once approved.
                   </p>
                 </div>
               </div>
             </div>
           </motion.div>
         )}
-        {status === "rejected" && (
-          <div className="rounded-xl border border-destructive/30 bg-gradient-to-r from-destructive/10 to-destructive/5 p-5">
-            <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-destructive/20">
-                <AlertCircle className="h-4 w-4 text-destructive" />
-              </div>
-              <div>
-                <p className="font-semibold text-destructive">Application Rejected</p>
-                <p className="text-muted-foreground mt-0.5 text-sm">
-                  Your application was not approved. Update your profile and contact support if needed.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-        {profile?.is_suspended && (
-          <div className="rounded-xl border border-destructive/30 bg-gradient-to-r from-destructive/10 to-destructive/5 p-5">
-            <p className="font-semibold text-destructive">Account Suspended</p>
-            <p className="text-muted-foreground mt-0.5 text-sm">Your account has been suspended due to policy violations.</p>
-          </div>
-        )}
 
-        {/* Stats (only if approved) */}
+        {/* Stats Grid */}
         {isApproved && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.4 }}
-            className="grid grid-cols-2 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-6"
           >
-            <div className="rounded-xl border border-border/60 bg-card p-4 text-center shadow-sm">
-              <div className="text-2xl font-display font-bold text-primary">{stats.totalJobs}</div>
-              <div className="text-xs text-muted-foreground mt-1">Completed Jobs</div>
+            <div className="group relative rounded-[2rem] border border-border/40 bg-card p-8 transition-all hover:shadow-elegant hover:border-primary/20">
+              <div className="absolute top-6 right-8">
+                <Briefcase className="h-6 w-6 opacity-20 group-hover:opacity-40 transition-opacity text-primary" />
+              </div>
+              <div className="text-5xl font-display font-bold mb-2 text-primary">{stats.totalJobs}</div>
+              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Completed Projects</div>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card p-4 text-center shadow-sm">
-              <div className="text-2xl font-display font-bold text-primary">
+            <div className="group relative rounded-[2rem] border border-border/40 bg-card p-8 transition-all hover:shadow-elegant hover:border-primary/20">
+              <div className="absolute top-6 right-8">
+                <Star className="h-6 w-6 opacity-20 group-hover:opacity-40 transition-opacity text-warning" />
+              </div>
+              <div className="text-5xl font-display font-bold mb-2 text-warning">
                 {stats.avgRating != null ? stats.avgRating.toFixed(1) : "—"}
               </div>
-              <div className="text-xs text-muted-foreground mt-1">Avg Rating</div>
+              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Customer Satisfaction</div>
             </div>
           </motion.div>
         )}
 
-        {/* Cards */}
+        {/* Main Actions */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="show"
-          className="grid gap-5 sm:grid-cols-3"
+          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
           <motion.div variants={itemVariants}>
             <Card
-              className="cursor-pointer hover:shadow-elegant hover:border-primary/30 transition-all group h-full"
+              className="group cursor-pointer rounded-[2rem] border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant overflow-hidden h-full"
               onClick={() => navigate("/freelancer/profile")}
             >
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl icon-gradient mb-2">
-                  <User className="h-5 w-5 text-primary" />
+              <CardHeader className="p-8">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl icon-gradient mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <User className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle className="font-display text-lg flex items-center justify-between">
-                  My Profile
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <CardTitle className="font-display text-2xl font-bold">
+                  Elite Profile
                 </CardTitle>
-                <CardDescription>Edit your bio, skills, and portfolio to attract more clients</CardDescription>
+                <CardDescription className="text-sm leading-relaxed pt-2">
+                  Update your commercial bio, technical stack, and portfolio to maintain elite status.
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button variant="outline" size="sm" className="w-full">Edit Profile</Button>
+              <CardContent className="p-8 pt-0">
+                <div className="flex items-center text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                  Maintain Profile <ArrowRight className="h-4 w-4 ml-2" />
+                </div>
               </CardContent>
             </Card>
           </motion.div>
 
           <motion.div variants={itemVariants}>
             <Card
-              className={`transition-all h-full ${isApproved ? "cursor-pointer hover:shadow-elegant hover:border-primary/30 group" : "opacity-60"}`}
+              className={`group transition-all h-full rounded-[2rem] border-border/40 overflow-hidden ${isApproved ? "cursor-pointer hover:shadow-elegant hover:border-primary/30" : "opacity-60 grayscale"}`}
               onClick={() => isApproved && navigate("/freelancer/orders")}
             >
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl icon-gradient mb-2">
-                  <Briefcase className="h-5 w-5 text-primary" />
+              <CardHeader className="p-8">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl icon-gradient mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Briefcase className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle className="font-display text-lg flex items-center justify-between">
-                  My Orders
-                  {isApproved && <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />}
+                <CardTitle className="font-display text-2xl font-bold">
+                  Workstreams
                 </CardTitle>
-                <CardDescription>Incoming briefs and active projects from clients</CardDescription>
+                <CardDescription className="text-sm leading-relaxed pt-2">
+                  Access incoming project briefs and manage your active execution pipeline.
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button variant="outline" size="sm" className="w-full" disabled={!isApproved}>
-                  {isApproved ? "View Orders" : "Approval required"}
-                </Button>
+              <CardContent className="p-8 pt-0">
+                <div className="flex items-center text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                  View Pipeline <ArrowRight className="h-4 w-4 ml-2" />
+                </div>
               </CardContent>
             </Card>
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="border-border/60 bg-card h-full">
-              <CardHeader>
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl mb-2 ${levelCfg.bg}`}>
-                  <LevelIcon className={`h-5 w-5 ${levelCfg.color}`} />
+            <Card className="rounded-[2rem] border-border/40 bg-card overflow-hidden h-full">
+              <CardHeader className="p-8">
+                <div className={`flex h-14 w-14 items-center justify-center rounded-2xl mb-6 shadow-sm border border-border/10 ${levelCfg.bg}`}>
+                  <LevelIcon className={`h-6 w-6 ${levelCfg.color}`} />
                 </div>
-                <CardTitle className="font-display text-lg">
-                  {levelCfg.label} Level
+                <CardTitle className="font-display text-2xl font-bold">
+                  {levelCfg.label} Status
                 </CardTitle>
-                <CardDescription>Complete orders and earn reviews to level up</CardDescription>
+                <CardDescription className="text-sm leading-relaxed pt-2">
+                  Maintain high performance to advance to the next elite tier and unlock premium perks.
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <Progress value={levelCfg.progress} className="h-2" />
-                <p className="text-xs text-muted-foreground">{levelCfg.progress}% to max level</p>
+              <CardContent className="p-8 pt-0 space-y-4">
+                <div className="space-y-2">
+                  <Progress value={levelCfg.progress} className="h-2 rounded-full" />
+                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                    <span>Progression</span>
+                    <span>{levelCfg.progress}%</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
         </motion.div>
+
+        {/* Decorative background element */}
+        <div className="fixed -bottom-24 -left-24 h-96 w-96 rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
       </div>
     </AppShell>
   );

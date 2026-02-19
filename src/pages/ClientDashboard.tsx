@@ -41,107 +41,127 @@ const ClientDashboard = () => {
 
   return (
     <AppShell>
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-12">
         {/* Greeting */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-medium text-primary mb-3">
-                <Sparkles className="h-3 w-3" /> Client Dashboard
+          <div className="flex flex-wrap items-end justify-between gap-6 pb-2 border-b border-border/40">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 border border-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary mb-2">
+                <Sparkles className="h-3 w-3" /> Workspace Overview
               </div>
-              <h1 className="font-display text-3xl sm:text-4xl font-bold">
-                Welcome back, {firstName} 👋
+              <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight">
+                Welcome, <span className="gradient-text">{firstName}</span>
               </h1>
-              <p className="text-muted-foreground mt-1.5">Find and hire top freelancers for your next project.</p>
+              <p className="text-muted-foreground text-base max-w-lg">Manage your elite network and projects from one central command center.</p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button onClick={() => navigate("/client/discover")} className="rounded-2xl h-12 px-6 bg-gradient-to-r from-primary to-primary-glow border-0 shadow-elegant">
+                <Search className="h-4 w-4 mr-2" /> Find Talent
+              </Button>
             </div>
           </div>
         </motion.div>
 
-        {/* Stats row */}
+        {/* Stats Grid */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.4 }}
-          className="grid grid-cols-3 gap-4"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-6"
         >
           {[
-            { label: "Total Orders", value: stats.total, icon: TrendingUp },
-            { label: "Active Orders", value: stats.active, icon: FileText },
-            { label: "Completed", value: stats.completed, icon: MessageSquare },
-          ].map(({ label, value, icon: Icon }) => (
-            <div key={label} className="rounded-xl border border-border/60 bg-card p-4 text-center shadow-sm">
-              <div className="text-2xl font-display font-bold text-primary">{value}</div>
-              <div className="text-xs text-muted-foreground mt-1">{label}</div>
+            { label: "Total Engagements", value: stats.total, icon: TrendingUp, color: "text-primary" },
+            { label: "Active Workstreams", value: stats.active, icon: FileText, color: "text-indigo-500" },
+            { label: "Deliveries Completed", value: stats.completed, icon: MessageSquare, color: "text-emerald-500" },
+          ].map(({ label, value, icon: Icon, color }) => (
+            <div key={label} className="group relative rounded-[2rem] border border-border/40 bg-card p-8 transition-all hover:shadow-elegant hover:border-primary/20">
+              <div className="absolute top-6 right-8">
+                <Icon className={`h-6 w-6 opacity-20 group-hover:opacity-40 transition-opacity ${color}`} />
+              </div>
+              <div className={`text-5xl font-display font-bold mb-2 ${color}`}>{value}</div>
+              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">{label}</div>
             </div>
           ))}
         </motion.div>
 
-        {/* Action cards */}
+        {/* Main Actions */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="show"
-          className="grid gap-5 sm:grid-cols-3"
+          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
           <motion.div variants={itemVariants}>
             <Card
-              className="cursor-pointer hover:shadow-elegant hover:border-primary/30 transition-all group h-full"
+              className="group cursor-pointer rounded-[2rem] border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant overflow-hidden h-full"
               onClick={() => navigate("/client/discover")}
             >
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl icon-gradient mb-2">
-                  <Search className="h-5 w-5 text-primary" />
+              <CardHeader className="p-8">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl icon-gradient mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Search className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle className="font-display text-lg flex items-center justify-between">
-                  Find Talent
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <CardTitle className="font-display text-2xl font-bold bg-clip-text">
+                  Source Talent
                 </CardTitle>
-                <CardDescription>Browse vetted freelancers by service category and hire the best</CardDescription>
+                <CardDescription className="text-sm leading-relaxed pt-2">
+                  Access our curated network of the world's top 1% freelancers across all domains.
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button className="w-full bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:opacity-90" size="sm">Start Discovery</Button>
+              <CardContent className="p-8 pt-0">
+                <div className="flex items-center text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                  Get Started <ArrowRight className="h-4 w-4 ml-2" />
+                </div>
               </CardContent>
             </Card>
           </motion.div>
 
           <motion.div variants={itemVariants}>
             <Card
-              className="cursor-pointer hover:shadow-elegant hover:border-primary/30 transition-all group h-full"
+              className="group cursor-pointer rounded-[2rem] border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant overflow-hidden h-full"
               onClick={() => navigate("/client/orders")}
             >
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl icon-gradient mb-2">
-                  <FileText className="h-5 w-5 text-primary" />
+              <CardHeader className="p-8">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl icon-gradient mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <FileText className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle className="font-display text-lg flex items-center justify-between">
-                  My Orders
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <CardTitle className="font-display text-2xl font-bold">
+                  Management
                 </CardTitle>
-                <CardDescription>View and manage your active projects and track their progress</CardDescription>
+                <CardDescription className="text-sm leading-relaxed pt-2">
+                  Oversee all active workstreams, track milestones, and manage secure escrow payments.
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button variant="outline" size="sm" className="w-full">View Orders</Button>
+              <CardContent className="p-8 pt-0">
+                <div className="flex items-center text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                  View Dashboard <ArrowRight className="h-4 w-4 ml-2" />
+                </div>
               </CardContent>
             </Card>
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="border-border/60 bg-muted/20 h-full">
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted mb-2">
-                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
+            <Card className="rounded-[2rem] border-border/40 bg-muted/20 overflow-hidden h-full">
+              <CardHeader className="p-8">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white borber border-border/20 mb-6 shadow-sm">
+                  <MessageSquare className="h-6 w-6 text-muted-foreground/60" />
                 </div>
-                <CardTitle className="font-display text-lg text-muted-foreground">Chat</CardTitle>
-                <CardDescription>Chat is available inside each order for secure communication</CardDescription>
+                <CardTitle className="font-display text-2xl font-bold text-muted-foreground/60">Communication</CardTitle>
+                <CardDescription className="text-sm leading-relaxed pt-2">
+                  Secure, verified communication channels are automatically established for every engagement.
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button variant="ghost" size="sm" className="w-full" onClick={() => navigate("/client/orders")}>
-                  Go to Orders
+              <CardContent className="p-8 pt-0">
+                <Button variant="outline" size="sm" className="rounded-xl font-bold border-2 hover:bg-white" onClick={() => navigate("/client/orders")}>
+                  Active Chats
                 </Button>
               </CardContent>
             </Card>
           </motion.div>
         </motion.div>
+
+        {/* Decorative background element */}
+        <div className="fixed -bottom-24 -right-24 h-96 w-96 rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
       </div>
     </AppShell>
   );

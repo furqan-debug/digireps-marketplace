@@ -69,144 +69,150 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex selection:bg-primary/20">
       {/* Left panel — brand */}
-      <div className="hidden lg:flex lg:w-[42%] relative overflow-hidden flex-col justify-between p-12 bg-gradient-to-br from-primary via-primary-glow to-accent">
-        {/* Background orbs */}
-        <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-64 h-64 rounded-full bg-black/10 blur-3xl" />
-
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-            <Shield className="h-5 w-5 text-white" />
-          </div>
-          <span className="font-display text-xl font-bold text-white">TopTier</span>
+      <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden flex-col justify-between p-16 bg-slate-950">
+        {/* Background Decorative patterns */}
+        <div className="absolute top-0 right-0 w-full h-full pointer-events-none opacity-40">
+          <div className="absolute top-[-10%] right-[-10%] w-[80%] h-[80%] rounded-full bg-primary/20 blur-[120px]" />
+          <div className="absolute bottom-[-5%] left-[-5%] w-[60%] h-[60%] rounded-full bg-accent/10 blur-[100px]" />
         </div>
 
-        <div className="relative z-10 space-y-8">
-          <div className="space-y-3">
-            <h2 className="font-display text-4xl font-bold text-white leading-tight">
-              The world's top freelancers, curated for you
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20">
+            <Shield className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <span className="font-display text-2xl font-bold tracking-tight text-white">Digi<span className="text-primary">Reps</span></span>
+        </div>
+
+        <div className="relative z-10 space-y-12">
+          <div className="space-y-6">
+            <h2 className="font-display text-6xl font-black text-white leading-[1.1] tracking-tight">
+              Access the <br />
+              <span className="text-primary">Elite Network</span>
             </h2>
-            <p className="text-white/75 text-base leading-relaxed">
-              Join a quality-first marketplace where every freelancer is hand-verified.
+            <p className="text-slate-400 text-xl leading-relaxed max-w-md font-medium">
+              Join the premium marketplace where world-class talent meets visionary projects.
             </p>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-5">
             {trustPoints.map((point) => (
-              <div key={point} className="flex items-center gap-3">
-                <CheckCircle className="h-5 w-5 text-white/90 shrink-0" />
-                <span className="text-white/90 text-sm">{point}</span>
+              <div key={point} className="flex items-center gap-4">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
+                  <CheckCircle className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-slate-300 text-lg font-semibold">{point}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative z-10 text-white/50 text-xs">
-          © 2026 TopTier. Quality-first freelance marketplace.
+        <div className="relative z-10 text-slate-500 text-sm font-bold tracking-widest uppercase">
+          © 2026 DigiReps. The Standard of Excellence.
         </div>
       </div>
 
       {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-background">
+      <div className="flex-1 flex items-center justify-center px-8 py-12 bg-background">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md space-y-7"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-md space-y-10"
         >
           {/* Mobile logo */}
-          <div className="flex items-center gap-2.5 lg:hidden">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-glow">
-              <Shield className="h-4 w-4 text-primary-foreground" />
+          <div className="flex items-center gap-3 lg:hidden">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary">
+              <Shield className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold gradient-text">TopTier</span>
+            <span className="font-display text-2xl font-bold tracking-tight text-foreground">DigiReps</span>
           </div>
 
-          <div>
-            <h1 className="font-display text-2xl font-bold">Welcome</h1>
-            <p className="text-muted-foreground text-sm mt-1">Sign in or create your account below.</p>
+          <div className="space-y-2">
+            <h1 className="font-display text-4xl font-black text-foreground tracking-tight">Welcome back</h1>
+            <p className="text-muted-foreground text-lg font-medium">Secure access to your professional dashboard.</p>
           </div>
 
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-10 p-1 bg-secondary/50 rounded-2xl h-14">
+              <TabsTrigger value="login" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold text-base">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold text-base">Sign Up</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
-                  <Input id="login-email" type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required placeholder="you@example.com" className="h-11" />
+            <TabsContent value="login" className="mt-0">
+              <form onSubmit={handleLogin} className="space-y-6">
+                <div className="space-y-3">
+                  <Label htmlFor="login-email" className="text-sm font-bold uppercase tracking-wider text-muted-foreground ml-1">Email Address</Label>
+                  <Input id="login-email" type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required placeholder="name@company.com" className="h-14 rounded-2xl border-border/50 bg-secondary/20 px-5 focus:ring-primary/20 focus:border-primary transition-all text-base font-medium" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
-                  <Input id="login-password" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required placeholder="••••••••" className="h-11" />
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center px-1">
+                    <Label htmlFor="login-password" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Password</Label>
+                    <span className="text-xs font-bold text-primary cursor-pointer hover:underline underline-offset-4">Forgot?</span>
+                  </div>
+                  <Input id="login-password" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required placeholder="••••••••" className="h-14 rounded-2xl border-border/50 bg-secondary/20 px-5 focus:ring-primary/20 focus:border-primary transition-all text-base font-medium" />
                 </div>
-                <Button type="submit" className="w-full h-11 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:opacity-90 shadow-elegant" disabled={isLoading}>
-                  {isLoading ? "Signing in..." : "Sign In"}
+                <Button type="submit" className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-bold rounded-2xl shadow-elegant transition-all hover:scale-[1.02] active:scale-100" disabled={isLoading}>
+                  {isLoading ? "Verifying..." : "Sign In to Dashboard"}
                 </Button>
               </form>
             </TabsContent>
 
-            <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Display Name</Label>
-                  <Input id="signup-name" value={signupName} onChange={(e) => setSignupName(e.target.value)} required placeholder="Your name or alias" className="h-11" />
+            <TabsContent value="signup" className="mt-0">
+              <form onSubmit={handleSignup} className="space-y-6">
+                <div className="space-y-3">
+                  <Label htmlFor="signup-name" className="text-sm font-bold uppercase tracking-wider text-muted-foreground ml-1">Full Name</Label>
+                  <Input id="signup-name" value={signupName} onChange={(e) => setSignupName(e.target.value)} required placeholder="John Doe" className="h-14 rounded-2xl border-border/50 bg-secondary/20 px-5 focus:ring-primary/20 focus:border-primary transition-all text-base font-medium" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input id="signup-email" type="email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} required placeholder="you@example.com" className="h-11" />
+                <div className="space-y-3">
+                  <Label htmlFor="signup-email" className="text-sm font-bold uppercase tracking-wider text-muted-foreground ml-1">Email Address</Label>
+                  <Input id="signup-email" type="email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} required placeholder="name@company.com" className="h-14 rounded-2xl border-border/50 bg-secondary/20 px-5 focus:ring-primary/20 focus:border-primary transition-all text-base font-medium" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input id="signup-password" type="password" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} required placeholder="Min 6 characters" className="h-11" />
+                <div className="space-y-3">
+                  <Label htmlFor="signup-password" className="text-sm font-bold uppercase tracking-wider text-muted-foreground ml-1">Create Password</Label>
+                  <Input id="signup-password" type="password" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} required placeholder="Min. 6 characters" className="h-14 rounded-2xl border-border/50 bg-secondary/20 px-5 focus:ring-primary/20 focus:border-primary transition-all text-base font-medium" />
                 </div>
 
                 {/* Role selector */}
-                <div className="space-y-2">
-                  <Label>I want to</Label>
-                  <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
+                  <Label className="text-sm font-bold uppercase tracking-wider text-muted-foreground ml-1">Account Type</Label>
+                  <div className="grid grid-cols-2 gap-4">
                     <button
                       type="button"
                       onClick={() => setSignupRole("client")}
-                      className={`rounded-xl border-2 p-4 text-left transition-all ${
-                        signupRole === "client"
-                          ? "border-primary bg-primary/8 shadow-elegant"
-                          : "border-border hover:border-primary/40 bg-card"
-                      }`}
+                      className={`rounded-2xl border-2 p-5 text-left transition-all ${signupRole === "client"
+                          ? "border-primary bg-primary/5 shadow-md"
+                          : "border-border/50 hover:border-primary/20 bg-card"
+                        }`}
                     >
-                      <Search className={`h-5 w-5 mb-2 ${signupRole === "client" ? "text-primary" : "text-muted-foreground"}`} />
-                      <p className="font-semibold text-sm">Hire talent</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">I'm a client</p>
+                      <Search className={`h-6 w-6 mb-3 ${signupRole === "client" ? "text-primary" : "text-muted-foreground"}`} />
+                      <p className="font-bold text-base leading-none">Hire Talent</p>
+                      <p className="text-sm text-muted-foreground mt-2 font-medium">I'm a Client</p>
                     </button>
                     <button
                       type="button"
                       onClick={() => setSignupRole("freelancer")}
-                      className={`rounded-xl border-2 p-4 text-left transition-all ${
-                        signupRole === "freelancer"
-                          ? "border-primary bg-primary/8 shadow-elegant"
-                          : "border-border hover:border-primary/40 bg-card"
-                      }`}
+                      className={`rounded-2xl border-2 p-5 text-left transition-all ${signupRole === "freelancer"
+                          ? "border-primary bg-primary/5 shadow-md"
+                          : "border-border/50 hover:border-primary/20 bg-card"
+                        }`}
                     >
-                      <Briefcase className={`h-5 w-5 mb-2 ${signupRole === "freelancer" ? "text-primary" : "text-muted-foreground"}`} />
-                      <p className="font-semibold text-sm">Work freelance</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">I'm a freelancer</p>
+                      <Briefcase className={`h-6 w-6 mb-3 ${signupRole === "freelancer" ? "text-primary" : "text-muted-foreground"}`} />
+                      <p className="font-bold text-base leading-none">Find Work</p>
+                      <p className="text-sm text-muted-foreground mt-2 font-medium">I'm a Freelancer</p>
                     </button>
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full h-11 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:opacity-90 shadow-elegant" disabled={isLoading}>
-                  {isLoading ? "Creating account..." : "Create Account"}
+                <Button type="submit" className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-bold rounded-2xl shadow-elegant transition-all hover:scale-[1.02] active:scale-100" disabled={isLoading}>
+                  {isLoading ? "Creating Profile..." : "Create Account"}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
 
-          <p className="text-center text-xs text-muted-foreground">
-            <a href="/" className="hover:text-foreground transition-colors underline underline-offset-2">← Back to home</a>
+          <p className="text-center">
+            <a href="/" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors underline underline-offset-8">Return to global marketplace</a>
           </p>
         </motion.div>
       </div>

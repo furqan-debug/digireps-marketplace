@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Send, ArrowLeft, AlertTriangle, DollarSign, Clock, Star, X, CheckCircle, RotateCcw } from "lucide-react";
+import { Loader2, Send, ArrowLeft, AlertTriangle, DollarSign, Clock, Star, X, CheckCircle, RotateCcw, ShieldCheck, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Order = {
@@ -32,13 +32,13 @@ type Message = {
 };
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  pending:     { label: "Pending Review", className: "bg-secondary text-secondary-foreground" },
-  accepted:    { label: "Accepted",       className: "bg-primary/10 text-primary" },
-  in_progress: { label: "In Progress",    className: "bg-primary/10 text-primary" },
-  delivered:   { label: "Delivered",      className: "bg-warning/15 text-warning" },
-  completed:   { label: "Completed",      className: "bg-success/15 text-success" },
-  disputed:    { label: "Disputed",       className: "bg-destructive/10 text-destructive" },
-  refunded:    { label: "Refunded",       className: "bg-muted text-muted-foreground" },
+  pending: { label: "Pending Review", className: "bg-secondary text-secondary-foreground" },
+  accepted: { label: "Accepted", className: "bg-primary/10 text-primary" },
+  in_progress: { label: "In Progress", className: "bg-primary/10 text-primary" },
+  delivered: { label: "Delivered", className: "bg-warning/15 text-warning" },
+  completed: { label: "Completed", className: "bg-success/15 text-success" },
+  disputed: { label: "Disputed", className: "bg-destructive/10 text-destructive" },
+  refunded: { label: "Refunded", className: "bg-muted text-muted-foreground" },
 };
 
 const StarPicker = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => (
@@ -184,91 +184,112 @@ const OrderDetail = () => {
 
   return (
     <AppShell>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="h-4 w-4" /> Back to Orders
+      <div className="max-w-5xl mx-auto space-y-10">
+        <button onClick={() => navigate(-1)} className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-all">
+          <ArrowLeft className="h-3 w-3 group-hover:-translate-x-1 transition-transform" /> Back to Dashboard
         </button>
 
-        {/* Order Header — split layout */}
+        {/* Order Header — Elite Workspace style */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <Card>
-            <CardContent className="pt-6 pb-5">
-              <div className="flex flex-col lg:flex-row lg:items-start gap-5 justify-between">
-                {/* Left: Info */}
-                <div className="space-y-3 flex-1">
-                  <div>
-                    <h1 className="font-display text-2xl font-bold">{order.title}</h1>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1.5 flex-wrap">
-                      <span className="flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs">
-                        <DollarSign className="h-3 w-3" />${order.budget.toLocaleString()}
-                      </span>
-                      {order.deadline && (
-                        <span className="flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs">
-                          <Clock className="h-3 w-3" />Due {new Date(order.deadline).toLocaleDateString()}
-                        </span>
-                      )}
-                      {order.escrow_status !== "none" && (
-                        <span className="flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-xs text-warning">
-                          Escrow: {order.escrow_status}
-                        </span>
-                      )}
+          <Card className="rounded-[2.5rem] border-border/40 overflow-hidden shadow-sm">
+            <CardContent className="p-10">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-10">
+                {/* Left: Branding + Info */}
+                <div className="space-y-6 flex-1 border-b lg:border-b-0 lg:border-r border-border/40 pb-10 lg:pb-0 lg:pr-10">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Badge className={`${statusCfg.className} rounded-xl px-3 py-1 text-[10px] font-bold uppercase tracking-wider border-0 shadow-sm`}>
+                        {statusCfg.label}
+                      </Badge>
+                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Workspace ID: #{orderId?.slice(-6).toUpperCase()}</span>
                     </div>
+                    <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">{order.title}</h1>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{order.description}</p>
+
+                  <div className="flex items-center gap-4 text-sm font-bold flex-wrap">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">Contract Budget</span>
+                      <span className="flex items-center gap-2 text-xl text-primary font-display font-bold">
+                        <DollarSign className="h-4 w-4" />{order.budget.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="h-10 w-px bg-border/40 mx-2" />
+
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">Timeline</span>
+                      <span className="flex items-center gap-2 text-foreground font-display font-medium">
+                        <Clock className="h-4 w-4 text-muted-foreground/40" />
+                        {order.deadline ? new Date(order.deadline).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : "Flexible"}
+                      </span>
+                    </div>
+
+                    {order.escrow_status !== "none" && (
+                      <>
+                        <div className="h-10 w-px bg-border/40 mx-2" />
+                        <div className="flex flex-col">
+                          <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">Escrow Status</span>
+                          <span className="flex items-center gap-2 text-warning font-display font-bold">
+                            <ShieldCheck className="h-4 w-4" /> {order.escrow_status.toUpperCase()}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">{order.description}</p>
                 </div>
 
-                {/* Right: Status + Actions */}
-                <div className="lg:w-56 space-y-3 shrink-0">
-                  <div className="flex lg:justify-end">
-                    <Badge className={`${statusCfg.className} text-sm px-3 py-1`}>{statusCfg.label}</Badge>
+                {/* Right: Actions Context */}
+                <div className="lg:w-64 space-y-6 flex flex-col items-center lg:items-stretch text-center lg:text-left">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">Engagement Phase</span>
+                    {stepLabel ? (
+                      <p className="text-sm font-bold text-primary leading-tight">{stepLabel}</p>
+                    ) : (
+                      <p className="text-sm font-bold text-muted-foreground leading-tight">Project active. Maintain regular updates.</p>
+                    )}
                   </div>
 
-                  {/* Step label */}
-                  {stepLabel && (
-                    <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary leading-relaxed">
-                      {stepLabel}
-                    </div>
-                  )}
-
-                  {/* Action buttons */}
-                  <div className="flex flex-col gap-2">
+                  {/* Actions Grid */}
+                  <div className="grid gap-3 w-full">
                     {isFreelancer && order.status === "pending" && (
                       <>
-                        <Button size="sm" className="w-full gap-1.5 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:opacity-90" onClick={() => updateStatus("accepted")} disabled={actionLoading}>
-                          <CheckCircle className="h-3.5 w-3.5" /> Accept Order
+                        <Button size="lg" className="w-full rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant" onClick={() => updateStatus("accepted")} disabled={actionLoading}>
+                          <CheckCircle className="h-4 w-4" /> Accept Proposal
                         </Button>
-                        <Button size="sm" variant="outline" className="w-full" onClick={() => updateStatus("refunded")} disabled={actionLoading}>
+                        <Button size="lg" variant="outline" className="w-full rounded-2xl border-2 font-bold" onClick={() => updateStatus("refunded")} disabled={actionLoading}>
                           Decline
                         </Button>
                       </>
                     )}
                     {isClient && order.status === "accepted" && (
-                      <Button size="sm" className="w-full gap-1.5 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:opacity-90" onClick={() => updateStatus("in_progress", "held")} disabled={actionLoading}>
-                        <DollarSign className="h-3.5 w-3.5" /> Confirm & Pay
+                      <Button size="lg" className="w-full rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant" onClick={() => updateStatus("in_progress", "held")} disabled={actionLoading}>
+                        <DollarSign className="h-4 w-4" /> Fund Escrow & Start
                       </Button>
                     )}
                     {isFreelancer && order.status === "in_progress" && (
-                      <Button size="sm" className="w-full gap-1.5 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:opacity-90" onClick={() => updateStatus("delivered")} disabled={actionLoading}>
-                        <CheckCircle className="h-3.5 w-3.5" /> Mark as Delivered
+                      <Button size="lg" className="w-full rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant" onClick={() => updateStatus("delivered")} disabled={actionLoading}>
+                        <CheckCircle className="h-4 w-4" /> Finalize & Deliver
                       </Button>
                     )}
                     {isClient && order.status === "delivered" && (
                       <>
-                        <Button size="sm" className="w-full gap-1.5 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:opacity-90" onClick={() => { updateStatus("completed", "released"); setShowRating(true); }} disabled={actionLoading}>
-                          <CheckCircle className="h-3.5 w-3.5" /> Approve & Complete
+                        <Button size="lg" className="w-full rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant" onClick={() => { updateStatus("completed", "released"); setShowRating(true); }} disabled={actionLoading}>
+                          <CheckCircle className="h-4 w-4" /> Approve Release
                         </Button>
-                        <Button size="sm" variant="destructive" className="w-full" onClick={() => updateStatus("disputed")} disabled={actionLoading}>
-                          <AlertTriangle className="h-3.5 w-3.5" /> Raise Dispute
+                        <Button size="lg" variant="destructive" className="w-full rounded-2xl border-0 font-bold" onClick={() => updateStatus("disputed")} disabled={actionLoading}>
+                          <AlertTriangle className="h-4 w-4" /> Dispute
                         </Button>
                       </>
                     )}
                     {order.status === "completed" && (
-                      <Button size="sm" variant="outline" className="w-full gap-1.5" onClick={() => setShowRating(true)}>
-                        <Star className="h-3.5 w-3.5" /> Leave a Review
+                      <Button size="lg" variant="outline" className="w-full rounded-2xl gap-2 border-2 font-bold" onClick={() => setShowRating(true)}>
+                        <Star className="h-4 w-4" /> Post Review
                       </Button>
                     )}
                   </div>
-                  {actionLoading && <div className="flex justify-center"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>}
+                  {actionLoading && <div className="flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary/40" /></div>}
                 </div>
               </div>
             </CardContent>
@@ -282,40 +303,46 @@ const OrderDetail = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
             >
               <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="w-full max-w-md rounded-2xl border border-border/60 bg-card shadow-elegant p-6 space-y-5"
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="w-full max-w-md rounded-[2.5rem] border border-border/40 bg-card shadow-elegant p-10 space-y-8"
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-display text-lg font-semibold">Leave a Rating</h3>
-                  <button onClick={() => setShowRating(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                  <div className="space-y-1">
+                    <h3 className="font-display text-2xl font-bold tracking-tight">Post Engagement Review</h3>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Rate the commercial experience</p>
+                  </div>
+                  <button onClick={() => setShowRating(false)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-muted/40 text-muted-foreground hover:text-foreground transition-colors">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
-                <div className="space-y-4">
-                  <div className="text-center py-2">
+
+                <div className="space-y-8">
+                  <div className="text-center py-4 bg-muted/20 rounded-[2rem] border border-border/20">
                     <StarPicker value={ratingValue} onChange={setRatingValue} />
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {ratingValue === 5 ? "Excellent!" : ratingValue === 4 ? "Great!" : ratingValue === 3 ? "Good" : ratingValue === 2 ? "Fair" : "Poor"}
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-primary mt-4">
+                      {ratingValue === 5 ? "Exceptional Delivery" : ratingValue === 4 ? "Above Standard" : ratingValue === 3 ? "Standard Met" : ratingValue === 2 ? "Below Standard" : "Unsatisfactory"}
                     </p>
                   </div>
+
                   <Textarea
-                    placeholder="Optional review message..."
+                    placeholder="Provide a detailed assessment of the partner's performance..."
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    rows={3}
-                    className="resize-none"
+                    rows={4}
+                    className="resize-none rounded-2xl bg-muted/20 border-border/40 focus:ring-primary/20 p-4 text-sm"
                   />
-                  <div className="flex gap-3">
-                    <Button className="flex-1 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:opacity-90" onClick={submitRating} disabled={submittingRating}>
-                      {submittingRating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit Rating"}
+
+                  <div className="flex gap-4">
+                    <Button className="flex-1 h-14 rounded-2xl bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant font-bold" onClick={submitRating} disabled={submittingRating}>
+                      {submittingRating ? <Loader2 className="h-5 w-5 animate-spin" /> : "Submit Assessment"}
                     </Button>
-                    <Button variant="ghost" onClick={() => setShowRating(false)}>Cancel</Button>
+                    <Button variant="ghost" className="h-14 rounded-2xl font-bold" onClick={() => setShowRating(false)}>Cancel</Button>
                   </div>
                 </div>
               </motion.div>
@@ -323,39 +350,62 @@ const OrderDetail = () => {
           )}
         </AnimatePresence>
 
-        {/* Chat */}
-        <Card className="flex flex-col">
-          <CardHeader className="pb-3 border-b">
-            <CardTitle className="font-display text-lg">Project Chat</CardTitle>
+        {/* Chat - Elite Interface */}
+        <Card className="rounded-[2.5rem] border-border/40 overflow-hidden shadow-sm flex flex-col bg-card/60 backdrop-blur-sm">
+          <CardHeader className="px-8 py-6 border-b border-border/40 bg-white/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
+                  <MessageSquare className="h-5 w-5" />
+                </div>
+                <div>
+                  <CardTitle className="font-display text-lg font-bold">Secure Command Center</CardTitle>
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
+                    <ShieldCheck className="h-3 w-3" /> Encrypted Protocol Active
+                  </div>
+                </div>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-0 flex flex-col">
             {/* Messages */}
-            <div className="chat-scroll flex flex-col gap-3 p-5 min-h-[320px] max-h-[420px] overflow-y-auto">
+            <div className="chat-scroll flex flex-col gap-6 p-8 min-h-[400px] max-h-[500px] overflow-y-auto">
               {messages.length === 0 && (
-                <div className="flex-1 flex flex-col items-center justify-center text-sm text-muted-foreground gap-2 py-8">
-                  <Send className="h-8 w-8 text-muted-foreground/30" />
-                  <p>No messages yet. Start the conversation.</p>
+                <div className="flex-1 flex flex-col items-center justify-center text-sm text-muted-foreground gap-4 py-12">
+                  <div className="h-16 w-16 rounded-full bg-muted/30 flex items-center justify-center">
+                    <Send className="h-8 w-8 text-muted-foreground/20" />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground/40 mb-1">Channel Initialized</p>
+                    <p className="text-sm">Initiate secure communication with your partner.</p>
+                  </div>
                 </div>
               )}
-              {messages.map((m) => {
+              {messages.map((m, idx) => {
                 const isOwn = m.sender_id === user?.id;
-                const initials = isOwn ? "Me" : "TM";
+                const nextMsg = messages[idx + 1];
+                const isLastInGroup = !nextMsg || nextMsg.sender_id !== m.sender_id;
+
                 return (
-                  <div key={m.id} className={`flex gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
-                    {/* Avatar */}
-                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold mt-1 ${isOwn ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                      {initials}
+                  <div key={m.id} className={`flex group/msg ${isOwn ? "flex-row-reverse" : "flex-row"} gap-4 items-end`}>
+                    {/* Avatar (only on last in group) */}
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold shadow-sm transition-all
+                      ${isLastInGroup ? "opacity-100 scale-100" : "opacity-0 scale-90 select-none"}
+                      ${isOwn ? "bg-primary text-primary-foreground" : "bg-card border border-border/60 text-muted-foreground"}`}>
+                      {isOwn ? "ME" : "RP"}
                     </div>
-                    <div className={`flex flex-col gap-1 max-w-[72%] ${isOwn ? "items-end" : "items-start"}`}>
-                      <div className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed
+
+                    <div className={`flex flex-col gap-1.5 max-w-[75%] ${isOwn ? "items-end" : "items-start"}`}>
+                      <div className={`relative px-5 py-4 text-sm leading-relaxed shadow-sm transition-all hover:shadow-md
                         ${isOwn
-                          ? "bg-gradient-to-br from-primary to-primary-glow text-primary-foreground rounded-br-sm"
-                          : "bg-muted text-foreground rounded-bl-sm"
+                          ? "bg-gradient-to-br from-primary to-primary-glow text-primary-foreground rounded-[1.5rem] rounded-br-sm"
+                          : "bg-white border border-border/40 text-foreground rounded-[1.5rem] rounded-bl-sm"
                         }`}>
                         {m.content}
                       </div>
-                      <div className="text-[10px] text-muted-foreground/60 px-1">
+                      <div className="flex items-center gap-2 px-1 text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest opacity-0 group-hover/msg:opacity-100 transition-opacity">
                         {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {isOwn && <ShieldCheck className="h-2.5 w-2.5 text-primary/40" />}
                       </div>
                     </div>
                   </div>
@@ -364,44 +414,56 @@ const OrderDetail = () => {
               <div ref={bottomRef} />
             </div>
 
-            {/* Violation warning — dismissible */}
+            {/* Violation warning — Modernized */}
             <AnimatePresence>
               {violationWarning && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="mx-4 mb-2 flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/8 px-4 py-3 text-xs text-destructive"
+                  className="mx-8 mb-4 flex items-start gap-4 rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-xs text-destructive shadow-sm"
                 >
-                  <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                  <span className="flex-1">{violationWarning}</span>
-                  <button onClick={() => setViolationWarning("")} className="shrink-0 hover:opacity-70"><X className="h-3.5 w-3.5" /></button>
+                  <AlertTriangle className="h-5 w-5 shrink-0 opacity-70" />
+                  <div className="flex-1 space-y-1">
+                    <p className="font-bold uppercase tracking-widest text-[10px]">Security Violation Detected</p>
+                    <p className="leading-relaxed font-medium">{violationWarning}</p>
+                  </div>
+                  <button onClick={() => setViolationWarning("")} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-destructive/10 transition-colors"><X className="h-4 w-4" /></button>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Input */}
-            <div className="flex gap-2 p-4 pt-2 border-t">
-              <Textarea
-                placeholder="Type a message... (no external contact info)"
-                value={msgContent}
-                onChange={(e) => setMsgContent(e.target.value)}
-                rows={2}
-                className="resize-none"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
-                }}
-              />
-              <Button
-                onClick={handleSend}
-                disabled={sending || !msgContent.trim()}
-                className="shrink-0 h-auto self-end bg-gradient-to-br from-primary to-primary-glow border-0 text-primary-foreground hover:opacity-90 shadow-elegant"
-              >
-                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              </Button>
+            {/* Input - Elite Interface */}
+            <div className="p-6 border-t border-border/40 bg-white/40">
+              <div className="relative group/input flex items-end gap-3 rounded-[2rem] bg-card border-2 border-border/40 p-2 pl-6 pr-2 focus-within:border-primary/40 transition-all focus-within:shadow-elegant">
+                <Textarea
+                  placeholder="Transmission protocol... (No external contact allowed)"
+                  value={msgContent}
+                  onChange={(e) => setMsgContent(e.target.value)}
+                  rows={1}
+                  className="flex-1 bg-transparent border-0 ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[44px] py-3 text-sm font-medium resize-none placeholder:text-muted-foreground/30"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
+                  }}
+                />
+                <Button
+                  onClick={handleSend}
+                  disabled={sending || !msgContent.trim()}
+                  className="shrink-0 h-11 w-11 rounded-2xl bg-gradient-to-br from-primary to-primary-glow border-0 text-primary-foreground hover:scale-105 transition-transform shadow-elegant overflow-hidden p-0"
+                >
+                  {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                </Button>
+              </div>
+              <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest text-center mt-3">
+                Commercial communication is monitored for security and compliance.
+              </p>
             </div>
           </CardContent>
         </Card>
+
+        {/* Decorative background elements */}
+        <div className="fixed -bottom-32 -left-32 h-[30rem] w-[30rem] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+        <div className="fixed -top-32 -right-32 h-[30rem] w-[30rem] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
       </div>
     </AppShell>
   );
