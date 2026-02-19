@@ -2,15 +2,16 @@ import { useState, useEffect } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Clock, Briefcase, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
+import { Star, MapPin, Clock, Briefcase, ArrowLeft, Loader2, Crown, Shield } from "lucide-react";
+import { motion } from "framer-motion";
 
-const LEVEL_COLOR: Record<string, string> = {
-  verified: "bg-secondary text-secondary-foreground",
-  pro: "bg-primary/10 text-primary",
-  elite: "bg-warning/15 text-warning",
+const LEVEL_CONFIG: Record<string, { icon: React.ElementType; label: string; className: string }> = {
+  verified: { icon: Shield, label: "Verified", className: "bg-secondary text-secondary-foreground" },
+  pro:      { icon: Star,   label: "Pro",      className: "bg-primary/10 text-primary" },
+  elite:    { icon: Crown,  label: "Elite",    className: "bg-warning/15 text-warning" },
 };
 
 type Profile = {
@@ -32,13 +33,20 @@ type Rating = { id: string; rating: number; review_text: string | null; created_
 const StarRow = ({ rating }: { rating: number }) => (
   <div className="flex gap-0.5">
     {[1, 2, 3, 4, 5].map((n) => (
-      <Star
-        key={n}
-        className={`h-4 w-4 ${n <= rating ? "fill-warning text-warning" : "text-muted"}`}
-      />
+      <Star key={n} className={`h-3.5 w-3.5 ${n <= rating ? "fill-warning text-warning" : "text-muted"}`} />
     ))}
   </div>
 );
+
+const timeAgo = (dateStr: string) => {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  return `${months}mo ago`;
+};
 
 const FreelancerProfile = () => {
   const { freelancerId } = useParams<{ freelancerId: string }>();
@@ -65,10 +73,9 @@ const FreelancerProfile = () => {
     });
   }, [freelancerId]);
 
-  const avgRating =
-    ratings.length > 0
-      ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length
-      : null;
+  const avgRating = ratings.length > 0
+    ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length
+    : null;
 
   if (loading) {
     return (
@@ -88,10 +95,14 @@ const FreelancerProfile = () => {
     );
   }
 
+  const level = profile.freelancer_level ?? "verified";
+  const lvlCfg = LEVEL_CONFIG[level];
+  const LvlIcon = lvlCfg.icon;
+  const initials = profile.display_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
+
   return (
     <AppShell>
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Back */}
+      <div className="max-w-3xl mx-auto space-y-7">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -99,89 +110,108 @@ const FreelancerProfile = () => {
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
 
-        {/* Header */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-display font-bold text-2xl">
-                {profile.display_name[0].toUpperCase()}
-              </div>
-              <div className="flex-1 space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="font-display text-2xl font-bold">{profile.display_name}</h1>
-                  <Badge className={LEVEL_COLOR[profile.freelancer_level ?? "verified"]}>
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    {profile.freelancer_level ?? "verified"}
-                  </Badge>
-                </div>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                  {profile.country && (
-                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{profile.country}</span>
-                  )}
-                  {profile.timezone && (
-                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{profile.timezone}</span>
-                  )}
-                  {profile.experience_years != null && (
-                    <span className="flex items-center gap-1">
-                      <Briefcase className="h-3 w-3" />{profile.experience_years}y experience
-                    </span>
-                  )}
-                  {avgRating != null && (
-                    <span className="flex items-center gap-1">
-                      <Star className="h-3 w-3 fill-warning text-warning" />
-                      {avgRating.toFixed(1)} ({ratings.length} review{ratings.length !== 1 ? "s" : ""})
-                    </span>
-                  )}
-                </div>
-                {profile.bio && (
-                  <p className="text-sm text-muted-foreground leading-relaxed">{profile.bio}</p>
-                )}
-                {(profile.skills ?? []).length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {profile.skills!.map((s) => (
-                      <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
-                    ))}
+        {/* Hero Card */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <Card className="overflow-hidden">
+            {/* Gradient header band */}
+            <div className="h-28 bg-gradient-to-br from-primary via-primary-glow to-accent relative">
+              <div className="absolute inset-0 bg-black/10" />
+            </div>
+            <CardContent className="pt-0">
+              {/* Avatar */}
+              <div className="-mt-10 mb-4 flex items-end justify-between">
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary to-primary-glow blur-md opacity-50" />
+                  <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-primary/30 to-primary-glow/20 border-4 border-card flex items-center justify-center font-display font-bold text-primary text-3xl shadow-elegant">
+                    {initials}
                   </div>
+                </div>
+                <Button
+                  className="bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:opacity-90 shadow-elegant gap-2 px-6"
+                  onClick={() => navigate(`/client/brief/${profile.user_id}${categoryId ? `?category=${categoryId}` : ""}`)}
+                >
+                  Hire {profile.display_name.split(" ")[0]}
+                </Button>
+              </div>
+
+              {/* Name + level */}
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <h1 className="font-display text-2xl font-bold">{profile.display_name}</h1>
+                <Badge className={`${lvlCfg.className} gap-1 text-sm`}>
+                  <LvlIcon className="h-3 w-3" />
+                  {lvlCfg.label}
+                </Badge>
+              </div>
+
+              {/* Stats pills */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {profile.country && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
+                    <MapPin className="h-3 w-3" />{profile.country}
+                  </span>
+                )}
+                {profile.timezone && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />{profile.timezone}
+                  </span>
+                )}
+                {profile.experience_years != null && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
+                    <Briefcase className="h-3 w-3" />{profile.experience_years}y experience
+                  </span>
+                )}
+                {avgRating != null && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-xs text-warning font-medium">
+                    <Star className="h-3 w-3 fill-warning" />{avgRating.toFixed(1)} ({ratings.length} review{ratings.length !== 1 ? "s" : ""})
+                  </span>
                 )}
               </div>
-            </div>
 
-            <div className="mt-6 flex justify-end">
-              <Button
-                className="gap-2"
-                onClick={() =>
-                  navigate(`/client/brief/${profile.user_id}${categoryId ? `?category=${categoryId}` : ""}`)
-                }
-              >
-                Hire {profile.display_name.split(" ")[0]}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              {profile.bio && (
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{profile.bio}</p>
+              )}
+
+              {(profile.skills ?? []).length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {profile.skills!.map((s) => (
+                    <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Portfolio */}
         {portfolio.length > 0 && (
           <div>
-            <h2 className="font-display text-xl font-semibold mb-3">Portfolio</h2>
+            <h2 className="font-display text-xl font-semibold mb-4">Portfolio</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              {portfolio.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
-                  <div className="aspect-video bg-muted overflow-hidden">
+              {portfolio.map((item, i) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.07, duration: 0.4 }}
+                  className="group relative rounded-2xl overflow-hidden border border-border/60 shadow-sm"
+                >
+                  <div className="aspect-[4/3] bg-muted overflow-hidden">
                     <img
                       src={item.image_url}
                       alt={item.title}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
-                  {item.title && (
-                    <CardContent className="py-3">
-                      <p className="text-sm font-medium">{item.title}</p>
+                  {/* Title overlay on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{item.title}</p>
                       {item.description && (
-                        <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+                        <p className="text-xs text-white/75 mt-0.5">{item.description}</p>
                       )}
-                    </CardContent>
-                  )}
-                </Card>
+                    </div>
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -190,20 +220,30 @@ const FreelancerProfile = () => {
         {/* Reviews */}
         {ratings.length > 0 && (
           <div>
-            <h2 className="font-display text-xl font-semibold mb-3">Reviews</h2>
+            <h2 className="font-display text-xl font-semibold mb-4">
+              Reviews
+              <span className="ml-2 text-sm font-normal text-muted-foreground">({ratings.length})</span>
+            </h2>
             <div className="space-y-3">
-              {ratings.map((r) => (
-                <Card key={r.id}>
-                  <CardContent className="pt-4 pb-4">
-                    <StarRow rating={r.rating} />
-                    {r.review_text && (
-                      <p className="mt-2 text-sm text-muted-foreground">{r.review_text}</p>
-                    )}
-                    <p className="mt-1 text-xs text-muted-foreground/60">
-                      {new Date(r.created_at).toLocaleDateString()}
-                    </p>
-                  </CardContent>
-                </Card>
+              {ratings.map((r, i) => (
+                <motion.div
+                  key={r.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05, duration: 0.3 }}
+                >
+                  <Card>
+                    <CardContent className="pt-4 pb-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <StarRow rating={r.rating} />
+                        <span className="text-xs text-muted-foreground/60">{timeAgo(r.created_at)}</span>
+                      </div>
+                      {r.review_text && (
+                        <p className="text-sm text-muted-foreground">{r.review_text}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
             </div>
           </div>

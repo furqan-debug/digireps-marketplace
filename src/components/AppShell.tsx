@@ -2,9 +2,10 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Shield, LogOut, LayoutDashboard, Search, FileText,
-  MessageSquare, User, Users, AlertTriangle, ShieldCheck,
+  User, Users, AlertTriangle, ShieldCheck,
 } from "lucide-react";
 
 interface NavItem {
@@ -48,64 +49,81 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
     navigate("/");
   };
 
+  const initials = profile?.display_name
+    ? profile.display_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+    : "?";
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Top Nav */}
-      <header className="sticky top-0 z-40 border-b bg-card/90 backdrop-blur-sm shadow-sm">
-        <div className="container flex h-16 items-center justify-between gap-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Shield className="h-4 w-4 text-primary-foreground" />
+    <TooltipProvider>
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Top Nav */}
+        <header className="sticky top-0 z-40 border-b card-glass">
+          <div className="container flex h-16 items-center justify-between gap-4">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2.5 shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-glow shadow-elegant">
+                <Shield className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <span className="font-display font-bold text-lg hidden sm:block gradient-text">TopTier</span>
+              {role === "admin" && (
+                <Badge variant="outline" className="text-xs hidden sm:flex border-primary/30 text-primary">Admin</Badge>
+              )}
+            </Link>
+
+            {/* Nav links */}
+            <nav className="flex items-center gap-0.5 overflow-x-auto">
+              {nav.map(({ label, to, icon: Icon }) => {
+                const active = location.pathname === to || location.pathname.startsWith(to + "/");
+                return (
+                  <Tooltip key={to}>
+                    <TooltipTrigger asChild>
+                      <Link
+                        to={to}
+                        className={`relative flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all whitespace-nowrap
+                          ${active
+                            ? "text-primary bg-primary/10"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+                          }`}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span className="hidden sm:block">{label}</span>
+                        {active && (
+                          <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-gradient-to-r from-primary to-primary-glow" />
+                        )}
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="sm:hidden">{label}</TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </nav>
+
+            {/* User + sign out */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Avatar circle */}
+              <div className="hidden md:flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-glow text-primary-foreground text-xs font-bold shadow-elegant">
+                {initials}
+              </div>
+              <span className="hidden lg:block text-sm text-muted-foreground truncate max-w-[120px]">
+                {profile?.display_name}
+              </span>
+              <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1.5 text-muted-foreground hover:text-foreground">
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:block">Sign Out</span>
+              </Button>
             </div>
-            <span className="font-display font-bold text-lg hidden sm:block">TopTier</span>
-            {role === "admin" && (
-              <Badge variant="outline" className="text-xs hidden sm:flex">Admin</Badge>
-            )}
-          </Link>
-
-          {/* Nav links */}
-          <nav className="flex items-center gap-1 overflow-x-auto">
-            {nav.map(({ label, to, icon: Icon }) => {
-              const active = location.pathname === to;
-              return (
-                <Link
-                  key={to}
-                  to={to}
-                  className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap
-                    ${active
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="hidden sm:block">{label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* User + sign out */}
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="hidden md:block text-sm text-muted-foreground truncate max-w-[140px]">
-              {profile?.display_name}
-            </span>
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1.5">
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:block">Sign Out</span>
-            </Button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Page content */}
-      <main className="flex-1 container py-8">{children}</main>
+        {/* Page content */}
+        <main className="flex-1 container py-8">{children}</main>
 
-      <footer className="border-t bg-card py-4">
-        <div className="container text-center text-xs text-muted-foreground">
-          © 2026 TopTier — Quality-first freelance marketplace
-        </div>
-      </footer>
-    </div>
+        <footer className="border-t bg-card/60 py-4">
+          <div className="container text-center text-xs text-muted-foreground">
+            © 2026 TopTier — Quality-first freelance marketplace
+          </div>
+        </footer>
+      </div>
+    </TooltipProvider>
   );
 };
