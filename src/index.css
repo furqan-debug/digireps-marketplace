@@ -119,3 +119,44 @@
     font-family: 'Space Grotesk', system-ui, sans-serif;
   }
 }
+
+@layer utilities {
+  /* Gradient text utility */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  }
+
+  /* Glassmorphism card */
+  .card-glass {
+    @apply bg-card/80 backdrop-blur-md border border-border/60;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Elegant shadow */
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+
+  /* Gradient icon container */
+  .icon-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--primary-glow) / 0.1));
+    @apply border border-primary/20;
+  }
+}
+
+/* Custom scrollbar for chat windows */
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+.chat-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 999px;
+}
