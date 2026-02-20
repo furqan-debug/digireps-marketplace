@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Loader2, X, Plus, Upload, Trash2, User, Eye, Sparkles, ShieldCheck, Globe, Crown, Send, Award, CheckCircle, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Move, Image as ImageIcon } from "lucide-react";
+import { Loader2, X, Plus, Upload, Trash2, User, Eye, Sparkles, ShieldCheck, Globe, Crown, Send, Award, CheckCircle, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Move, Clock, Briefcase, ArrowRight, Image as ImageIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getActivityStatus } from "@/lib/activity-status";
 import { PortfolioProjectForm } from "@/components/freelancer/PortfolioProjectForm";
@@ -48,6 +48,7 @@ const EditProfile = () => {
   const [certifications, setCertifications] = useState<Certification[]>((profile as any)?.certifications ?? []);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isAdjustingAvatar, setIsAdjustingAvatar] = useState(false);
@@ -201,10 +202,9 @@ const EditProfile = () => {
   };
   const removeCertification = (idx: number) => setCertifications(prev => prev.filter((_, i) => i !== idx));
 
-  const handleSaveProfile = async () => {
+  const handleSaveProfile = async (silent = false) => {
     if (!user) return;
     setSaving(true);
-
     try {
       const { error: profErr } = await supabase.from("profiles").update({
         display_name: displayName.trim(),
@@ -229,9 +229,12 @@ const EditProfile = () => {
       }
 
       await refreshProfile();
-      toast({ title: "Profile saved!" });
+      if (!silent) {
+        toast({ title: "Profile saved!" });
+      }
     } catch (error: any) {
       toast({ title: "Failed to save profile", description: error.message, variant: "destructive" });
+      throw error;
     } finally {
       setSaving(false);
     }
@@ -244,16 +247,47 @@ const EditProfile = () => {
       return;
     }
     setSubmitting(true);
-    await handleSaveProfile();
-    const { error } = await supabase.from("profiles").update({ application_status: "pending" }).eq("user_id", user.id);
-    if (error) {
+    try {
+      await handleSaveProfile(true); // Save current profile data first
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          application_status: 'pending',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      await refreshProfile(); // Refresh profile after status update
+
+      setShowCelebration(true);
+      toast({
+        title: "Protocol Engaged",
+        description: "Your elite presence is now being vetted by the commercial network.",
+      });
+
+      // Reset and redirect after a delay
+      setTimeout(() => {
+        setShowCelebration(false);
+        navigate("/freelancer/dashboard", {
+          state: { celebration: true }
+        });
+      }, 3000);
+    } catch (error: any) {
       toast({ title: "Submission failed", description: error.message, variant: "destructive" });
-    } else {
-      await refreshProfile();
-      toast({ title: "Application Submitted!", description: "An elite specialist will review your credentials shortly." });
-      navigate("/freelancer");
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
+  };
+
+  const handleNextStep = async () => {
+    try {
+      await handleSaveProfile(true);
+      setWizardStep(wizardStep + 1);
+    } catch (error) {
+      // Error handled in handleSaveProfile
+    }
   };
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -349,6 +383,27 @@ const EditProfile = () => {
 
   const activityStatus = getActivityStatus((profile as any)?.last_active_at ?? null);
 
+  const calculateProfileStrength = () => {
+    let score = 0;
+    if (displayName) score += 10;
+    if (avatarUrl) score += 20;
+    if (bio) score += 20;
+    if (headline) score += 10;
+    if (skills.length >= 3) score += 20;
+    else if (skills.length > 0) score += 10;
+    if (portfolio.length > 0) score += 20;
+    return score;
+  };
+
+  const strength = calculateProfileStrength();
+  const strengthConfig = {
+    0: { label: "Elite Identity Missing", color: "bg-muted" },
+    30: { label: "Foundational Specialist", color: "bg-warning" },
+    60: { label: "High-Tier Strategist", color: "bg-primary" },
+    90: { label: "Master-Class Profile", color: "bg-emerald-500" },
+  };
+  const currentStrength = Object.entries(strengthConfig).reverse().find(([s]) => strength >= parseInt(s))?.[1] || strengthConfig[0];
+
   // === WIZARD MODE ===
   if (isNewProfile) {
     const progress = ((wizardStep + 1) / WIZARD_STEPS.length) * 100;
@@ -363,64 +418,75 @@ const EditProfile = () => {
       switch (wizardStep) {
         case 0:
           return (
-            <motion.div key="step0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
-              <div className="space-y-2">
-                <h2 className="font-display text-3xl font-bold">Your Identity</h2>
-                <p className="text-muted-foreground">Tell us who you are.</p>
+            <motion.div key="step0" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
+              <div className="space-y-3">
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">The Core Identity</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Your identity is the foundation of your elite presence. Establish your commercial persona.</p>
               </div>
-              <div className="space-y-6">
-                <div className="flex flex-col items-center gap-4 mb-8">
+
+              <div className="grid md:grid-cols-[200px_1fr] gap-12 items-start pt-4">
+                {/* Photo Section */}
+                <div className="flex flex-col items-center gap-6">
                   <input ref={avatarFileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                   <div className="relative group cursor-pointer" onClick={() => avatarFileRef.current?.click()}>
-                    <div className="h-32 w-32 rounded-3xl bg-muted/20 border-2 border-dashed border-border/40 flex items-center justify-center overflow-hidden group-hover:border-primary/40 transition-all">
+                    <div className="absolute -inset-1 rounded-[2.8rem] bg-gradient-to-br from-primary to-primary/40 blur-md opacity-0 group-hover:opacity-30 transition-opacity" />
+                    <div className="relative h-44 w-44 rounded-[2.5rem] bg-card border-4 border-white shadow-2xl overflow-hidden ring-1 ring-border/20">
                       {(avatarPreview || avatarUrl) ? (
                         <img
                           src={avatarPreview || avatarUrl}
                           alt="Avatar"
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           style={{
                             transform: `scale(${zoom})`,
                             objectPosition: `${position.x}% ${position.y}%`
                           }}
-                          onError={(e) => {
-                            const src = (e.target as HTMLImageElement).src;
-                            console.error("❌ Identity Avatar Failed to Load. Src:", src);
-                          }}
-                          onLoad={() => {
-                            console.log("🖼️ Identity Avatar Loaded Successfully");
-                          }}
                         />
                       ) : (
-                        <User className="h-12 w-12 text-muted-foreground/40" />
+                        <div className="h-full w-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center font-display font-bold text-primary text-5xl">
+                          {(displayName || "E")[0]?.toUpperCase()}
+                        </div>
                       )}
                       {uploadingAvatar && (
-                        <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-                          <Loader2 className="h-6 w-6 animate-spin" />
+                        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
                       )}
                     </div>
-                    <div className="absolute -bottom-2 -right-2 h-10 w-10 rounded-xl bg-primary text-primary-foreground shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Plus className="h-5 w-5" />
+                    <div className="absolute -bottom-3 -right-3 h-12 w-12 rounded-2xl bg-primary text-primary-foreground shadow-elegant flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Plus className="h-6 w-6" />
                     </div>
                   </div>
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Profile Photo</Label>
+                  <div className="text-center space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-primary">Headshot Portfolio</p>
+                    <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-relaxed">JPG/PNG &bull; Max 5MB</p>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Display Name *</Label>
-                  <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your professional name" className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium" />
-                </div>
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Professional Headline</Label>
-                  <Input value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="e.g. Senior Full-Stack Engineer" className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium" />
-                </div>
-                <div className="grid sm:grid-cols-2 gap-6">
+
+                {/* Fields Section */}
+                <div className="space-y-8 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Country</Label>
-                    <Input value={country} readOnly className="h-14 rounded-2xl bg-muted/10 border-border/20 px-6 font-medium text-muted-foreground" />
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Commercial Display Name *</Label>
+                    <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Full name or elite persona" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-lg focus:ring-primary/20" />
                   </div>
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Timezone (auto-detected)</Label>
-                    <Input value={timezone} readOnly className="h-14 rounded-2xl bg-muted/10 border-border/20 px-6 font-medium text-muted-foreground" />
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Professional Focus / Headline</Label>
+                    <Input value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="e.g. Master Copywriter & Content Strategist" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-lg focus:ring-primary/20" />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-6 pt-4 border-t border-border/5">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 ml-1">
+                        <Globe className="h-3.5 w-3.5 text-primary/40" />
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Base of Operations</Label>
+                      </div>
+                      <Input value={country} readOnly className="h-14 rounded-2xl bg-muted/30 border-border/20 px-6 font-bold text-muted-foreground/60 cursor-not-allowed" />
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 ml-1">
+                        <Clock className="h-3.5 w-3.5 text-primary/40" />
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Network Timezone</Label>
+                      </div>
+                      <Input value={timezone} readOnly className="h-14 rounded-2xl bg-muted/30 border-border/20 px-6 font-bold text-muted-foreground/60 cursor-not-allowed" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -428,43 +494,63 @@ const EditProfile = () => {
           );
         case 1:
           return (
-            <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
-              <div className="space-y-2">
-                <h2 className="font-display text-3xl font-bold">Your Expertise</h2>
-                <p className="text-muted-foreground">Define your skills and service areas.</p>
+            <motion.div key="step1" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
+              <div className="space-y-3">
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">The Professional Arsenal</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Define your domain of excellence and technical stack.</p>
               </div>
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Experience Years</Label>
-                  <Input type="number" min="0" max="50" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} placeholder="e.g. 8" className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium" />
+
+              <div className="space-y-10 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
+                <div className="grid sm:grid-cols-2 gap-8 items-end">
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Commercial Experience (Years)</Label>
+                    <div className="relative">
+                      <Input type="number" min="0" max="50" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} placeholder="8" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-xl focus:ring-primary/20" />
+                      <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-primary/40">Years</div>
+                    </div>
+                  </div>
+                  <div className="h-16 flex items-center px-6 rounded-2xl bg-primary/5 border border-primary/10 italic text-xs font-medium text-primary/60">
+                    "Elite partners typically possess 5+ years of demonstrable expertise."
+                  </div>
                 </div>
+
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Bio</Label>
-                  <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Describe your expertise..." className="rounded-2xl bg-muted/20 border-border/40 p-6 font-medium resize-none" />
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Commercial Bio / Value Proposition</Label>
+                  <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={5} placeholder="Translate your technical expertise into commercial value..." className="rounded-2xl bg-white border-border/40 p-6 font-medium text-lg resize-none focus:ring-primary/20 leading-relaxed" />
                 </div>
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Skills *</Label>
+
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Technical Stack *</Label>
                   <div className="flex gap-3">
-                    <Input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} placeholder="Add skill and press Enter" className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium" />
-                    <Button type="button" variant="outline" onClick={addSkill} className="h-14 w-14 rounded-2xl shrink-0"><Plus className="h-5 w-5" /></Button>
+                    <Input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} placeholder="Add a skill (e.g. Next.js, Strategic Writing)" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-lg focus:ring-primary/20" />
+                    <Button type="button" onClick={addSkill} className="h-16 w-16 rounded-2xl shrink-0 bg-primary/10 text-primary hover:bg-primary/20 border-0 shadow-none"><Plus className="h-6 w-6" /></Button>
                   </div>
                   {skills.length > 0 && (
                     <div className="flex flex-wrap gap-2 pt-2">
                       {skills.map((s) => (
-                        <div key={s} className="flex items-center gap-2 rounded-xl border border-border/40 bg-card px-4 py-2 text-xs font-bold">
+                        <div key={s} className="flex items-center gap-2 rounded-xl border border-primary/10 bg-white/80 backdrop-blur-sm px-4 py-2.5 text-xs font-black uppercase tracking-widest text-primary shadow-sm group">
                           {s}
-                          <button onClick={() => removeSkill(s)} className="text-muted-foreground/40 hover:text-destructive"><X className="h-3 w-3" /></button>
+                          <button onClick={() => removeSkill(s)} className="text-primary/20 hover:text-destructive transition-colors"><X className="h-3 w-3" /></button>
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Marketplace Segments *</Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+
+                <div className="space-y-4 pt-6 border-t border-border/5">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Elite Network Segments *</Label>
+                    <span className="text-[9px] font-bold text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-md">Required</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {allCategories.map((cat) => (
-                      <button key={cat.id} onClick={() => toggleCategory(cat.id)} className={`p-4 rounded-2xl border-2 text-xs font-bold uppercase tracking-wider transition-all ${selectedCategories.includes(cat.id) ? "bg-primary/10 border-primary text-primary" : "bg-muted/10 border-border/40 text-muted-foreground hover:border-primary/20"}`}>
-                        {cat.name}
+                      <button
+                        key={cat.id}
+                        onClick={() => toggleCategory(cat.id)}
+                        className={`group relative p-6 rounded-[1.8rem] border-2 text-[10px] font-black uppercase tracking-widest transition-all h-28 flex flex-col items-center justify-center gap-2 shadow-sm ${selectedCategories.includes(cat.id) ? "bg-primary text-white border-primary shadow-elegant -translate-y-1" : "bg-white border-border/40 text-muted-foreground hover:border-primary/40 hover:bg-primary/5 hover:text-primary"}`}
+                      >
+                        {selectedCategories.includes(cat.id) && <motion.div layoutId="check" className="absolute top-3 right-3 h-5 w-5 bg-white/20 rounded-full flex items-center justify-center"><CheckCircle className="h-3 w-3" /></motion.div>}
+                        <span className="text-center leading-tight">{cat.name}</span>
                       </button>
                     ))}
                   </div>
@@ -474,49 +560,53 @@ const EditProfile = () => {
           );
         case 2:
           return (
-            <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
-              <div className="space-y-2">
-                <h2 className="font-display text-3xl font-bold">Credentials</h2>
-                <p className="text-muted-foreground">Add certifications to boost your credibility.</p>
+            <motion.div key="step2" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
+              <div className="space-y-3">
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">The Commercial Seal</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Add certifications and industry credentials to solidify your authority.</p>
               </div>
-              <div className="space-y-6">
-                <Card className="rounded-2xl border-border/40">
-                  <CardContent className="p-6 space-y-4">
-                    <div className="grid sm:grid-cols-3 gap-4">
-                      <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Certification name" className="h-12 rounded-xl bg-muted/20 border-border/40 px-4 font-medium" />
-                      <Input value={certIssuer} onChange={(e) => setCertIssuer(e.target.value)} placeholder="Issuing organization" className="h-12 rounded-xl bg-muted/20 border-border/40 px-4 font-medium" />
-                      <div className="flex gap-2">
-                        <Input type="number" value={certYear} onChange={(e) => setCertYear(e.target.value)} placeholder="Year" className="h-12 rounded-xl bg-muted/20 border-border/40 px-4 font-medium" />
-                        <Button type="button" onClick={addCertification} className="h-12 rounded-xl shrink-0"><Plus className="h-4 w-4" /></Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
 
-                {certifications.length > 0 && (
-                  <div className="space-y-3">
+              <div className="space-y-10 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1">Credential Name</Label>
+                    <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Google Cloud Architect" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold focus:ring-primary/20" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1">Issuing Authority</Label>
+                    <Input value={certIssuer} onChange={(e) => setCertIssuer(e.target.value)} placeholder="Google" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold focus:ring-primary/20" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1">Year</Label>
+                    <div className="flex gap-3">
+                      <Input type="number" value={certYear} onChange={(e) => setCertYear(e.target.value)} placeholder="2024" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold focus:ring-primary/20" />
+                      <Button type="button" onClick={addCertification} className="h-14 w-14 rounded-2xl shrink-0 bg-primary/10 text-primary hover:bg-primary/20 border-0 shadow-none"><Plus className="h-5 w-5" /></Button>
+                    </div>
+                  </div>
+                </div>
+
+                {certifications.length > 0 ? (
+                  <div className="space-y-4 pt-6 border-t border-border/5">
                     {certifications.map((cert, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-5 rounded-2xl border border-border/40 bg-card">
-                        <div className="flex items-center gap-4">
-                          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                            {cert.verified ? <CheckCircle className="h-5 w-5 text-primary" /> : <Award className="h-5 w-5 text-muted-foreground" />}
+                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={idx} className="group flex items-center justify-between p-6 rounded-[2rem] border border-white/60 bg-white/40 backdrop-blur-sm transition-all hover:shadow-elegant hover:bg-white/80">
+                        <div className="flex items-center gap-5">
+                          <div className="h-14 w-14 rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10 shadow-sm group-hover:scale-110 transition-transform duration-500 text-primary">
+                            <Award className="h-7 w-7" />
                           </div>
                           <div>
-                            <p className="font-bold text-sm">{cert.name}</p>
-                            <p className="text-xs text-muted-foreground">{cert.issuer} · {cert.year}</p>
+                            <p className="font-black text-lg tracking-tight leading-tight">{cert.name}</p>
+                            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mt-1">{cert.issuer} &bull; {cert.year}</p>
                           </div>
                         </div>
-                        <button onClick={() => removeCertification(idx)} className="text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
-                      </div>
+                        <button onClick={() => removeCertification(idx)} className="h-10 w-10 rounded-xl bg-muted/20 flex items-center justify-center text-muted-foreground/40 hover:bg-destructive/10 hover:text-destructive transition-all"><X className="h-4 w-4" /></button>
+                      </motion.div>
                     ))}
                   </div>
-                )}
-
-                {certifications.length === 0 && (
-                  <div className="text-center py-12 text-muted-foreground/40">
-                    <Award className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                    <p className="text-sm font-bold">No certifications yet</p>
-                    <p className="text-xs mt-1">This step is optional — you can add them later.</p>
+                ) : (
+                  <div className="text-center py-20 bg-muted/10 rounded-[2rem] border border-dashed border-border/40">
+                    <Crown className="h-12 w-12 mx-auto mb-4 text-primary/20" />
+                    <p className="text-sm font-black uppercase tracking-widest text-muted-foreground/40">No Credentials Listed</p>
+                    <p className="text-xs font-bold text-muted-foreground/20 mt-1 uppercase tracking-widest">Optional Step &bull; Recommended for Elite Verification</p>
                   </div>
                 )}
               </div>
@@ -524,99 +614,163 @@ const EditProfile = () => {
           );
         case 3:
           return (
-            <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
-              <div className="space-y-2">
-                <h2 className="font-display text-3xl font-bold">Portfolio</h2>
-                <p className="text-muted-foreground">Showcase your best work.</p>
+            <motion.div key="step3" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
+              <div className="space-y-3">
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">The Exhibition Gallery</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Showcase your most impactful commercial projects. High-tier clients demand visual proof of excellence.</p>
               </div>
-              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePortfolioUpload} />
-              <button onClick={() => setIsPortfolioFormOpen(true)} className="w-full rounded-2xl border-2 border-dashed border-border/40 hover:border-primary/40 bg-muted/10 hover:bg-primary/5 transition-all py-16 flex flex-col items-center gap-4 text-muted-foreground hover:text-primary">
-                <div className="h-14 w-14 rounded-2xl bg-background border border-border/20 flex items-center justify-center">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                    <Plus className="h-5 w-5" />
-                  </div>
-                </div>
-                <span className="text-sm font-bold">Add Portfolio Project</span>
-              </button>
-              {portfolio.length > 0 && (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {portfolio.map((item) => (
-                    <div key={item.id} className="relative group rounded-2xl overflow-hidden border border-border/40 aspect-video bg-muted/20">
-                      {item.image_url ? (
-                        <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
-                          <ImageIcon className="h-10 w-10" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all p-4 flex flex-col justify-between">
-                        <div className="flex justify-between items-start">
-                          <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{item.role || "Project"}</Badge>
-                          <Button size="icon" variant="destructive" onClick={() => deletePortfolioItem(item)} className="h-8 w-8 rounded-lg">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="text-white">
-                          <p className="font-bold text-sm truncate">{item.title}</p>
-                          <p className="text-[10px] text-white/60 line-clamp-1">{item.description}</p>
-                        </div>
-                      </div>
+
+              <div className="space-y-10">
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePortfolioUpload} />
+                <button
+                  onClick={() => setIsPortfolioFormOpen(true)}
+                  className="w-full group relative rounded-[2.5rem] border-2 border-dashed border-primary/20 bg-white/40 hover:bg-primary/5 transition-all py-24 flex flex-col items-center gap-6 shadow-sm overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative h-20 w-20 rounded-[2rem] bg-white border border-primary/10 flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                      <Plus className="h-6 w-6" />
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                  <div className="relative text-center space-y-2">
+                    <span className="text-lg font-black uppercase tracking-[0.2em] text-primary">Ingest New Project</span>
+                    <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">Case studies &bull; Technical Blueprints &bull; Designs</p>
+                  </div>
+                </button>
+
+                {portfolio.length > 0 ? (
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    {portfolio.map((item) => (
+                      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} key={item.id} className="relative group aspect-video rounded-[2rem] overflow-hidden border border-white/60 shadow-elegant bg-card/60 backdrop-blur-sm">
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-primary/20">
+                            <ImageIcon className="h-16 w-16" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 p-8 flex flex-col justify-between translate-y-4 group-hover:translate-y-0">
+                          <div className="flex justify-between items-start">
+                            <Badge className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border-0 rounded-lg py-1 px-3 text-[10px] font-black uppercase tracking-widest">{item.role || "Elite Project"}</Badge>
+                            <Button size="icon" variant="destructive" onClick={(e) => { e.stopPropagation(); deletePortfolioItem(item); }} className="h-10 w-10 rounded-xl bg-white/10 hover:bg-destructive shadow-lg transition-all">
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
+                          <div className="text-white space-y-2">
+                            <p className="font-black text-xl tracking-tight leading-tight truncate">{item.title}</p>
+                            <p className="text-[11px] font-medium text-white/60 line-clamp-2 leading-relaxed">{item.description || "Deep technical execution for high-tier enterprise partners."}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground/20 italic font-medium uppercase tracking-[0.3em] text-[10px]">
+                    "Excellence is not an act, but a habit. Exhibit your best work."
+                  </div>
+                )}
+              </div>
             </motion.div>
           );
         case 4:
           return (
-            <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
-              <div className="space-y-2">
-                <h2 className="font-display text-3xl font-bold">Review & Submit</h2>
-                <p className="text-muted-foreground">Review your profile before submitting for approval.</p>
+            <motion.div key="step4" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
+              <div className="space-y-3">
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Elite Authentication</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Review your commercial hologram before engaging the network. This is how the global market sees you.</p>
               </div>
-              <Card className="rounded-2xl border-border/40 overflow-hidden">
-                <div className="h-20 bg-gradient-to-r from-primary to-primary/60" />
-                <CardContent className="px-8 pb-8">
-                  <div className="-mt-8 mb-6">
-                    {(avatarPreview || avatarUrl) ? (
-                      <div className="h-16 w-16 rounded-2xl bg-background border-4 border-background overflow-hidden shadow-sm">
-                        <img
-                          src={avatarPreview || avatarUrl}
-                          alt={displayName}
-                          className="w-full h-full object-cover"
-                          style={{
-                            transform: `scale(${zoom})`,
-                            objectPosition: `${position.x}% ${position.y}%`
-                          }}
-                          onError={(e) => {
-                            const src = (e.target as HTMLImageElement).src;
-                            console.error("❌ Review Avatar Failed to Load. Src:", src);
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-16 w-16 rounded-2xl bg-background border-4 border-background flex items-center justify-center font-display font-bold text-primary text-2xl shadow-sm">
-                        {(displayName || "?")[0]?.toUpperCase()}
-                      </div>
-                    )}
+
+              <div className="relative group">
+                <div className="absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/20 to-transparent blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                <Card className="relative rounded-[3rem] border border-white/60 bg-white/40 backdrop-blur-md overflow-hidden shadow-2xl transition-all">
+                  <div className="h-40 bg-gradient-to-r from-primary via-indigo-600 to-primary/80 relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/10 to-transparent" />
                   </div>
-                  <h3 className="font-display text-2xl font-bold">{displayName}</h3>
-                  {headline && <p className="text-muted-foreground font-medium">{headline}</p>}
-                  {country && <p className="text-xs text-muted-foreground/60 mt-1">{country} · {timezone}</p>}
-                  {bio && <p className="text-sm text-muted-foreground mt-4 italic line-clamp-3">"{bio}"</p>}
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {skills.slice(0, 5).map(s => <Badge key={s} variant="secondary" className="rounded-lg text-[10px]">{s}</Badge>)}
-                    {skills.length > 5 && <Badge variant="secondary" className="rounded-lg text-[10px]">+{skills.length - 5}</Badge>}
-                  </div>
-                  {certifications.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-border/20">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">Certifications</p>
-                      {certifications.map((c, i) => <p key={i} className="text-xs text-foreground">{c.name} — {c.issuer} ({c.year})</p>)}
+                  <CardContent className="px-12 pb-12 pt-0">
+                    <div className="flex flex-col md:flex-row items-end gap-8 -mt-16 mb-10">
+                      <div className="relative h-40 w-40 rounded-[2.5rem] bg-card border-[6px] border-white shadow-2xl overflow-hidden shadow-elegant-dark">
+                        {(avatarPreview || avatarUrl) ? (
+                          <img
+                            src={avatarPreview || avatarUrl}
+                            alt={displayName}
+                            className="w-full h-full object-cover"
+                            style={{
+                              transform: `scale(${zoom})`,
+                              objectPosition: `${position.x}% ${position.y}%`
+                            }}
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-primary/10 flex items-center justify-center font-display font-black text-primary text-5xl">
+                            {(displayName || "?")[0]?.toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-2 pb-2">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-display text-4xl font-black tracking-tight">{displayName}</h3>
+                          <Badge className="bg-primary/10 text-primary border-primary/20 rounded-lg px-2 text-[8px] font-black uppercase tracking-widest">Awaiting Verification</Badge>
+                        </div>
+                        {headline && <p className="text-xl font-bold text-muted-foreground/80 tracking-tight">{headline}</p>}
+                        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
+                          <span className="flex items-center gap-1.5"><Globe className="h-3 w-3" /> {country}</span>
+                          <span className="h-1 w-1 rounded-full bg-muted-foreground/20" />
+                          <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> {timezone}</span>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                  <p className="text-xs text-muted-foreground/60 mt-4">{portfolio.length} portfolio item(s) · {selectedCategories.length} segment(s)</p>
-                </CardContent>
-              </Card>
+
+                    <div className="grid md:grid-cols-[1fr_2fr] gap-12 items-start border-t border-border/5 pt-10">
+                      <div className="space-y-10">
+                        <div className="space-y-4">
+                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Technical Expertise</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {skills.slice(0, 10).map(s => <Badge key={s} variant="secondary" className="rounded-xl px-3 py-1.5 text-[10px] font-bold border-0 bg-muted/20 text-foreground/80">{s}</Badge>)}
+                          </div>
+                        </div>
+                        {certifications.length > 0 && (
+                          <div className="space-y-4">
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Commercial Credentials</h4>
+                            <div className="space-y-3">
+                              {certifications.slice(0, 3).map((c, i) => (
+                                <div key={i} className="flex items-center gap-3">
+                                  <Award className="h-4 w-4 text-primary/40" />
+                                  <span className="text-xs font-bold truncate leading-tight">{c.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-10">
+                        <div className="space-y-4">
+                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Commercial Narrative</h4>
+                          <p className="text-lg font-medium text-muted-foreground leading-relaxed italic border-l-4 border-primary/10 pl-6 py-2">"{bio}"</p>
+                        </div>
+                        <div className="space-y-4">
+                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Portfolio Statistics</h4>
+                          <div className="flex items-center gap-8">
+                            <div className="space-y-1">
+                              <p className="text-3xl font-black text-foreground">{portfolio.length}</p>
+                              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Exhibits</p>
+                            </div>
+                            <div className="h-8 w-px bg-border/10" />
+                            <div className="space-y-1">
+                              <p className="text-3xl font-black text-foreground">{selectedCategories.length}</p>
+                              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Market Slots</p>
+                            </div>
+                            <div className="h-8 w-px bg-border/10" />
+                            <div className="space-y-1">
+                              <p className="text-3xl font-black text-foreground">{experienceYears}+</p>
+                              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Domain Experience</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </motion.div>
           );
         default:
@@ -626,94 +780,131 @@ const EditProfile = () => {
 
     return (
       <AppShell>
-        <div className="max-w-3xl mx-auto space-y-8 pb-20">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="relative isolate min-h-screen">
+          {/* Premium Mesh Background */}
+          <div className="absolute inset-x-0 top-0 -z-10 h-[600px] overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
+            <div className="absolute top-[5%] left-[20%] h-64 w-64 rounded-full bg-primary/5 blur-[100px]" />
+            <div className="absolute top-[15%] right-[25%] h-80 w-80 rounded-full bg-indigo-500/5 blur-[120px]" />
+          </div>
+
+          <div className="max-w-4xl mx-auto px-6 lg:px-12 py-10 space-y-12 pb-24">
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+              <div className="space-y-8">
+                <div className="flex flex-wrap items-center justify-between gap-6">
+                  <div className="inline-flex items-center gap-2 rounded-xl bg-white/60 backdrop-blur-sm border border-primary/20 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary shadow-sm">
+                    <Sparkles className="h-3.5 w-3.5" /> Discovery Phase &bull; {WIZARD_STEPS[wizardStep]}
+                  </div>
+
+                  {/* Profile Strength Meter */}
+                  <div className="flex flex-col items-end gap-2 group cursor-help">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{currentStrength.label}</span>
+                      <span className="text-[11px] font-black text-primary">{strength}%</span>
+                    </div>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <div
+                          key={i}
+                          className={`h-1.5 w-8 rounded-full transition-all duration-500 ${strength >= i * 20 ? currentStrength.color : "bg-muted/40"}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex justify-between text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
+                    {WIZARD_STEPS.map((s, i) => (
+                      <span key={s} className={`transition-colors duration-500 ${i <= wizardStep ? "text-primary" : ""}`}>{s}</span>
+                    ))}
+                  </div>
+                  <div className="h-2 rounded-full bg-white/40 border border-white/60 overflow-hidden shadow-inner">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-primary to-indigo-500"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <AnimatePresence mode="wait">
+              {renderStep()}
+            </AnimatePresence>
+
+            <div className="flex justify-between items-center pt-10 border-t border-border/5">
+              <Button variant="ghost" onClick={() => setWizardStep(Math.max(0, wizardStep - 1))} disabled={wizardStep === 0} className="rounded-2xl h-14 px-8 gap-3 font-black text-xs uppercase tracking-widest hover:bg-white/50 backdrop-blur-sm">
+                <ChevronLeft className="h-4 w-4" /> Back
+              </Button>
+              {wizardStep < WIZARD_STEPS.length - 1 ? (
+                <Button onClick={handleNextStep} disabled={!canProceed() || saving} className="rounded-[1.5rem] h-16 px-12 gap-3 bg-primary text-primary-foreground shadow-elegant hover:scale-[1.03] transition-all font-black uppercase tracking-[0.2em] text-xs">
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Execute Next Phase <ChevronRight className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button onClick={handleSubmitApplication} disabled={submitting} className="rounded-[1.5rem] h-16 px-12 gap-3 bg-gradient-to-r from-primary to-indigo-600 text-white shadow-elegant hover:scale-[1.03] transition-all font-black uppercase tracking-[0.2em] text-xs border-0">
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}
+                  Engage Elite Network
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  // Loading state (if needed, though profile should be loaded by AuthContext)
+  // This block was added in the diff, but the original code didn't have a `loading` state.
+  // Assuming `profile` is available or `user` is null, so this might not be strictly necessary
+  // unless there's an explicit `loading` state in AuthContext.
+  // For now, I'll include it as per the diff, assuming `loading` is a variable that needs to be defined
+  // or removed if not used. Since it's not defined, I'll comment it out or remove it if it causes issues.
+  // For this task, I'll assume it's a placeholder and remove it as it's not part of the original code.
+
+  if (showCelebration) {
+    return (
+      <AppShell>
+        <div className="min-h-[90vh] flex flex-col items-center justify-center overflow-hidden relative">
+          <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", damping: 15 }} className="relative z-10 text-center space-y-8">
+            <div className="h-32 w-32 rounded-[2.5rem] bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto shadow-2xl">
+              <ShieldCheck className="h-16 w-16 text-primary" />
+            </div>
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
-                <Sparkles className="h-3 w-3" /> Profile Setup
-              </div>
-              <Progress value={progress} className="h-2 rounded-full" />
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                {WIZARD_STEPS.map((s, i) => (
-                  <span key={s} className={i <= wizardStep ? "text-primary" : ""}>{s}</span>
-                ))}
-              </div>
+              <h1 className="font-display text-5xl font-black tracking-tight">Protocol Engaged</h1>
+              <p className="text-muted-foreground/60 text-lg font-medium max-w-md mx-auto">Your identity has been broadcasted to the elite network. Prepare for high-tier execution.</p>
             </div>
           </motion.div>
 
-          <AnimatePresence mode="wait">
-            {renderStep()}
-          </AnimatePresence>
-
-          <div className="flex justify-between pt-4">
-            <Button variant="outline" onClick={() => setWizardStep(Math.max(0, wizardStep - 1))} disabled={wizardStep === 0} className="rounded-2xl h-12 gap-2">
-              <ChevronLeft className="h-4 w-4" /> Back
-            </Button>
-            {wizardStep < WIZARD_STEPS.length - 1 ? (
-              <Button onClick={() => setWizardStep(wizardStep + 1)} disabled={!canProceed()} className="rounded-2xl h-12 gap-2">
-                Next <ChevronRight className="h-4 w-4" />
-              </Button>
-            ) : (
-              <Button onClick={handleSubmitApplication} disabled={submitting} className="rounded-2xl h-12 gap-2 bg-gradient-to-r from-primary to-primary/80">
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                Submit Application
-              </Button>
-            )}
+          <div className="absolute inset-0 pointer-events-none">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{
+                  x: "50%",
+                  y: "50%",
+                  scale: 0,
+                  opacity: 1
+                }}
+                animate={{
+                  x: `${Math.random() * 100}%`,
+                  y: `${Math.random() * 100}%`,
+                  scale: Math.random() * 2 + 1,
+                  opacity: 0
+                }}
+                transition={{
+                  duration: 2,
+                  delay: Math.random() * 0.5,
+                  ease: "easeOut"
+                }}
+                className="absolute h-2 w-2 rounded-full bg-primary"
+              />
+            ))}
           </div>
         </div>
-
-        {/* Avatar Adjustment Dialog */}
-        <Dialog open={isAdjustingAvatar} onOpenChange={setIsAdjustingAvatar}>
-          <DialogContent className="sm:max-w-md rounded-[2rem]">
-            <DialogHeader>
-              <DialogTitle className="font-display">Adjust Profile Photo</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-8 py-4">
-              <div className="flex justify-center">
-                <div className="h-48 w-48 rounded-full overflow-hidden border-4 border-primary/20 bg-muted/20 relative">
-                  {avatarPreview && (
-                    <img
-                      src={avatarPreview}
-                      alt="Crop Preview"
-                      className="w-full h-full object-cover"
-                      style={{
-                        transform: `scale(${zoom})`,
-                        objectPosition: `${position.x}% ${position.y}%`
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
-                    <div className="flex items-center gap-2"><ZoomOut className="h-3 w-3" /> Zoom</div>
-                    <span>{Math.round(zoom * 100)}%</span>
-                  </div>
-                  <Slider value={[zoom]} min={1} max={3} step={0.1} onValueChange={([v]) => setZoom(v)} />
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
-                    <div className="flex items-center gap-2"><Move className="h-3 w-3" /> Center (Horizontal)</div>
-                    <span>{position.x}%</span>
-                  </div>
-                  <Slider value={[position.x]} min={0} max={100} step={1} onValueChange={([v]) => setPosition(p => ({ ...p, x: v }))} />
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
-                    <div className="flex items-center gap-2"><Move className="h-3 w-3" /> Center (Vertical)</div>
-                    <span>{position.y}%</span>
-                  </div>
-                  <Slider value={[position.y]} min={0} max={100} step={1} onValueChange={([v]) => setPosition(p => ({ ...p, y: v }))} />
-                </div>
-              </div>
-            </div>
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="ghost" onClick={() => { setIsAdjustingAvatar(false); setAvatarPreview(null); }} className="rounded-xl">Cancel</Button>
-              <Button onClick={saveAvatarAdjusted} className="rounded-xl px-8">Save & Upload</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </AppShell>
     );
   }
@@ -721,311 +912,287 @@ const EditProfile = () => {
   // === RETURNING FREELANCER — FULL EDIT MODE ===
   return (
     <AppShell>
-      <div className="max-w-6xl mx-auto space-y-12 pb-20">
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-border/40">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary mb-2">
-                <Sparkles className="h-3 w-3" /> Identity Office
-              </div>
-              <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight">Elite Profile</h1>
-              <p className="text-muted-foreground/60 text-sm font-medium">Refine your commercial presence to attract high-tier engagements.</p>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              {!profile?.application_status && (
-                <Button onClick={handleSubmitApplication} disabled={submitting} variant="outline" className="rounded-2xl h-14 px-8 gap-3 border-primary/30 text-primary hover:bg-primary/5 shadow-sm text-sm font-bold">
-                  {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                  Submit Application
-                </Button>
-              )}
-              <Button onClick={handleSaveProfile} disabled={saving} className="rounded-2xl h-14 px-10 gap-3 bg-gradient-to-r from-primary to-primary/80 border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant text-sm font-bold">
-                {saving ? <><Loader2 className="h-5 w-5 animate-spin" />Saving...</> : <><ShieldCheck className="h-5 w-5" /> Save Changes</>}
-              </Button>
-            </div>
-          </div>
-        </motion.div>
+      <div className="relative min-h-screen bg-[#fafafa]">
+        {/* Elite Mesh Context */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden isolate">
+          <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]" />
+          <div className="absolute top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-indigo-500/5 blur-[150px]" />
+          <div className="absolute -bottom-[10%] left-[20%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]" />
+        </div>
 
-        <div className="grid lg:grid-cols-[1fr_380px] gap-12 items-start">
-          {/* Left: Form */}
-          <div className="space-y-10">
-            <section className="space-y-8">
-              <div className="flex items-center gap-3">
-                <div className="h-px w-8 bg-primary/40" />
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">Core Identity</h2>
+        <div className="relative max-w-7xl mx-auto px-6 space-y-12 pb-24 pt-12">
+          {/* Dashboard Header */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-black/[0.03]">
+              <div className="space-y-3">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white border border-black/[0.03] px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] shadow-sm">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                  Terminal Identity
+                </div>
+                <h1 className="font-display text-5xl font-black tracking-tight leading-none">Elite Command</h1>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Optimize your commercial presence for the global marketplace.</p>
               </div>
-              <Card className="rounded-[2.5rem] border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden">
-                <CardContent className="p-10 space-y-8">
-                  <div className="flex flex-col sm:flex-row items-center gap-8 pb-8 border-b border-border/10">
-                    <input ref={avatarFileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+              <div className="flex flex-wrap items-center gap-4">
+                {!profile?.application_status && (
+                  <Button onClick={handleSubmitApplication} disabled={submitting} variant="outline" className="h-16 px-10 rounded-2xl bg-white border-primary/20 text-primary hover:bg-primary/5 shadow-sm font-black uppercase tracking-widest text-xs gap-3">
+                    {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                    Broadcast Application
+                  </Button>
+                )}
+                <Button onClick={() => handleSaveProfile()} disabled={saving} className="h-16 px-12 rounded-2xl bg-primary text-primary-foreground shadow-elegant hover:scale-[1.03] transition-all font-black uppercase tracking-widest text-xs gap-3 border-0">
+                  {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}
+                  Commit Changes
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-[1fr_420px] gap-12 items-start">
+            {/* Control Matrix */}
+            <div className="space-y-12">
+              <section className="space-y-8">
+                <div className="flex items-center gap-4">
+                  <div className="h-px flex-1 bg-black/5" />
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Identity Matrix</h2>
+                  <div className="h-px flex-1 bg-black/5" />
+                </div>
+
+                <div className="grid gap-8 bg-white/60 backdrop-blur-xl rounded-[3rem] p-12 border border-white shadow-sm">
+                  <div className="flex flex-col sm:flex-row items-center gap-10 pb-10 border-b border-black/[0.03]">
                     <div className="relative group cursor-pointer" onClick={() => avatarFileRef.current?.click()}>
-                      <div className="h-32 w-32 rounded-3xl bg-muted/20 border-2 border-dashed border-border/40 flex items-center justify-center overflow-hidden group-hover:border-primary/40 transition-all">
+                      <div className="h-40 w-40 rounded-[2.5rem] bg-white border-[6px] border-white shadow-2xl overflow-hidden group-hover:scale-105 transition-all duration-500">
                         {(avatarPreview || avatarUrl) ? (
-                          <img
-                            src={avatarPreview || avatarUrl}
-                            alt="Avatar"
-                            className="w-full h-full object-cover"
-                            style={{
-                              transform: `scale(${zoom})`,
-                              objectPosition: `${position.x}% ${position.y}%`
-                            }}
-                          />
+                          <img src={avatarPreview || avatarUrl} alt="Identity Preview" className="w-full h-full object-cover" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
                         ) : (
-                          <User className="h-16 w-16 text-muted-foreground/40" />
+                          <div className="h-full w-full bg-primary/5 flex items-center justify-center"><User className="h-12 w-12 text-primary/20" /></div>
                         )}
-                        {uploadingAvatar && (
-                          <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-                            <Loader2 className="h-8 w-8 animate-spin" />
-                          </div>
-                        )}
+                        {uploadingAvatar && <div className="absolute inset-0 bg-white/80 flex items-center justify-center backdrop-blur-sm"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
                       </div>
-                      <div className="absolute -bottom-2 -right-2 h-10 w-10 rounded-xl bg-primary text-primary-foreground shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Plus className="h-5 w-5" />
+                      <div className="absolute -bottom-2 -right-2 h-12 w-12 rounded-2xl bg-primary text-white shadow-xl flex items-center justify-center group-hover:rotate-12 transition-all">
+                        <Upload className="h-5 w-5" />
                       </div>
+                      <input ref={avatarFileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                     </div>
-                    <div className="space-y-2 text-center sm:text-left">
-                      <h3 className="font-bold">Profile Photo</h3>
-                      <p className="text-xs text-muted-foreground max-w-[200px]">Help clients recognize you. Upload a professional headshot.</p>
-                      <Button variant="outline" size="sm" onClick={() => avatarFileRef.current?.click()} className="rounded-xl h-9 text-xs font-bold gap-2">
-                        <Upload className="h-3.5 w-3.5" /> Replace Photo
-                      </Button>
+                    <div className="space-y-3 text-center sm:text-left flex-1">
+                      <h3 className="text-xl font-black tracking-tight">Biological Proxy</h3>
+                      <p className="text-muted-foreground/60 text-sm font-medium leading-relaxed">High-tier engagements require a verified human presence. Upload a high-fidelity headshot.</p>
+                      <div className="flex gap-3 justify-center sm:justify-start pt-2">
+                        <Button variant="ghost" size="sm" onClick={() => avatarFileRef.current?.click()} className="rounded-xl font-black text-[10px] uppercase tracking-widest h-10 px-6 border border-black/5 hover:bg-white bg-white/40">Adjust Signal</Button>
+                        <Button variant="ghost" size="sm" onClick={() => setIsAdjustingAvatar(true)} className="rounded-xl font-black text-[10px] uppercase tracking-widest h-10 px-6 border border-black/5 hover:bg-white bg-white/40">Recalibrate</Button>
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-4">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Marketplace Segments</Label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {allCategories.map((cat) => (
-                        <button key={cat.id} onClick={() => toggleCategory(cat.id)} className={`flex items-center justify-center p-4 rounded-2xl border-2 transition-all text-xs font-bold uppercase tracking-wider ${selectedCategories.includes(cat.id) ? "bg-primary/10 border-primary text-primary shadow-sm" : "bg-muted/10 border-border/40 text-muted-foreground hover:border-primary/20"}`}>
-                          {cat.name}
-                        </button>
+
+                  <div className="grid sm:grid-cols-2 gap-8 pt-4">
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Legal Designation</Label>
+                      <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Full Name" className="h-16 rounded-[1.5rem] bg-white border-black/[0.03] px-6 font-bold text-lg shadow-inner-sm focus:ring-primary/20" />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Commercial Title</Label>
+                      <Input value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="e.g. Lead System Architect" className="h-16 rounded-[1.5rem] bg-white border-black/[0.03] px-6 font-bold text-lg shadow-inner-sm focus:ring-primary/20" />
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Operational Territory</Label>
+                      <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country" className="h-16 rounded-[1.5rem] bg-white border-black/[0.03] px-6 font-bold text-lg shadow-inner-sm focus:ring-primary/20" />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Temporal Offset</Label>
+                      <div className="h-16 rounded-[1.5rem] bg-black/[0.02] border border-black/[0.03] px-6 flex items-center font-bold text-muted-foreground/60">{timezone}</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Commercial Bio</Label>
+                    <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={6} className="rounded-[2rem] bg-white border-black/[0.03] p-8 font-medium text-lg resize-none shadow-inner-sm focus:ring-primary/20 leading-relaxed" />
+                  </div>
+                </div>
+              </section>
+
+              <section className="space-y-8">
+                <div className="flex items-center gap-4">
+                  <div className="h-px flex-1 bg-black/5" />
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Technical Repository</h2>
+                  <div className="h-px flex-1 bg-black/5" />
+                </div>
+
+                <div className="bg-white/60 backdrop-blur-xl rounded-[3rem] p-12 border border-white shadow-sm space-y-10">
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Skills Arsenal</Label>
+                    <div className="flex gap-3">
+                      <Input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} placeholder="Add Tech Skill" className="h-16 rounded-[1.5rem] bg-white border-black/[0.03] px-6 font-bold text-lg shadow-inner-sm focus:ring-primary/20" />
+                      <Button onClick={addSkill} className="h-16 w-16 rounded-[1.5rem] bg-primary/5 text-primary hover:bg-primary/10 border-0"><Plus /></Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-4">
+                      {skills.map(s => (
+                        <div key={s} className="flex items-center gap-3 rounded-xl bg-white border border-black/[0.03] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary shadow-sm group">
+                          {s}
+                          <button onClick={() => removeSkill(s)} className="text-primary/20 hover:text-destructive transition-colors"><X className="h-3 w-3" /></button>
+                        </div>
                       ))}
                     </div>
                   </div>
-                  <div className="space-y-3 pt-4 border-t border-border/10">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Display Name</Label>
-                    <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium" />
-                  </div>
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Professional Headline</Label>
-                    <Input value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="e.g. Senior Full-Stack Engineer" className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium" />
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-8">
-                    <div className="space-y-3">
-                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Country</Label>
-                      <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="e.g. United Kingdom" className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium" />
-                    </div>
-                    <div className="space-y-3">
-                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Timezone</Label>
-                      <Input value={timezone} readOnly className="h-14 rounded-2xl bg-muted/10 border-border/20 px-6 font-medium text-muted-foreground" />
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Experience Years</Label>
-                    <Input type="number" min="0" max="50" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium" />
-                  </div>
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Bio</Label>
-                    <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={5} placeholder="Your professional narrative..." className="rounded-2xl bg-muted/20 border-border/40 p-6 font-medium resize-none" />
-                  </div>
-                  <div className="space-y-6 pt-4 border-t border-border/20">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Skills</Label>
-                      {skills.length > 0 && <Badge className="bg-primary/10 text-primary border-0 rounded-lg px-2 text-[10px] font-bold">{skills.length} skills</Badge>}
-                    </div>
-                    <div className="flex gap-3">
-                      <Input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} placeholder="Add skill" className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium" />
-                      <Button type="button" variant="outline" onClick={addSkill} className="h-14 w-14 rounded-2xl shrink-0"><Plus className="h-6 w-6" /></Button>
-                    </div>
-                    {skills.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {skills.map((s) => (
-                          <div key={s} className="flex items-center gap-3 rounded-xl border border-border/40 bg-card px-4 py-2 text-xs font-bold">
-                            {s}
-                            <button onClick={() => removeSkill(s)} className="text-muted-foreground/40 hover:text-destructive"><X className="h-3 w-3" /></button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
 
-            {/* Certifications Section */}
-            <section className="space-y-8">
-              <div className="flex items-center gap-3">
-                <div className="h-px w-8 bg-primary/40" />
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">Certifications</h2>
-              </div>
-              <Card className="rounded-[2.5rem] border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden">
-                <CardContent className="p-10 space-y-6">
-                  <div className="grid sm:grid-cols-3 gap-4">
-                    <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Certification name" className="h-12 rounded-xl bg-muted/20 border-border/40 px-4 font-medium" />
-                    <Input value={certIssuer} onChange={(e) => setCertIssuer(e.target.value)} placeholder="Issuer" className="h-12 rounded-xl bg-muted/20 border-border/40 px-4 font-medium" />
-                    <div className="flex gap-2">
-                      <Input type="number" value={certYear} onChange={(e) => setCertYear(e.target.value)} placeholder="Year" className="h-12 rounded-xl bg-muted/20 border-border/40 px-4 font-medium" />
-                      <Button onClick={addCertification} className="h-12 rounded-xl shrink-0"><Plus className="h-4 w-4" /></Button>
-                    </div>
-                  </div>
-                  {certifications.map((cert, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-5 rounded-2xl border border-border/40 bg-muted/10">
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                          {cert.verified ? <CheckCircle className="h-5 w-5 text-primary" /> : <Award className="h-5 w-5 text-muted-foreground" />}
+                  <div className="pt-10 border-t border-black/[0.03] space-y-6">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Commercial Certifications</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {certifications.map((c, i) => (
+                        <div key={i} className="flex items-center justify-between p-6 rounded-[2rem] bg-white border border-black/[0.03] shadow-sm">
+                          <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary"><Award className="h-6 w-6" /></div>
+                            <div>
+                              <p className="font-black text-xs uppercase tracking-tight truncate max-w-[120px]">{c.name}</p>
+                              <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">{c.issuer}</p>
+                            </div>
+                          </div>
+                          <button onClick={() => removeCertification(i)} className="p-2 text-muted-foreground/20 hover:text-destructive transition-colors"><X className="h-4 w-4" /></button>
                         </div>
-                        <div>
-                          <p className="font-bold text-sm">{cert.name}</p>
-                          <p className="text-xs text-muted-foreground">{cert.issuer} · {cert.year}</p>
-                        </div>
-                        {cert.verified && <Badge className="bg-primary/10 text-primary border-0 rounded-lg text-[10px] font-bold ml-2">Verified</Badge>}
-                      </div>
-                      <button onClick={() => removeCertification(idx)} className="text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
+                      ))}
+                      <button onClick={() => setWizardStep(2)} className="flex items-center justify-center p-6 rounded-[2rem] border-2 border-dashed border-black/5 hover:border-primary/20 bg-white/40 hover:bg-white transition-all text-[10px] font-black uppercase tracking-widest text-primary/40 hover:text-primary">
+                        <Plus className="h-4 w-4 mr-2" /> Add Credential
+                      </button>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </section>
-
-            {/* Portfolio */}
-            <section className="space-y-8">
-              <div className="flex items-center gap-3">
-                <div className="h-px w-8 bg-primary/40" />
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">Portfolio</h2>
-              </div>
-              <Card className="rounded-[2.5rem] border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden p-10">
-                <CardContent className="p-0 space-y-8">
-                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePortfolioUpload} />
-                  <button onClick={() => setIsPortfolioFormOpen(true)} className="w-full rounded-[2rem] border-2 border-dashed border-border/40 hover:border-primary/40 bg-muted/10 hover:bg-primary/5 transition-all py-16 flex flex-col items-center gap-4 text-muted-foreground hover:text-primary group">
-                    <div className="h-16 w-16 rounded-2xl bg-background border border-border/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Plus className="h-8 w-8" />
-                    </div>
-                    <span className="text-sm font-bold uppercase tracking-widest text-primary">Add Portfolio Project</span>
-                  </button>
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    {portfolio.map((item) => (
-                      <div key={item.id} className="relative group rounded-3xl overflow-hidden border border-border/40 shadow-sm bg-muted/20 aspect-video">
-                        {item.image_url ? (
-                          <img src={item.image_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground/20">
-                            <ImageIcon className="h-12 w-12" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all p-6 flex flex-col justify-between">
-                          <div className="flex justify-between items-start">
-                            <Badge className="bg-white/20 hover:bg-white/30 text-white border-0 text-[10px] uppercase font-bold tracking-wider">{item.role || "Project"}</Badge>
-                            <Button size="icon" variant="destructive" onClick={() => deletePortfolioItem(item)} className="h-10 w-10 rounded-xl">
-                              <Trash2 className="h-5 w-5" />
-                            </Button>
-                          </div>
-                          <div className="text-white space-y-1">
-                            <p className="font-display font-bold text-lg truncate">{item.title}</p>
-                            <p className="text-xs text-white/60 line-clamp-2 leading-relaxed">{item.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            </section>
-          </div>
-
-          {user && (
-            <PortfolioProjectForm
-              isOpen={isPortfolioFormOpen}
-              onClose={() => setIsPortfolioFormOpen(false)}
-              onSave={(item) => setPortfolio([...portfolio, item])}
-              userId={user.id}
-            />
-          )}
-
-          {/* Right: Identity Preview */}
-          <div className="lg:sticky lg:top-12 space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="h-px w-6 bg-primary/40" />
-              <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">Identity Preview</h2>
+                </div>
+              </section>
             </div>
-            <Card className="rounded-[2.5rem] border-primary/20 bg-gradient-to-b from-card to-muted/20 overflow-hidden shadow-elegant border-2 border-dashed">
-              <div className="h-24 bg-gradient-to-br from-primary via-primary/60 to-accent relative isolate">
-                <div className="absolute inset-0 bg-black/10 mix-blend-overlay" />
+
+            {/* Identity Hologram */}
+            <div className="lg:sticky lg:top-12 space-y-8">
+              <div className="flex items-center gap-4">
+                <div className="h-px flex-1 bg-black/5" />
+                <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Hologram Preview</h2>
+                <div className="h-px flex-1 bg-black/5" />
               </div>
-              <CardContent className="px-8 pb-10">
-                <div className="-mt-12 mb-6">
-                  <div className="relative inline-block">
-                    {(avatarPreview || avatarUrl) ? (
-                      <div className="h-20 w-20 rounded-[1.5rem] bg-background border-4 border-background overflow-hidden shadow-sm">
-                        <img
-                          src={avatarPreview || avatarUrl}
-                          alt={displayName}
-                          className="w-full h-full object-cover"
-                          style={{
-                            transform: `scale(${zoom})`,
-                            objectPosition: `${position.x}% ${position.y}%`
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-20 w-20 rounded-[1.5rem] bg-background border-4 border-background flex items-center justify-center font-display font-bold text-primary text-3xl shadow-sm">
-                        {(displayName || "?")[0]?.toUpperCase()}
-                      </div>
-                    )}
-                    <div className={`absolute -bottom-1 -right-1 h-6 w-6 rounded-lg ${activityStatus.color} border-2 border-background shadow-sm flex items-center justify-center`}>
-                      <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                    </div>
-                  </div>
+
+              <Card className="relative rounded-[3.5rem] border-0 bg-white shadow-2xl overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+                <div className="h-32 bg-gradient-to-r from-primary via-indigo-600 to-primary/80 relative">
+                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
                 </div>
-                <div className="space-y-6">
-                  <div className="space-y-1">
-                    <h3 className="font-display font-bold text-2xl tracking-tight">{displayName || "Elite Partner"}</h3>
-                    {headline && <p className="text-sm text-muted-foreground font-medium">{headline}</p>}
-                    {country && (
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                        <Globe className="h-3.5 w-3.5" />{country}
+                <CardContent className="px-10 pb-12">
+                  <div className="-mt-16 mb-8 relative z-10">
+                    <div className="inline-block relative">
+                      <div className="h-32 w-32 rounded-[2.5rem] bg-white border-[6px] border-white shadow-2xl overflow-hidden shadow-elegant-dark">
+                        {(avatarPreview || avatarUrl) ? (
+                          <img src={avatarPreview || avatarUrl} alt="Hologram" className="w-full h-full object-cover" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
+                        ) : (
+                          <div className="h-full w-full bg-primary/10 flex items-center justify-center font-display font-black text-primary text-4xl">{(displayName || "?")[0]}</div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  {bio && <p className="text-xs text-muted-foreground font-medium leading-relaxed italic line-clamp-4">"{bio}"</p>}
-                  <div className="space-y-4 pt-4 border-t border-border/10">
-                    <div className="flex flex-wrap gap-1.5">
-                      {selectedCategories.map((catId) => {
-                        const cat = allCategories.find(c => c.id === catId);
-                        return cat ? <div key={cat.id} className="px-2.5 py-1 rounded-lg bg-primary text-primary-foreground text-[8px] font-bold uppercase tracking-widest">{cat.name}</div> : null;
-                      })}
-                      {skills.slice(0, 3).map((s) => <div key={s} className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest">{s}</div>)}
-                      {skills.length > 3 && <div className="px-2.5 py-1 rounded-lg bg-muted text-muted-foreground text-[10px] font-bold uppercase tracking-widest">+{skills.length - 3}</div>}
+                      <div className={`absolute bottom-0 right-0 h-8 w-8 rounded-2xl ${activityStatus.color} border-4 border-white shadow-lg flex items-center justify-center`}>
+                        <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                      </div>
                     </div>
-                    {certifications.length > 0 && (
-                      <div className="pt-2 border-t border-border/10">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40 mb-2">Credentials</p>
-                        {certifications.slice(0, 2).map((c, i) => (
-                          <div key={i} className="flex items-center gap-2 text-[10px] mb-1">
-                            {c.verified ? <CheckCircle className="h-3 w-3 text-primary" /> : <Award className="h-3 w-3 text-muted-foreground/40" />}
-                            <span className="font-bold">{c.name}</span>
-                          </div>
+                  </div>
+
+                  <div className="space-y-8">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-display text-3xl font-black tracking-tight">{displayName || "Anonymous Partner"}</h3>
+                        <Crown className="h-5 w-5 text-primary" />
+                      </div>
+                      <p className="font-bold text-muted-foreground leading-snug">{headline || "Operational Executive"}</p>
+                      <div className="flex items-center gap-4 pt-1 font-black text-[9px] uppercase tracking-widest text-muted-foreground/40">
+                        <span className="flex items-center gap-2"><Globe className="h-3.5 w-3.5" />{country}</span>
+                        <span className="h-1 w-1 rounded-full bg-black/10" />
+                        <span className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" />{timezone}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 pt-8 border-t border-black/[0.03]">
+                      <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">Technical Segments</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedCategories.map(id => (
+                          <Badge key={id} className="bg-black/5 text-black hover:bg-black/10 border-0 rounded-lg px-3 py-1.5 text-[9px] font-black uppercase tracking-widest">
+                            {allCategories.find(c => c.id === id)?.name}
+                          </Badge>
                         ))}
-                        {certifications.length > 2 && <p className="text-[9px] text-muted-foreground/40">+{certifications.length - 2} more</p>}
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-lg bg-primary/5 flex items-center justify-center">
-                        <Crown className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-foreground">
-                          {profile?.application_status === "approved" ? "Elite Verified" : "Awaiting Vetting"}
-                        </p>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40">
-                          {activityStatus.label}
-                        </p>
                       </div>
                     </div>
+
+                    <div className="pt-8 border-t border-black/[0.03]">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Identity Strength</span>
+                        <span className="text-[10px] font-black text-primary">{Math.round(strength)}%</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-black/5 overflow-hidden">
+                        <motion.div initial={{ width: 0 }} animate={{ width: `${strength}%` }} className="h-full bg-primary" />
+                      </div>
+                    </div>
+
+                    <Button onClick={() => navigate(`/freelancer/${user?.id}`)} variant="ghost" className="w-full h-14 rounded-2xl border border-black/5 font-black uppercase tracking-widest text-[10px] hover:bg-black/5 mt-4 group">
+                      Review Public Transmission
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Portfolo Form Bridge */}
+      {user && (
+        <PortfolioProjectForm
+          isOpen={isPortfolioFormOpen}
+          onClose={() => setIsPortfolioFormOpen(false)}
+          onSave={(item) => setPortfolio([...portfolio, item])}
+          userId={user.id}
+        />
+      )}
+
+      {/* Refinement Modals */}
+      <Dialog open={isAdjustingAvatar} onOpenChange={setIsAdjustingAvatar}>
+        <DialogContent className="sm:max-w-md rounded-[3rem] border-0 shadow-2xl p-0 overflow-hidden">
+          <div className="p-10 space-y-10">
+            <DialogHeader>
+              <DialogTitle className="font-display text-4xl font-black tracking-tight text-center">Refine Identity</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-12">
+              <div className="flex justify-center">
+                <div className="h-56 w-56 rounded-[2.5rem] overflow-hidden border-[8px] border-black/5 shadow-inner-lg relative isolate">
+                  <div className="absolute inset-0 bg-primary/5" />
+                  {avatarPreview && (
+                    <img src={avatarPreview} alt="Crop Signal" className="w-full h-full object-cover relative z-10" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
+                  )}
+                </div>
+              </div>
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                    <span className="flex items-center gap-2"><ZoomIn className="h-3 w-3" /> Amplitude (Zoom)</span>
+                    <span>{Math.round(zoom * 100)}%</span>
+                  </div>
+                  <Slider value={[zoom]} min={1} max={3} step={0.01} onValueChange={([v]) => setZoom(v)} className="py-2" />
+                </div>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                    <span className="flex items-center gap-2"><Move className="h-3 w-3" /> Lateral Offset (X)</span>
+                    <span>{position.x}%</span>
+                  </div>
+                  <Slider value={[position.x]} min={0} max={100} step={1} onValueChange={([v]) => setPosition(p => ({ ...p, x: v }))} className="py-2" />
+                </div>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                    <span className="flex items-center gap-2"><Move className="h-3 w-3" /> Vertical Offset (Y)</span>
+                    <span>{position.y}%</span>
+                  </div>
+                  <Slider value={[position.y]} min={0} max={100} step={1} onValueChange={([v]) => setPosition(p => ({ ...p, y: v }))} className="py-2" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex p-4 gap-2 bg-black/5">
+            <Button variant="ghost" onClick={() => setIsAdjustingAvatar(false)} className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px]">Abort</Button>
+            <Button onClick={saveAvatarAdjusted} className="flex-[2] h-14 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-[10px] shadow-lg">Commit Identity</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 };

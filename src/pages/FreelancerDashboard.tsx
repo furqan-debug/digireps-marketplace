@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Briefcase, User, Star, ArrowRight, Clock, Crown, Shield, AlertCircle, Sparkles } from "lucide-react";
-import { motion } from "framer-motion";
+import { Briefcase, User, Star, ArrowRight, Clock, Crown, Shield, AlertCircle, Sparkles, Eye } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const STATUS_CONFIG = {
   pending: { label: "Under Review", className: "bg-warning/15 text-warning border-warning/30" },
@@ -60,174 +60,260 @@ const FreelancerDashboard = () => {
 
   return (
     <AppShell>
-      <div className="max-w-5xl mx-auto space-y-12">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex flex-wrap items-end justify-between gap-6 pb-2 border-b border-border/40">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 border border-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary mb-2">
-                <Sparkles className="h-3 w-3" /> Freelancer Center
-              </div>
-              <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight">
-                Welcome, <span className="gradient-text">{profile?.display_name?.split(" ")[0] || "Elite Partner"}</span>
-              </h1>
-              <p className="text-muted-foreground text-base max-w-lg">Execute projects, manage your elite profile, and track your commercial performance.</p>
-            </div>
-            <Badge className={`${statusCfg.className} rounded-xl border px-4 py-1.5 text-xs font-bold uppercase tracking-wider`}>{statusCfg.label}</Badge>
-          </div>
-        </motion.div>
+      <div className="relative isolate min-h-screen">
+        {/* Premium Mesh Background */}
+        <div className="absolute inset-x-0 top-0 -z-10 h-[600px] overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
+          <div className="absolute top-[5%] left-[20%] h-64 w-64 rounded-full bg-primary/10 blur-[100px] animate-pulse" />
+          <div className="absolute top-[15%] right-[25%] h-80 w-80 rounded-full bg-indigo-500/5 blur-[120px]" />
+        </div>
 
-        {/* Status banners */}
-        {!status && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-            <div className="rounded-[2.5rem] border-2 border-dashed border-primary/20 bg-primary/5 p-10 text-center space-y-6">
-              <div className="flex h-20 w-20 items-center justify-center rounded-[2rem] bg-background border border-primary/20 shadow-sm mx-auto">
-                <User className="h-10 w-10 text-primary" />
-              </div>
-              <div className="space-y-2">
-                <h2 className="font-display text-3xl font-bold tracking-tight text-foreground">Complete Your Identity</h2>
-                <p className="text-muted-foreground text-sm max-w-lg mx-auto leading-relaxed">
-                  Your profile is the first step to joining our elite network. Complete your bio, skills, and categories to submit your application for review.
-                </p>
-              </div>
-              <Button
-                onClick={() => navigate("/freelancer/profile")}
-                className="rounded-2xl h-14 px-10 gap-3 bg-primary text-primary-foreground shadow-elegant hover:scale-[1.02] transition-transform font-bold"
-              >
-                Finalize Profile <ArrowRight className="h-5 w-5" />
-              </Button>
-            </div>
-          </motion.div>
-        )}
-
-        {status === "pending" && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-            <div className="rounded-[2.5rem] border border-warning/20 bg-gradient-to-br from-warning/10 to-transparent p-10 shadow-sm">
-              <div className="flex items-start gap-6">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-warning/10 border border-warning/20">
-                  <Clock className="h-7 w-7 text-warning" />
-                </div>
-                <div className="space-y-2">
-                  <p className="text-2xl font-display font-bold text-warning">Application Under Review</p>
-                  <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl">
-                    Our compliance team is currently verifying your credentials. Maintaining an elite network requires rigorous vetting. You will be notified via email once approved.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Stats Grid */}
-        {isApproved && (
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-10 space-y-16">
+          {/* Header Section */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+            transition={{ duration: 0.6 }}
+            className="flex flex-col md:flex-row md:items-end justify-between gap-10"
           >
-            <div className="group relative rounded-[2rem] border border-border/40 bg-card p-8 transition-all hover:shadow-elegant hover:border-primary/20">
-              <div className="absolute top-6 right-8">
-                <Briefcase className="h-6 w-6 opacity-20 group-hover:opacity-40 transition-opacity text-primary" />
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-xl bg-white/60 backdrop-blur-sm border border-primary/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary shadow-sm">
+                <Sparkles className="h-3.5 w-3.5" /> Elite Workspace
               </div>
-              <div className="text-5xl font-display font-bold mb-2 text-primary">{stats.totalJobs}</div>
-              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Completed Projects</div>
+              <h1 className="font-display text-5xl sm:text-7xl font-black tracking-tight leading-[0.9]">
+                Welcome Back,<br />
+                <span className="text-primary italic">{profile?.display_name?.split(" ")[0] || "Partner"}</span>
+              </h1>
+              <p className="text-muted-foreground/80 text-lg sm:text-xl font-medium max-w-xl leading-relaxed">
+                Your command center for elite project execution and commercial growth.
+              </p>
             </div>
-            <div className="group relative rounded-[2rem] border border-border/40 bg-card p-8 transition-all hover:shadow-elegant hover:border-primary/20">
-              <div className="absolute top-6 right-8">
-                <Star className="h-6 w-6 opacity-20 group-hover:opacity-40 transition-opacity text-warning" />
-              </div>
-              <div className="text-5xl font-display font-bold mb-2 text-warning">
-                {stats.avgRating != null ? stats.avgRating.toFixed(1) : "—"}
-              </div>
-              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Customer Satisfaction</div>
+
+            <div className="flex flex-col items-end gap-6">
+              <Badge className={`${statusCfg.className} rounded-2xl border-2 px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] shadow-sm`}>
+                {statusCfg.label}
+              </Badge>
+              {profile && (
+                <Button
+                  onClick={() => navigate(`/client/freelancer/${user?.id}`)}
+                  variant="outline"
+                  className="rounded-2xl h-14 px-8 border-border/40 hover:bg-white/60 transition-all font-black text-xs uppercase tracking-widest gap-3 shadow-sm hover:shadow-elegant"
+                >
+                  <Eye className="h-4 w-4" /> View Public Profile
+                </Button>
+              )}
             </div>
           </motion.div>
-        )}
 
-        {/* Main Actions */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          <motion.div variants={itemVariants}>
-            <Card
-              className="group cursor-pointer rounded-[2rem] border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant overflow-hidden h-full"
-              onClick={() => navigate("/freelancer/profile")}
-            >
-              <CardHeader className="p-8">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl icon-gradient mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <User className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle className="font-display text-2xl font-bold">
-                  Elite Profile
-                </CardTitle>
-                <CardDescription className="text-sm leading-relaxed pt-2">
-                  Update your commercial bio, technical stack, and portfolio to maintain elite status.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-8 pt-0">
-                <div className="flex items-center text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
-                  Maintain Profile <ArrowRight className="h-4 w-4 ml-2" />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <div className="grid lg:grid-cols-[1fr_400px] gap-12 items-start">
+            <div className="space-y-12">
+              {/* Specialized Banners based on Status */}
+              <AnimatePresence mode="wait">
+                {(!status || status === 'onboarding') && (
+                  <motion.div
+                    key="onboarding"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="relative p-1 bg-gradient-to-br from-primary/40 to-primary/5 rounded-[3rem] shadow-elegant overflow-hidden group"
+                  >
+                    <div className="bg-card/40 backdrop-blur-md rounded-[2.8rem] p-10 sm:p-12 text-center space-y-8 border border-white/40">
+                      <div className="flex h-24 w-24 items-center justify-center rounded-[2.5rem] bg-white border border-primary/20 shadow-xl mx-auto group-hover:scale-110 transition-transform duration-500">
+                        <User className="h-10 w-10 text-primary" />
+                      </div>
+                      <div className="space-y-3">
+                        <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-foreground">Finalize Your Presence</h2>
+                        <p className="text-muted-foreground font-medium max-w-lg mx-auto leading-relaxed">
+                          Your profile is currently <span className="text-primary font-bold">Incomplete</span>. Craft your high-end portfolio to unlock the global network.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => navigate("/freelancer/profile")}
+                        className="rounded-[1.5rem] h-16 px-12 gap-3 bg-primary text-primary-foreground shadow-2xl hover:scale-[1.03] transition-all font-black uppercase tracking-[0.2em] text-xs"
+                      >
+                        Complete Onboarding <ArrowRight className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
 
-          <motion.div variants={itemVariants}>
-            <Card
-              className={`group transition-all h-full rounded-[2rem] border-border/40 overflow-hidden ${isApproved ? "cursor-pointer hover:shadow-elegant hover:border-primary/30" : "opacity-60 grayscale"}`}
-              onClick={() => isApproved && navigate("/freelancer/orders")}
-            >
-              <CardHeader className="p-8">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl icon-gradient mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Briefcase className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle className="font-display text-2xl font-bold">
-                  Workstreams
-                </CardTitle>
-                <CardDescription className="text-sm leading-relaxed pt-2">
-                  Access incoming project briefs and manage your active execution pipeline.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-8 pt-0">
-                <div className="flex items-center text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
-                  View Pipeline <ArrowRight className="h-4 w-4 ml-2" />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                {status === "pending" && (
+                  <motion.div
+                    key="pending"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative p-1 bg-gradient-to-br from-warning/40 to-warning/5 rounded-[3rem] shadow-elegant overflow-hidden"
+                  >
+                    <div className="bg-amber-50/40 backdrop-blur-md rounded-[2.8rem] p-10 sm:p-12 border border-white/60">
+                      <div className="flex items-start gap-8">
+                        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[2rem] bg-white border border-warning/20 shadow-xl">
+                          <Clock className="h-10 w-10 text-warning" />
+                        </div>
+                        <div className="space-y-4">
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-warning/10 text-[10px] font-black uppercase tracking-widest text-warning border border-warning/10">
+                            Elite Verification in Progress
+                          </div>
+                          <h2 className="text-3xl font-display font-black tracking-tight text-warning">Strict Quality Vetting</h2>
+                          <p className="text-muted-foreground font-medium leading-relaxed max-w-2xl text-lg">
+                            Our team is meticulously reviewing your credentials. Maintaining a 100% vetted network ensures premium project flow. Expect verification within 24-48 hours.
+                          </p>
+                          <div className="pt-4 flex items-center gap-4">
+                            <Button onClick={() => navigate("/freelancer/profile")} variant="ghost" className="rounded-xl h-12 text-xs font-black uppercase tracking-widest hover:bg-warning/5">
+                              Edit Application
+                            </Button>
+                            <div className="h-1 w-1 rounded-full bg-warning/20" />
+                            <span className="text-xs font-bold text-warning/60 uppercase tracking-widest">Priority Review Active</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-          <motion.div variants={itemVariants}>
-            <Card className="rounded-[2rem] border-border/40 bg-card overflow-hidden h-full">
-              <CardHeader className="p-8">
-                <div className={`flex h-14 w-14 items-center justify-center rounded-2xl mb-6 shadow-sm border border-border/10 ${levelCfg.bg}`}>
-                  <LevelIcon className={`h-6 w-6 ${levelCfg.color}`} />
-                </div>
-                <CardTitle className="font-display text-2xl font-bold">
-                  {levelCfg.label} Status
-                </CardTitle>
-                <CardDescription className="text-sm leading-relaxed pt-2">
-                  Maintain high performance to advance to the next elite tier and unlock premium perks.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-8 pt-0 space-y-4">
-                <div className="space-y-2">
-                  <Progress value={levelCfg.progress} className="h-2 rounded-full" />
-                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                    <span>Progression</span>
-                    <span>{levelCfg.progress}%</span>
+              {/* Stats Grid */}
+              {isApproved && (
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.4 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-8"
+                >
+                  <div className="group relative rounded-[2.5rem] border border-border/40 bg-white/40 backdrop-blur-sm p-10 transition-all hover:shadow-elegant hover:border-primary/20">
+                    <div className="absolute top-8 right-10">
+                      <Briefcase className="h-8 w-8 opacity-10 group-hover:opacity-30 transition-opacity text-primary" />
+                    </div>
+                    <div className="text-7xl font-display font-black mb-2 tracking-tighter text-primary">{stats.totalJobs}</div>
+                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Elite Project Wins</div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </motion.div>
+                  <div className="group relative rounded-[2.5rem] border border-border/40 bg-white/40 backdrop-blur-sm p-10 transition-all hover:shadow-elegant hover:border-primary/20">
+                    <div className="absolute top-8 right-10">
+                      <Star className="h-8 w-8 opacity-10 group-hover:opacity-30 transition-opacity text-warning" />
+                    </div>
+                    <div className="text-7xl font-display font-black mb-2 tracking-tighter text-warning">
+                      {stats.avgRating != null ? stats.avgRating.toFixed(1) : "5.0"}
+                    </div>
+                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Global Talent Rating</div>
+                  </div>
+                </motion.div>
+              )}
 
-        {/* Decorative background element */}
-        <div className="fixed -bottom-24 -left-24 h-96 w-96 rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+              {/* Action Cards */}
+              <div className="grid gap-8 sm:grid-cols-2">
+                <motion.div variants={itemVariants} initial="hidden" animate="show">
+                  <Card
+                    className="group cursor-pointer rounded-[3rem] border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant overflow-hidden h-full bg-white/40 backdrop-blur-sm"
+                    onClick={() => navigate("/freelancer/profile")}
+                  >
+                    <CardHeader className="p-10 pb-6">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-primary/10 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                        <User className="h-7 w-7 text-primary" />
+                      </div>
+                      <CardTitle className="font-display text-3xl font-black tracking-tight">
+                        Identity Office
+                      </CardTitle>
+                      <CardDescription className="text-base font-medium leading-relaxed pt-2 text-muted-foreground/60">
+                        Manage your global commercial presence, certifications, and portfolio items.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-10 pt-0">
+                      <div className="inline-flex items-center text-xs font-black uppercase tracking-widest text-primary border-b-2 border-primary/20 pb-1 group-hover:border-primary transition-all">
+                        Edit Elite Profile <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
+                <motion.div variants={itemVariants} initial="hidden" animate="show">
+                  <Card
+                    className={`group transition-all h-full rounded-[3rem] border-border/40 overflow-hidden bg-white/40 backdrop-blur-sm ${isApproved ? "cursor-pointer hover:shadow-elegant hover:border-primary/30" : "opacity-60 grayscale cursor-not-allowed"}`}
+                    onClick={() => isApproved && navigate("/freelancer/orders")}
+                  >
+                    <CardHeader className="p-10 pb-6">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-indigo-50 color-indigo-500 mb-8 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500">
+                        <Briefcase className="h-7 w-7 text-indigo-500" />
+                      </div>
+                      <CardTitle className="font-display text-3xl font-black tracking-tight">
+                        Project Briefs
+                      </CardTitle>
+                      <CardDescription className="text-base font-medium leading-relaxed pt-2 text-muted-foreground/60">
+                        Access incoming high-budget briefs and manage your active execution workstreams.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-10 pt-0">
+                      <div className="inline-flex items-center text-xs font-black uppercase tracking-widest text-indigo-500 border-b-2 border-indigo-500/20 pb-1 group-hover:border-indigo-500 transition-all">
+                        {isApproved ? "Open Workstream" : "Awaiting Verification"} <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Sidebar Column */}
+            <div className="space-y-8">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Card className="rounded-[3rem] border-border/40 bg-gradient-to-br from-card to-muted/20 p-10 space-y-8 shadow-sm">
+                  <div className="space-y-6">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] shadow-xl border border-border/10 m-auto" style={{ backgroundColor: 'white' }}>
+                      <LevelIcon className={`h-8 w-8 ${levelCfg.color}`} />
+                    </div>
+                    <div className="text-center space-y-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Elite Tier</p>
+                      <h3 className="font-display text-3xl font-black tracking-tight">
+                        {levelCfg.label} Specialist
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-[11px] font-black uppercase tracking-widest">
+                      <span className="text-muted-foreground/60">Tier Progression</span>
+                      <span className="text-primary">{levelCfg.progress}%</span>
+                    </div>
+                    <div className="h-3 rounded-full bg-white border border-border/10 overflow-hidden p-0.5">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${levelCfg.progress}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="h-full rounded-full bg-gradient-to-r from-primary to-indigo-500"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs font-medium text-center text-muted-foreground/60 leading-relaxed italic">
+                    "Consistent excellence in execution unlocks the next elite tier and global perks."
+                  </p>
+                </Card>
+              </motion.div>
+
+              <Card className="rounded-[2.5rem] border border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm">
+                    <AlertCircle className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-xs font-black uppercase tracking-widest">Quick Support</h3>
+                </div>
+                <div className="space-y-4">
+                  <p className="text-sm font-medium leading-relaxed text-muted-foreground">
+                    Need assistance with a brief or have a technical query? Our partner success team is online.
+                  </p>
+                  <Button variant="outline" className="w-full rounded-xl h-12 text-[10px] font-black uppercase tracking-widest border-border/60 hover:bg-white/60">
+                    Contact Partner Support
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating Decorative Elements */}
+        <div className="fixed -bottom-48 -right-48 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+        <div className="fixed -top-48 -left-48 h-[500px] w-[500px] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
       </div>
     </AppShell>
   );

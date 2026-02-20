@@ -49,27 +49,64 @@ export const PortfolioProjectForm = ({ isOpen, onClose, onSave, userId }: Portfo
         const file = e.target.files?.[0];
         if (!file || !currentBlockType) return;
 
-        setUploading(true);
-        const fileName = `${userId}/portfolio/${Date.now()}-${file.name}`;
-        const { error: upErr } = await supabase.storage.from("portfolio").upload(fileName, file);
-
-        if (upErr) {
-            toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
-            setUploading(false);
+        // Allow images for 'image' type, and PDFs/Docs for 'file' type
+        if (currentBlockType === 'image' && !file.type.startsWith('image/')) {
+            toast({ title: "Invalid file type", description: "Please upload an image file.", variant: "destructive" });
             return;
         }
 
-        const { data: urlData } = supabase.storage.from("portfolio").getPublicUrl(fileName);
+        if (currentBlockType === 'file' && file.type !== 'application/pdf' && !file.type.startsWith('text/')) {
+            // We'll allow PDFs and text files for now
+            // If it's a docx etc, mime type might be different, but PDF is the priority
+        }
 
-        const newBlock: PortfolioContentBlock = {
-            id: Math.random().toString(36).substr(2, 9),
-            type: currentBlockType,
-            url: urlData.publicUrl,
-        };
+        setUploading(true);
+        const fileName = `${userId}/portfolio/${Date.now()}-${file.name}`;
 
-        setBlocks([...blocks, newBlock]);
-        setUploading(false);
-        setCurrentBlockType(null);
+        try {
+            const { error: upErr } = await supabase.storage.from("portfolio").upload(fileName, file);
+
+            if (upErr) {
+                toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
+                setUploading(false);
+                return;
+            }
+
+            const { data: urlData } = supabase.storage.from("portfolio").getPublicUrl(fileName);
+
+            const newBlock: PortfolioContentBlock = {
+                id: Math.random().toString(36).substr(2, 9),
+                type: currentBlockType,
+                url: urlData.publicUrl,
+            };
+
+            setBlocks([...blocks, newBlock]);
+        } catch (error: any) {
+            toast({ title: "Unexpected error", description: error.message, variant: "destructive" });
+        } finally {
+            setUploading(false);
+            setCurrentBlockType(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+
+    const getVideoEmbedUrl = (url: string) => {
+        if (!url) return null;
+
+        // Youtube
+        const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/);
+        if (ytMatch && ytMatch[1]) {
+            const id = ytMatch[1].split('&')[0].split('?')[0];
+            return `https://www.youtube.com/embed/${id}`;
+        }
+
+        // Vimeo
+        const vimeoMatch = url.match(/(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:$|\/|\?)/);
+        if (vimeoMatch && vimeoMatch[1]) {
+            return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+        }
+
+        return null;
     };
 
     const addTextBlock = () => {
@@ -189,9 +226,21 @@ export const PortfolioProjectForm = ({ isOpen, onClose, onSave, userId }: Portfo
 
                                             {block.type === 'image' && <img src={block.url} className="w-full rounded-lg object-contain max-h-48" />}
                                             {block.type === 'video' && (
-                                                <div className="flex items-center gap-3">
-                                                    <Video className="h-5 w-5 text-primary" />
-                                                    <Input value={block.url} onChange={(e) => updateBlockUrl(block.id, e.target.value)} placeholder="Video URL (Youtube/Vimeo)" className="h-9 text-xs" />
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <Video className="h-5 w-5 text-primary" />
+                                                        <Input value={block.url} onChange={(e) => updateBlockUrl(block.id, e.target.value)} placeholder="Video URL (Youtube/Vimeo)" className="h-9 text-xs" />
+                                                    </div>
+                                                    {getVideoEmbedUrl(block.url || "") && (
+                                                        <div className="aspect-video w-full rounded-lg overflow-hidden border border-border/20">
+                                                            <iframe
+                                                                src={getVideoEmbedUrl(block.url || "")!}
+                                                                className="w-full h-full"
+                                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                                allowFullScreen
+                                                            />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                             {block.type === 'text' && <Textarea value={block.content} onChange={(e) => updateBlockContent(block.id, e.target.value)} placeholder="Write something..." className="min-h-24 text-sm" />}

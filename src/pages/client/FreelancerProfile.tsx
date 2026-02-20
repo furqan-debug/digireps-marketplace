@@ -2,18 +2,16 @@ import { useState, useEffect } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, ArrowLeft, Star, Crown, Shield, Award, Loader2, Globe, Sparkles, CheckCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import {
+  MapPin, ArrowLeft, Star, Crown, Shield, Award,
+  Loader2, Globe, Sparkles, CheckCircle, ExternalLink,
+  MessageSquare, Briefcase, Calendar, Zap, FileText, PlayCircle, Image
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { getActivityStatus } from "@/lib/activity-status";
-
-const LEVEL_CONFIG: Record<string, { icon: React.ElementType; label: string; className: string }> = {
-  verified: { icon: Shield, label: "Verified", className: "bg-secondary text-secondary-foreground" },
-  pro: { icon: Star, label: "Pro", className: "bg-primary/10 text-primary" },
-  elite: { icon: Crown, label: "Elite", className: "bg-warning/15 text-warning" },
-};
 
 type Profile = {
   id: string;
@@ -33,8 +31,21 @@ type Profile = {
   certifications: any[] | null;
 };
 
-type PortfolioItem = { id: string; title: string; description: string | null; image_url: string };
-type Rating = { id: string; rating: number; review_text: string | null; created_at: string };
+type PortfolioItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string;
+  project_data?: any[];
+};
+
+type Rating = {
+  id: string;
+  rating: number;
+  review_text: string | null;
+  created_at: string;
+  reviewer_name?: string;
+};
 
 const FreelancerProfile = () => {
   const { freelancerId } = useParams<{ freelancerId: string }>();
@@ -49,16 +60,27 @@ const FreelancerProfile = () => {
 
   useEffect(() => {
     if (!freelancerId) return;
-    Promise.all([
-      supabase.from("profiles").select("*").eq("user_id", freelancerId).single(),
-      supabase.from("portfolio_items").select("*").eq("freelancer_id", freelancerId),
-      supabase.from("ratings").select("*").eq("reviewee_id", freelancerId).order("created_at", { ascending: false }),
-    ]).then(([profileRes, portfolioRes, ratingsRes]) => {
-      setProfile(profileRes.data as unknown as Profile | null);
-      setPortfolio(portfolioRes.data ?? []);
-      setRatings(ratingsRes.data ?? []);
-      setLoading(false);
-    });
+    window.scrollTo(0, 0);
+
+    const fetchData = async () => {
+      try {
+        const [profileRes, portfolioRes, ratingsRes] = await Promise.all([
+          supabase.from("profiles").select("*").eq("user_id", freelancerId).single(),
+          supabase.from("portfolio_items").select("*").eq("freelancer_id", freelancerId),
+          supabase.from("ratings").select("*").eq("reviewee_id", freelancerId).order("created_at", { ascending: false }),
+        ]);
+
+        if (profileRes.data) setProfile(profileRes.data as unknown as Profile);
+        if (portfolioRes.data) setPortfolio(portfolioRes.data ?? []);
+        if (ratingsRes.data) setRatings(ratingsRes.data ?? []);
+      } catch (err) {
+        console.error("Error fetching freelancer details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [freelancerId]);
 
   const avgRating = ratings.length > 0
@@ -68,8 +90,9 @@ const FreelancerProfile = () => {
   if (loading) {
     return (
       <AppShell>
-        <div className="flex justify-center py-24">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary/40" />
+          <p className="text-sm font-medium text-muted-foreground animate-pulse">Loading Elite Talent...</p>
         </div>
       </AppShell>
     );
@@ -78,7 +101,14 @@ const FreelancerProfile = () => {
   if (!profile) {
     return (
       <AppShell>
-        <div className="text-center py-24 text-muted-foreground">Freelancer not found.</div>
+        <div className="max-w-2xl mx-auto py-24 text-center space-y-6">
+          <div className="h-20 w-20 rounded-3xl bg-muted/20 flex items-center justify-center mx-auto">
+            <Shield className="h-10 w-10 text-muted-foreground/40" />
+          </div>
+          <h1 className="text-3xl font-bold">Talent Unavailable</h1>
+          <p className="text-muted-foreground">The requested freelancer profile is no longer public or was recently moved.</p>
+          <Button onClick={() => navigate("/client/discover")} variant="outline" className="rounded-2xl">Return to Discovery</Button>
+        </div>
       </AppShell>
     );
   }
@@ -87,252 +117,337 @@ const FreelancerProfile = () => {
   const activity = getActivityStatus(profile.last_active_at);
   const certs = (profile.certifications ?? []) as { name: string; issuer: string; year: number; verified: boolean }[];
 
-  const badgeConfigMap = {
-    verified: { label: "Verified", bg: "bg-blue-500/10", color: "text-blue-500", icon: Shield },
-    pro: { label: "Pro", bg: "bg-purple-500/10", color: "text-purple-500", icon: Star },
-    elite: { label: "Elite", bg: "bg-yellow-500/10", color: "text-yellow-500", icon: Crown },
+  const levelConfigs = {
+    verified: { label: "Verified", color: "text-blue-500", icon: Shield, gradient: "from-blue-500/20 to-cyan-500/5" },
+    pro: { label: "Pro Elite", color: "text-purple-500", icon: Star, gradient: "from-purple-500/20 to-pink-500/5" },
+    elite: { label: "Master Class", color: "text-yellow-600", icon: Crown, gradient: "from-amber-500/20 to-yellow-500/5" },
   };
-  const badgeCfg = badgeConfigMap[profile.freelancer_level || "verified"];
-  const BadgeIcon = badgeCfg.icon;
+  const config = levelConfigs[profile.freelancer_level || "verified"];
+  const LevelIcon = config.icon;
+
+  const getVideoId = (url: string) => {
+    if (!url) return null;
+    const ytMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/);
+    if (ytMatch && ytMatch[1]) return ytMatch[1].split('&')[0];
+    return null;
+  };
 
   return (
     <AppShell>
-      <div className="max-w-5xl mx-auto space-y-12">
-        <button onClick={() => navigate(-1)} className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-all">
-          <ArrowLeft className="h-3 w-3 group-hover:-translate-x-1 transition-transform" /> Back
-        </button>
+      <div className="relative isolate">
+        {/* Dynamic Background */}
+        <div className="absolute inset-x-0 top-0 -z-10 h-[500px] overflow-hidden">
+          <div className={`absolute inset-0 bg-gradient-to-b ${config.gradient} to-background`} />
+          <div className="absolute top-[10%] left-[15%] h-64 w-64 rounded-full bg-primary/10 blur-[100px]" />
+          <div className="absolute top-[20%] right-[10%] h-96 w-96 rounded-full bg-indigo-500/5 blur-[120px]" />
+        </div>
 
-        {/* Profile Header */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex flex-col md:flex-row gap-10 items-start md:items-end pb-12 border-b border-border/40">
-            <div className="relative shrink-0 self-center md:self-auto">
-              <div className="absolute -inset-2 rounded-[2.5rem] bg-gradient-to-br from-primary to-primary/40 blur-md opacity-20" />
-              <div className="relative flex h-48 w-48 items-center justify-center rounded-[3rem] bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 font-display font-bold text-primary text-6xl shadow-inner overflow-hidden">
-                {initials}
-              </div>
-              <div className="absolute -bottom-2 -right-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-background border border-border/60 shadow-elegant">
-                <BadgeIcon className={`h-6 w-6 ${badgeCfg.color}`} />
-              </div>
-            </div>
-
-            <div className="flex-1 space-y-6 text-center md:text-left">
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                  <Badge className={`${badgeCfg.bg} ${badgeCfg.color} rounded-xl px-4 py-1.5 text-xs font-bold uppercase tracking-wider border-0 shadow-sm`}>
-                    {badgeCfg.label} Specialist
-                  </Badge>
-                  {/* Activity Status Pill */}
-                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold ${activity.status === "online" ? "bg-emerald-500/10 text-emerald-600" : activity.status === "away" ? "bg-amber-500/10 text-amber-600" : "bg-muted text-muted-foreground"}`}>
-                    <div className={`h-2 w-2 rounded-full ${activity.color} ${activity.status === "online" ? "animate-pulse" : ""}`} />
-                    {activity.label}
-                  </div>
-                  {profile.is_suspended && (
-                    <Badge variant="destructive" className="rounded-xl px-4 py-1.5 text-xs font-bold uppercase tracking-wider border-0">
-                      Account Restricted
-                    </Badge>
-                  )}
-                </div>
-                <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tight">{profile.display_name}</h1>
-                {profile.headline && <p className="text-xl text-muted-foreground font-medium">{profile.headline}</p>}
-                {profile.country && (
-                  <div className="flex items-center justify-center md:justify-start gap-2 text-sm font-bold text-muted-foreground/60 uppercase tracking-widest">
-                    <MapPin className="h-4 w-4" />
-                    {profile.country} {profile.created_at && `— Member since ${new Date(profile.created_at).getFullYear()}`}
-                  </div>
-                )}
-              </div>
-
-              {/* Stats pills */}
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                {avgRating != null && (
-                  <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-warning/10 text-warning text-sm font-bold">
-                    <Star className="h-4 w-4 fill-warning" /> {avgRating.toFixed(1)}
-                  </div>
-                )}
-                {profile.experience_years != null && (
-                  <div className="px-4 py-2 rounded-xl bg-muted text-sm font-bold text-foreground/70">
-                    {profile.experience_years}+ years
-                  </div>
-                )}
-                <div className="px-4 py-2 rounded-xl bg-muted text-sm font-bold text-foreground/70">
-                  {ratings.length} review{ratings.length !== 1 ? "s" : ""}
-                </div>
-              </div>
-
-              <Button size="lg" className="rounded-2xl h-14 px-10 gap-2 bg-gradient-to-r from-primary to-primary/80 border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant text-sm font-bold" onClick={() => navigate(`/client/brief/${profile.user_id}${categoryId ? `?category=${categoryId}` : ""}`)}>
-                Hire {profile.display_name.split(" ")[0]}
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-8 space-y-12">
+          {/* Top Navbar */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-all group px-4 py-2 rounded-xl hover:bg-white/50 backdrop-blur-sm border border-transparent hover:border-border/40"
+            >
+              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+              Back to Search
+            </button>
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="sm" className="hidden sm:flex rounded-xl gap-2 h-10 border-border/40 font-bold text-xs uppercase tracking-wider">
+                <ExternalLink className="h-3.5 w-3.5" /> Share
               </Button>
             </div>
           </div>
-        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <div className="lg:col-span-2 space-y-12">
-            {/* Bio */}
-            <section className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-border/40" />
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">About</h2>
-                <div className="h-px flex-1 bg-border/40" />
-              </div>
-              <p className="text-xl text-foreground font-medium leading-relaxed italic opacity-80">
-                "{profile.bio || "Maintaining elite performance standards across all engagements."}"
-              </p>
-            </section>
-
-            {/* Skills */}
-            <section className="space-y-8">
-              <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-border/40" />
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">Technical Expertise</h2>
-                <div className="h-px flex-1 bg-border/40" />
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {(profile.skills ?? []).map((skill) => (
-                  <div key={skill} className="flex items-center gap-3 rounded-[1.5rem] border border-border/40 bg-card px-6 py-4 text-sm font-bold shadow-sm hover:border-primary/40 hover:shadow-elegant transition-all group">
-                    <div className="h-2 w-2 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
-                    {skill}
+          <div className="grid lg:grid-cols-[1fr_400px] gap-12 items-start">
+            {/* Main Content */}
+            <div className="space-y-16">
+              {/* Profile Card Header */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative p-1 bg-gradient-to-br from-white/80 to-white/20 rounded-[3rem] border border-white/40 shadow-elegant backdrop-blur-md"
+              >
+                <div className="p-8 sm:p-12 flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
+                  {/* Photo Section */}
+                  <div className="relative group">
+                    <div className="absolute -inset-1 rounded-[2.8rem] bg-gradient-to-br from-primary to-primary/40 blur-md opacity-0 group-hover:opacity-30 transition-opacity" />
+                    <div className="relative h-44 w-44 sm:h-52 sm:w-52 rounded-[2.5rem] bg-card border-4 border-white shadow-2xl overflow-hidden ring-1 ring-border/20">
+                      {profile.avatar_url ? (
+                        <img src={profile.avatar_url} alt={profile.display_name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      ) : (
+                        <div className="h-full w-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center font-display font-bold text-primary text-6xl">
+                          {initials}
+                        </div>
+                      )}
+                    </div>
+                    {/* Level Badge Overlay */}
+                    <div className="absolute -bottom-3 -right-3 h-14 w-14 rounded-2xl bg-background border border-border/40 shadow-elegant flex items-center justify-center">
+                      <LevelIcon className={`h-7 w-7 ${config.color}`} />
+                    </div>
                   </div>
-                ))}
-              </div>
-            </section>
 
-            {/* Certifications */}
-            {certs.length > 0 && (
-              <section className="space-y-8">
-                <div className="flex items-center gap-3">
-                  <div className="h-px flex-1 bg-border/40" />
-                  <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">Verified Credentials</h2>
-                  <div className="h-px flex-1 bg-border/40" />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {certs.map((cert, idx) => (
-                    <Card key={idx} className="rounded-2xl border-border/40 p-6">
-                      <div className="flex items-start gap-4">
-                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 ${cert.verified ? "bg-primary/10" : "bg-muted"}`}>
-                          {cert.verified ? <CheckCircle className="h-6 w-6 text-primary" /> : <Award className="h-6 w-6 text-muted-foreground" />}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-sm">{cert.name}</h3>
-                            {cert.verified && <Badge className="bg-primary/10 text-primary border-0 rounded-lg text-[9px] font-bold">Verified</Badge>}
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">{cert.issuer} · {cert.year}</p>
-                        </div>
+                  {/* Identity Detail */}
+                  <div className="flex-1 space-y-4">
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                      <Badge className={`rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-widest border-0 shadow-sm transition-transform cursor-default ${config.color} bg-white/80`}>
+                        {config.label}
+                      </Badge>
+                      <div className={`flex items-center gap-2 px-3 py-1 rounded-lg border border-border/10 text-[10px] font-black uppercase tracking-widest ${activity.status === "online" ? "bg-emerald-50 text-emerald-600" : "bg-muted/30 text-muted-foreground"}`}>
+                        <div className={`h-1.5 w-1.5 rounded-full ${activity.color} ${activity.status === "online" ? "animate-pulse" : ""}`} />
+                        {activity.label}
                       </div>
-                    </Card>
-                  ))}
-                </div>
-              </section>
-            )}
+                    </div>
 
-            {/* Portfolio */}
-            {portfolio.length > 0 && (
-              <section className="space-y-8">
-                <div className="flex items-center gap-3">
-                  <div className="h-px flex-1 bg-border/40" />
-                  <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">Showcased Works</h2>
-                  <div className="h-px flex-1 bg-border/40" />
-                </div>
-                <div className="grid gap-8 sm:grid-cols-2">
-                  {portfolio.map((item) => (
-                    <Card key={item.id} className="group overflow-hidden rounded-[2.5rem] border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant">
-                      <div className="aspect-video relative overflow-hidden bg-muted">
-                        <img src={item.image_url} alt={item.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    <h1 className="font-display text-4xl sm:text-6xl font-black tracking-tight text-foreground leading-[1.1]">
+                      {profile.display_name}
+                    </h1>
+
+                    {profile.headline && (
+                      <p className="text-xl sm:text-2xl text-muted-foreground/80 font-medium leading-relaxed max-w-xl">
+                        {profile.headline}
+                      </p>
+                    )}
+
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest pt-2">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="h-3 w-3 text-primary/60" /> {profile.country}
                       </div>
-                      <CardContent className="p-8">
-                        <h3 className="font-display text-xl font-bold mb-2">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">{item.description}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Reviews */}
-            {ratings.length > 0 && (
-              <section className="space-y-8">
-                <div className="flex items-center gap-3">
-                  <div className="h-px flex-1 bg-border/40" />
-                  <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">Reviews</h2>
-                  <div className="h-px flex-1 bg-border/40" />
-                </div>
-                <div className="grid gap-6">
-                  {ratings.map((rating) => (
-                    <Card key={rating.id} className="rounded-[2rem] border-border/40 bg-card/60 backdrop-blur-sm p-8">
-                      <div className="flex items-start justify-between gap-4 mb-4">
-                        <div className="flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map((i) => (
-                            <Star key={i} className={`h-3 w-3 ${i <= rating.rating ? "fill-warning text-warning" : "text-muted-foreground/20"}`} />
-                          ))}
-                        </div>
-                        <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-                          {new Date(rating.created_at).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })}
-                        </span>
+                      <div className="h-1 w-1 rounded-full bg-border" />
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="h-3 w-3 text-primary/60" /> Joined {new Date(profile.created_at || "").getFullYear()}
                       </div>
-                      <p className="text-sm text-foreground/80 leading-relaxed italic">"{rating.review_text}"</p>
-                    </Card>
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-8">
-            <Card className="rounded-[2.5rem] border-border/40 bg-muted/20 overflow-hidden">
-              <CardHeader className="p-8 border-b border-border/10 bg-white/20">
-                <CardTitle className="font-display text-lg font-bold">Performance</CardTitle>
-              </CardHeader>
-              <CardContent className="p-8 space-y-8">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">Rating</p>
-                    <p className="text-3xl font-display font-bold text-primary">{avgRating != null ? avgRating.toFixed(1) : "N/A"}/5.0</p>
+                    </div>
                   </div>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map(i => (
-                      <Star key={i} className={`h-4 w-4 ${avgRating != null && i <= avgRating ? "fill-warning text-warning" : "text-muted-foreground/20"}`} />
+                </div>
+              </motion.div>
+
+              {/* Bio & Skills */}
+              <div className="grid md:grid-cols-1 gap-16">
+                <section className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <Zap className="h-4 w-4 bg-primary/10 p-0.5 rounded" /> The Vision
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-border/80 to-transparent" />
+                  </div>
+                  <div className="relative p-8 sm:p-10 rounded-[2.5rem] bg-card border border-border/40 shadow-sm overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-8 text-primary/5 select-none pointer-events-none group-hover:scale-110 transition-transform duration-700">
+                      <Shield className="h-32 w-32" />
+                    </div>
+                    <p className="relative text-lg sm:text-xl text-foreground font-medium italic leading-relaxed whitespace-pre-wrap leading-[1.8]">
+                      "{profile.bio || "Excellence in every pixel, code line, and strategy implementation."}"
+                    </p>
+                  </div>
+                </section>
+
+                <section className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <Crown className="h-4 w-4 bg-primary/10 p-0.5 rounded" /> Core Specialties
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-border/80 to-transparent" />
+                  </div>
+                  <div className="flex flex-wrap gap-4">
+                    {(profile.skills ?? []).map((skill, i) => (
+                      <motion.div
+                        key={skill}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className="group flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border border-border/40 shadow-sm hover:border-primary/40 hover:shadow-elegant transition-all cursor-default"
+                      >
+                        <div className="h-2 w-2 rounded-full bg-primary/20 group-hover:bg-primary transition-colors" />
+                        <span className="text-[13px] font-black uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">{skill}</span>
+                      </motion.div>
                     ))}
                   </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="p-5 rounded-2xl bg-white/40 border border-border/20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Shield className="h-5 w-5 text-primary/60" />
-                      <span className="text-xs font-bold uppercase tracking-wide text-foreground/70">Experience</span>
-                    </div>
-                    <span className="text-sm font-bold">{profile.experience_years || 0} Years</span>
-                  </div>
-                  <div className="p-5 rounded-2xl bg-white/40 border border-border/20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Globe className="h-5 w-5 text-primary/60" />
-                      <span className="text-xs font-bold uppercase tracking-wide text-foreground/70">Timezone</span>
-                    </div>
-                    <span className="text-sm font-bold truncate max-w-[120px]">{profile.timezone || "N/A"}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-[2.5rem] border-primary/20 bg-primary/5 p-8 border-2 border-dashed">
-              <div className="text-center space-y-4">
-                <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="h-7 w-7 text-primary" />
-                </div>
-                <h3 className="font-display text-xl font-bold">Elite Verified</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">This partner has passed our vetting process and maintains top-tier performance.</p>
+                </section>
               </div>
-            </Card>
+
+              {/* Portfolio Grid */}
+              {portfolio.length > 0 && (
+                <section className="space-y-10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 flex-1">
+                      <h2 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                        <Briefcase className="h-4 w-4 bg-primary/10 p-0.5 rounded" /> Commercial Case Studies
+                      </h2>
+                      <div className="h-px flex-1 bg-gradient-to-r from-border/80 to-transparent" />
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-10">
+                    {portfolio.map((item, i) => (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        viewport={{ once: true }}
+                        className="group relative flex flex-col rounded-[2.5rem] bg-card border border-border/40 shadow-sm hover:shadow-elegant hover:border-primary/20 transition-all overflow-hidden"
+                      >
+                        <div className="aspect-[16/10] relative overflow-hidden bg-muted">
+                          {item.image_url ? (
+                            <img src={item.image_url} alt={item.title} className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
+                              <Briefcase className="h-12 w-12 text-primary/10" />
+                            </div>
+                          )}
+                          {/* Media Type Icon */}
+                          <div className="absolute top-6 right-6">
+                            {item.project_data?.some(b => b.type === 'video') && (
+                              <div className="h-10 w-10 rounded-xl bg-white/90 backdrop-blur-md shadow-xl flex items-center justify-center">
+                                <PlayCircle className="h-5 w-5 text-primary" />
+                              </div>
+                            )}
+                            {!item.project_data?.some(b => b.type === 'video') && (
+                              <div className="h-10 w-10 rounded-xl bg-white/90 backdrop-blur-md shadow-xl flex items-center justify-center">
+                                <Image className="h-5 w-5 text-muted-foreground/40" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="p-8 space-y-3">
+                          <h3 className="font-display text-2xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors">{item.title}</h3>
+                          <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-2 font-medium">
+                            {item.description}
+                          </p>
+                          <div className="pt-4 flex items-center gap-2">
+                            <Button variant="ghost" className="rounded-xl h-10 px-4 text-xs font-black uppercase tracking-widest text-primary bg-primary/5 hover:bg-primary/10">
+                              View Case Study
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Verified Credentials */}
+              {certs.length > 0 && (
+                <section className="space-y-8">
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <Award className="h-4 w-4 bg-primary/10 p-0.5 rounded" /> Verified Credentials
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-border/80 to-transparent" />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {certs.map((cert, idx) => (
+                      <div key={idx} className="group p-6 rounded-[2rem] border border-border/40 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-primary/20 transition-all flex items-center gap-5">
+                        <div className={`h-14 w-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${cert.verified ? "bg-primary/10 ring-1 ring-primary/20" : "bg-muted"}`}>
+                          {cert.verified ? <CheckCircle className="h-7 w-7 text-primary" /> : <Award className="h-7 w-7 text-muted-foreground" />}
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-black text-sm uppercase tracking-tight">{cert.name}</h3>
+                          </div>
+                          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{cert.issuer} • {cert.year}</p>
+                          {cert.verified && <span className="inline-block text-[9px] font-black uppercase tracking-[0.2em] text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Trust Verified</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+
+            {/* Sidebar Sticky Panel */}
+            <div className="lg:sticky lg:top-8 space-y-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative p-1 bg-gradient-to-br from-primary to-primary/60 rounded-[3rem] shadow-elegant overflow-hidden"
+              >
+                <div className="bg-card rounded-[2.8rem] p-8 sm:p-10 space-y-10">
+                  <div className="space-y-2 text-center">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-primary">Service Performance</p>
+                    <div className="flex items-end justify-center gap-2">
+                      <span className="text-5xl font-display font-black tracking-tighter">{avgRating != null ? avgRating.toFixed(1) : "5.0"}</span>
+                      <div className="pb-2">
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map(i => (
+                            <Star key={i} className={`h-4 w-4 ${(avgRating != null ? i <= avgRating : i <= 5) ? "fill-warning text-warning" : "text-muted-foreground/20"}`} />
+                          ))}
+                        </div>
+                        <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest mt-1">From {ratings.length || 0} Reviews</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-5 rounded-[1.5rem] bg-muted/20 border border-border/10">
+                      <div className="flex items-center gap-3">
+                        <Shield className="h-5 w-5 text-primary/40" />
+                        <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Experience</span>
+                      </div>
+                      <span className="text-sm font-black">{profile.experience_years || 0}+ Years</span>
+                    </div>
+                    <div className="flex items-center justify-between p-5 rounded-[1.5rem] bg-muted/20 border border-border/10">
+                      <div className="flex items-center gap-3">
+                        <Globe className="h-5 w-5 text-primary/40" />
+                        <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Availability</span>
+                      </div>
+                      <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Full Time</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Button
+                      size="lg"
+                      className="w-full rounded-[1.5rem] h-16 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg text-sm font-black uppercase tracking-[0.2em] transform transition hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3"
+                      onClick={() => navigate(`/client/brief/${profile.user_id}${categoryId ? `?category=${categoryId}` : ""}`)}
+                    >
+                      Secure Services <ShieldCheck className="h-5 w-5" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full rounded-[1.5rem] h-16 border-border/40 text-sm font-black uppercase tracking-[0.2em] hover:bg-muted/30 transition-colors flex items-center justify-center gap-3"
+                    >
+                      Messenger <MessageSquare className="h-5 w-5" />
+                    </Button>
+                  </div>
+
+                  <div className="pt-6 border-t border-border/10 text-center">
+                    <p className="text-[10px] font-bold text-muted-foreground/60 leading-relaxed px-4 uppercase tracking-[0.05em]">
+                      All transactions are secured by DigiReps Enterprise Protection.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <Card className="rounded-[2.5rem] border border-border/40 bg-white/40 backdrop-blur-sm p-8 space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                  </div>
+                  <h3 className="text-xs font-black uppercase tracking-widest">Vetting Status</h3>
+                </div>
+                <p className="text-sm font-medium leading-relaxed text-muted-foreground">
+                  This partner is one of the top 3% of talent on DigiReps, having passed our comprehensive skills and portfolio verification process.
+                </p>
+                <div className="space-y-3">
+                  {['Identity Verified', 'Portfolio Screened', 'Performance Tracked'].map(check => (
+                    <div key={check} className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-foreground/70">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" /> {check}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
           </div>
         </div>
-
-        <div className="fixed -bottom-48 -right-48 h-[40rem] w-[40rem] rounded-full bg-primary/5 blur-[140px] pointer-events-none" />
-        <div className="fixed -top-48 -left-48 h-[40rem] w-[40rem] rounded-full bg-indigo-500/5 blur-[140px] pointer-events-none" />
       </div>
     </AppShell>
   );
 };
+
+const ShieldCheck = ({ className }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" /></svg>
+);
 
 export default FreelancerProfile;
