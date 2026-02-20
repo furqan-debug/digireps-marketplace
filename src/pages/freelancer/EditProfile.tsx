@@ -11,11 +11,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, X, Plus, Upload, Trash2, User, Eye, Sparkles, ShieldCheck, Globe, Crown, Send, Award, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Loader2, X, Plus, Upload, Trash2, User, Eye, Sparkles, ShieldCheck, Globe, Crown, Send, Award, CheckCircle, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Move, Image as ImageIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getActivityStatus } from "@/lib/activity-status";
+import { PortfolioProjectForm } from "@/components/freelancer/PortfolioProjectForm";
 
-type PortfolioItem = { id: string; title: string; description: string | null; image_url: string };
+type PortfolioItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  role?: string | null;
+  skills_deliverables?: string[];
+  project_data?: any[];
+};
 type Certification = { name: string; issuer: string; year: number; verified: boolean };
 
 const WIZARD_STEPS = ["Identity", "Expertise", "Credentials", "Portfolio", "Review"];
@@ -29,6 +40,7 @@ const EditProfile = () => {
   const [headline, setHeadline] = useState((profile as any)?.headline ?? "");
   const [country, setCountry] = useState(profile?.country ?? "");
   const [timezone, setTimezone] = useState(profile?.timezone ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url ?? "");
   const [bio, setBio] = useState(profile?.bio ?? "");
   const [experienceYears, setExperienceYears] = useState(profile?.experience_years?.toString() ?? "");
   const [skills, setSkills] = useState<string[]>(profile?.skills ?? []);
@@ -36,6 +48,13 @@ const EditProfile = () => {
   const [certifications, setCertifications] = useState<Certification[]>((profile as any)?.certifications ?? []);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isAdjustingAvatar, setIsAdjustingAvatar] = useState(false);
+  const [tempAvatarFile, setTempAvatarFile] = useState<File | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 50, y: 50 });
+  const avatarFileRef = useRef<HTMLInputElement>(null);
 
   // Wizard state
   const isNewProfile = !profile?.bio && (!profile?.skills || profile.skills.length === 0);
@@ -50,15 +69,102 @@ const EditProfile = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [isPortfolioFormOpen, setIsPortfolioFormOpen] = useState(false);
   const [uploadingPortfolio, setUploadingPortfolio] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Auto-detect timezone if empty
+  // Sync state with profile when it loads or changes
   useEffect(() => {
-    if (!timezone) {
-      setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    if (profile) {
+      if (!displayName) setDisplayName(profile.display_name ?? "");
+      if (!headline) setHeadline((profile as any).headline ?? "");
+      if (!bio) setBio(profile.bio ?? "");
+      if (!experienceYears) setExperienceYears(profile.experience_years?.toString() ?? "");
+      if (skills.length === 0) setSkills(profile.skills ?? []);
+      if (certifications.length === 0) setCertifications((profile as any).certifications ?? []);
+      if (profile.avatar_url && avatarUrl !== profile.avatar_url && !avatarPreview && !uploadingAvatar) {
+        setAvatarUrl(profile.avatar_url);
+      }
+
+      // Handle timezone/country detection if they are still missing
+      if (!timezone && profile.timezone) setTimezone(profile.timezone);
+      if (!country && profile.country) setCountry(profile.country);
+
+      if (!timezone && !profile.timezone) {
+        setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+      }
+
+      if (!country && !profile.country) {
+        try {
+          const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+          const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+
+          let detectedCountry = null;
+
+          // 1. Priority: Guess from Timezone city (often more accurate for physical location than language)
+          const countryMap: Record<string, string> = {
+            'Karachi': 'Pakistan',
+            'Islamabad': 'Pakistan',
+            'Lahore': 'Pakistan',
+            'Dubai': 'United Arab Emirates',
+            'Abu_Dhabi': 'United Arab Emirates',
+            'London': 'United Kingdom',
+            'Riyadh': 'Saudi Arabia',
+            'Singapore': 'Singapore',
+            'Sydney': 'Australia',
+            'Melbourne': 'Australia',
+            'Mumbai': 'India',
+            'Kolkata': 'India',
+            'Delhi': 'India',
+            'Berlin': 'Germany',
+            'Paris': 'France',
+            'Tokyo': 'Japan',
+            'Seoul': 'South Korea',
+            'Toronto': 'Canada',
+            'Vancouver': 'Canada',
+          };
+
+          const city = tz.split('/').pop()?.replace('_', ' ');
+          if (city) {
+            for (const [key, value] of Object.entries(countryMap)) {
+              if (city.includes(key)) {
+                detectedCountry = value;
+                break;
+              }
+            }
+          }
+
+          // 2. Fallback: Use locale region if timezone detection failed
+          if (!detectedCountry) {
+            const parts = locale.split(/[-_]/);
+            const countryCode = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : null;
+            if (countryCode && countryCode.length === 2) {
+              try {
+                detectedCountry = regionNames.of(countryCode);
+              } catch (e) { }
+            }
+          }
+
+          if (detectedCountry) {
+            console.log("✅ Country Auto-Detected:", detectedCountry, "from Timezone:", tz);
+            setCountry(detectedCountry);
+          } else {
+            console.warn("❌ Country Auto-Detection Failed. Locale:", locale, "TZ:", tz);
+          }
+        } catch (e) {
+          console.error("Failed to detect country", e);
+        }
+      }
+    } else {
+      // Still load defaults if user just landed
+      if (!timezone) {
+        const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        console.log("Detecting initial TZ:", detectedTz);
+        setTimezone(detectedTz);
+      }
     }
-  }, []);
+  }, [profile]);
 
   useEffect(() => {
     if (!user) return;
@@ -105,6 +211,7 @@ const EditProfile = () => {
         headline: headline.trim() || null,
         country: country.trim(),
         timezone: timezone.trim(),
+        avatar_url: avatarUrl,
         bio: bio.trim(),
         experience_years: experienceYears ? parseInt(experienceYears) : null,
         skills,
@@ -147,6 +254,60 @@ const EditProfile = () => {
       navigate("/freelancer");
     }
     setSubmitting(false);
+  };
+
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Only image files are allowed", variant: "destructive" });
+      return;
+    }
+
+    const localUrl = URL.createObjectURL(file);
+    setAvatarPreview(localUrl);
+    setTempAvatarFile(file);
+    setIsAdjustingAvatar(true);
+    // Reset adjustments
+    setZoom(1);
+    setPosition({ x: 50, y: 50 });
+  };
+
+  const saveAvatarAdjusted = async () => {
+    if (!tempAvatarFile || !user) return;
+
+    // Clear adjusting state immediately
+    setIsAdjustingAvatar(false);
+
+    const fileName = `${user.id}/avatar-${Date.now()}-${tempAvatarFile.name}`;
+    const { error: upErr } = await supabase.storage.from("avatars").upload(fileName, tempAvatarFile, { upsert: true });
+
+    if (upErr) {
+      toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
+      setUploadingAvatar(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(fileName);
+    const newAvatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+    console.log("✅ Avatar Uploaded Successfully. URL:", newAvatarUrl);
+
+    // Update DB first
+    await supabase.from("profiles").update({
+      avatar_url: newAvatarUrl
+    } as any).eq("user_id", user.id);
+
+    // Explicitly update local state BEFORE refreshing profile to prevent flicker
+    setAvatarUrl(newAvatarUrl);
+    setAvatarPreview(null);
+    setTempAvatarFile(null);
+
+    // Refresh context
+    await refreshProfile();
+
+    setUploadingAvatar(false);
+    toast({ title: "Profile photo updated!" });
   };
 
   const handlePortfolioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -208,6 +369,42 @@ const EditProfile = () => {
                 <p className="text-muted-foreground">Tell us who you are.</p>
               </div>
               <div className="space-y-6">
+                <div className="flex flex-col items-center gap-4 mb-8">
+                  <input ref={avatarFileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                  <div className="relative group cursor-pointer" onClick={() => avatarFileRef.current?.click()}>
+                    <div className="h-32 w-32 rounded-3xl bg-muted/20 border-2 border-dashed border-border/40 flex items-center justify-center overflow-hidden group-hover:border-primary/40 transition-all">
+                      {(avatarPreview || avatarUrl) ? (
+                        <img
+                          src={avatarPreview || avatarUrl}
+                          alt="Avatar"
+                          className="w-full h-full object-cover"
+                          style={{
+                            transform: `scale(${zoom})`,
+                            objectPosition: `${position.x}% ${position.y}%`
+                          }}
+                          onError={(e) => {
+                            const src = (e.target as HTMLImageElement).src;
+                            console.error("❌ Identity Avatar Failed to Load. Src:", src);
+                          }}
+                          onLoad={() => {
+                            console.log("🖼️ Identity Avatar Loaded Successfully");
+                          }}
+                        />
+                      ) : (
+                        <User className="h-12 w-12 text-muted-foreground/40" />
+                      )}
+                      {uploadingAvatar && (
+                        <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 h-10 w-10 rounded-xl bg-primary text-primary-foreground shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Plus className="h-5 w-5" />
+                    </div>
+                  </div>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Profile Photo</Label>
+                </div>
                 <div className="space-y-3">
                   <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Display Name *</Label>
                   <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your professional name" className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium" />
@@ -219,7 +416,7 @@ const EditProfile = () => {
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div className="space-y-3">
                     <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Country</Label>
-                    <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="e.g. United Kingdom" className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium" />
+                    <Input value={country} readOnly className="h-14 rounded-2xl bg-muted/10 border-border/20 px-6 font-medium text-muted-foreground" />
                   </div>
                   <div className="space-y-3">
                     <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Timezone (auto-detected)</Label>
@@ -333,21 +530,36 @@ const EditProfile = () => {
                 <p className="text-muted-foreground">Showcase your best work.</p>
               </div>
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePortfolioUpload} />
-              <button onClick={() => fileRef.current?.click()} disabled={uploadingPortfolio} className="w-full rounded-2xl border-2 border-dashed border-border/40 hover:border-primary/40 bg-muted/10 hover:bg-primary/5 transition-all py-16 flex flex-col items-center gap-4 text-muted-foreground hover:text-primary">
+              <button onClick={() => setIsPortfolioFormOpen(true)} className="w-full rounded-2xl border-2 border-dashed border-border/40 hover:border-primary/40 bg-muted/10 hover:bg-primary/5 transition-all py-16 flex flex-col items-center gap-4 text-muted-foreground hover:text-primary">
                 <div className="h-14 w-14 rounded-2xl bg-background border border-border/20 flex items-center justify-center">
-                  {uploadingPortfolio ? <Loader2 className="h-7 w-7 animate-spin" /> : <Upload className="h-7 w-7" />}
+                  <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Plus className="h-5 w-5" />
+                  </div>
                 </div>
-                <span className="text-sm font-bold">{uploadingPortfolio ? "Uploading..." : "Upload Image"}</span>
+                <span className="text-sm font-bold">Add Portfolio Project</span>
               </button>
               {portfolio.length > 0 && (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {portfolio.map((item) => (
-                    <div key={item.id} className="relative group rounded-2xl overflow-hidden border border-border/40 aspect-video">
-                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                        <Button size="sm" variant="destructive" onClick={() => deletePortfolioItem(item)} className="rounded-xl gap-2 text-xs font-bold">
-                          <Trash2 className="h-4 w-4" /> Remove
-                        </Button>
+                    <div key={item.id} className="relative group rounded-2xl overflow-hidden border border-border/40 aspect-video bg-muted/20">
+                      {item.image_url ? (
+                        <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
+                          <ImageIcon className="h-10 w-10" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all p-4 flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
+                          <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{item.role || "Project"}</Badge>
+                          <Button size="icon" variant="destructive" onClick={() => deletePortfolioItem(item)} className="h-8 w-8 rounded-lg">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="text-white">
+                          <p className="font-bold text-sm truncate">{item.title}</p>
+                          <p className="text-[10px] text-white/60 line-clamp-1">{item.description}</p>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -366,9 +578,27 @@ const EditProfile = () => {
                 <div className="h-20 bg-gradient-to-r from-primary to-primary/60" />
                 <CardContent className="px-8 pb-8">
                   <div className="-mt-8 mb-6">
-                    <div className="h-16 w-16 rounded-2xl bg-background border-4 border-background flex items-center justify-center font-display font-bold text-primary text-2xl shadow-sm">
-                      {(displayName || "?")[0]?.toUpperCase()}
-                    </div>
+                    {(avatarPreview || avatarUrl) ? (
+                      <div className="h-16 w-16 rounded-2xl bg-background border-4 border-background overflow-hidden shadow-sm">
+                        <img
+                          src={avatarPreview || avatarUrl}
+                          alt={displayName}
+                          className="w-full h-full object-cover"
+                          style={{
+                            transform: `scale(${zoom})`,
+                            objectPosition: `${position.x}% ${position.y}%`
+                          }}
+                          onError={(e) => {
+                            const src = (e.target as HTMLImageElement).src;
+                            console.error("❌ Review Avatar Failed to Load. Src:", src);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-16 w-16 rounded-2xl bg-background border-4 border-background flex items-center justify-center font-display font-bold text-primary text-2xl shadow-sm">
+                        {(displayName || "?")[0]?.toUpperCase()}
+                      </div>
+                    )}
                   </div>
                   <h3 className="font-display text-2xl font-bold">{displayName}</h3>
                   {headline && <p className="text-muted-foreground font-medium">{headline}</p>}
@@ -431,6 +661,59 @@ const EditProfile = () => {
             )}
           </div>
         </div>
+
+        {/* Avatar Adjustment Dialog */}
+        <Dialog open={isAdjustingAvatar} onOpenChange={setIsAdjustingAvatar}>
+          <DialogContent className="sm:max-w-md rounded-[2rem]">
+            <DialogHeader>
+              <DialogTitle className="font-display">Adjust Profile Photo</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-8 py-4">
+              <div className="flex justify-center">
+                <div className="h-48 w-48 rounded-full overflow-hidden border-4 border-primary/20 bg-muted/20 relative">
+                  {avatarPreview && (
+                    <img
+                      src={avatarPreview}
+                      alt="Crop Preview"
+                      className="w-full h-full object-cover"
+                      style={{
+                        transform: `scale(${zoom})`,
+                        objectPosition: `${position.x}% ${position.y}%`
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
+                    <div className="flex items-center gap-2"><ZoomOut className="h-3 w-3" /> Zoom</div>
+                    <span>{Math.round(zoom * 100)}%</span>
+                  </div>
+                  <Slider value={[zoom]} min={1} max={3} step={0.1} onValueChange={([v]) => setZoom(v)} />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
+                    <div className="flex items-center gap-2"><Move className="h-3 w-3" /> Center (Horizontal)</div>
+                    <span>{position.x}%</span>
+                  </div>
+                  <Slider value={[position.x]} min={0} max={100} step={1} onValueChange={([v]) => setPosition(p => ({ ...p, x: v }))} />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
+                    <div className="flex items-center gap-2"><Move className="h-3 w-3" /> Center (Vertical)</div>
+                    <span>{position.y}%</span>
+                  </div>
+                  <Slider value={[position.y]} min={0} max={100} step={1} onValueChange={([v]) => setPosition(p => ({ ...p, y: v }))} />
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="ghost" onClick={() => { setIsAdjustingAvatar(false); setAvatarPreview(null); }} className="rounded-xl">Cancel</Button>
+              <Button onClick={saveAvatarAdjusted} className="rounded-xl px-8">Save & Upload</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </AppShell>
     );
   }
@@ -472,6 +755,41 @@ const EditProfile = () => {
               </div>
               <Card className="rounded-[2.5rem] border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden">
                 <CardContent className="p-10 space-y-8">
+                  <div className="flex flex-col sm:flex-row items-center gap-8 pb-8 border-b border-border/10">
+                    <input ref={avatarFileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                    <div className="relative group cursor-pointer" onClick={() => avatarFileRef.current?.click()}>
+                      <div className="h-32 w-32 rounded-3xl bg-muted/20 border-2 border-dashed border-border/40 flex items-center justify-center overflow-hidden group-hover:border-primary/40 transition-all">
+                        {(avatarPreview || avatarUrl) ? (
+                          <img
+                            src={avatarPreview || avatarUrl}
+                            alt="Avatar"
+                            className="w-full h-full object-cover"
+                            style={{
+                              transform: `scale(${zoom})`,
+                              objectPosition: `${position.x}% ${position.y}%`
+                            }}
+                          />
+                        ) : (
+                          <User className="h-16 w-16 text-muted-foreground/40" />
+                        )}
+                        {uploadingAvatar && (
+                          <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
+                            <Loader2 className="h-8 w-8 animate-spin" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 h-10 w-10 rounded-xl bg-primary text-primary-foreground shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Plus className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-center sm:text-left">
+                      <h3 className="font-bold">Profile Photo</h3>
+                      <p className="text-xs text-muted-foreground max-w-[200px]">Help clients recognize you. Upload a professional headshot.</p>
+                      <Button variant="outline" size="sm" onClick={() => avatarFileRef.current?.click()} className="rounded-xl h-9 text-xs font-bold gap-2">
+                        <Upload className="h-3.5 w-3.5" /> Replace Photo
+                      </Button>
+                    </div>
+                  </div>
                   <div className="space-y-4">
                     <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Marketplace Segments</Label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -576,26 +894,34 @@ const EditProfile = () => {
               <Card className="rounded-[2.5rem] border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden p-10">
                 <CardContent className="p-0 space-y-8">
                   <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePortfolioUpload} />
-                  <button onClick={() => fileRef.current?.click()} disabled={uploadingPortfolio} className="w-full rounded-[2rem] border-2 border-dashed border-border/40 hover:border-primary/40 bg-muted/10 hover:bg-primary/5 transition-all py-16 flex flex-col items-center gap-4 text-muted-foreground hover:text-primary group">
+                  <button onClick={() => setIsPortfolioFormOpen(true)} className="w-full rounded-[2rem] border-2 border-dashed border-border/40 hover:border-primary/40 bg-muted/10 hover:bg-primary/5 transition-all py-16 flex flex-col items-center gap-4 text-muted-foreground hover:text-primary group">
                     <div className="h-16 w-16 rounded-2xl bg-background border border-border/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      {uploadingPortfolio ? <Loader2 className="h-8 w-8 animate-spin" /> : <Upload className="h-8 w-8" />}
+                      <Plus className="h-8 w-8" />
                     </div>
-                    <span className="text-sm font-bold uppercase tracking-widest">{uploadingPortfolio ? "Uploading..." : "Upload Case Study"}</span>
+                    <span className="text-sm font-bold uppercase tracking-widest text-primary">Add Portfolio Project</span>
                   </button>
                   <div className="grid gap-6 sm:grid-cols-2">
                     {portfolio.map((item) => (
                       <div key={item.id} className="relative group rounded-3xl overflow-hidden border border-border/40 shadow-sm bg-muted/20 aspect-video">
-                        <img src={item.image_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                          <Button size="sm" variant="destructive" onClick={() => deletePortfolioItem(item)} className="rounded-xl px-6 gap-2 font-bold text-xs">
-                            <Trash2 className="h-4 w-4" /> Remove
-                          </Button>
-                        </div>
-                        {item.title && (
-                          <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-background/80 backdrop-blur-md border border-white/20 text-[10px] font-bold uppercase tracking-widest truncate">
-                            {item.title}
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground/20">
+                            <ImageIcon className="h-12 w-12" />
                           </div>
                         )}
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all p-6 flex flex-col justify-between">
+                          <div className="flex justify-between items-start">
+                            <Badge className="bg-white/20 hover:bg-white/30 text-white border-0 text-[10px] uppercase font-bold tracking-wider">{item.role || "Project"}</Badge>
+                            <Button size="icon" variant="destructive" onClick={() => deletePortfolioItem(item)} className="h-10 w-10 rounded-xl">
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
+                          <div className="text-white space-y-1">
+                            <p className="font-display font-bold text-lg truncate">{item.title}</p>
+                            <p className="text-xs text-white/60 line-clamp-2 leading-relaxed">{item.description}</p>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -603,6 +929,15 @@ const EditProfile = () => {
               </Card>
             </section>
           </div>
+
+          {user && (
+            <PortfolioProjectForm
+              isOpen={isPortfolioFormOpen}
+              onClose={() => setIsPortfolioFormOpen(false)}
+              onSave={(item) => setPortfolio([...portfolio, item])}
+              userId={user.id}
+            />
+          )}
 
           {/* Right: Identity Preview */}
           <div className="lg:sticky lg:top-12 space-y-6">
@@ -617,9 +952,23 @@ const EditProfile = () => {
               <CardContent className="px-8 pb-10">
                 <div className="-mt-12 mb-6">
                   <div className="relative inline-block">
-                    <div className="h-20 w-20 rounded-[1.5rem] bg-background border-4 border-background flex items-center justify-center font-display font-bold text-primary text-3xl shadow-sm">
-                      {(displayName || "?")[0]?.toUpperCase()}
-                    </div>
+                    {(avatarPreview || avatarUrl) ? (
+                      <div className="h-20 w-20 rounded-[1.5rem] bg-background border-4 border-background overflow-hidden shadow-sm">
+                        <img
+                          src={avatarPreview || avatarUrl}
+                          alt={displayName}
+                          className="w-full h-full object-cover"
+                          style={{
+                            transform: `scale(${zoom})`,
+                            objectPosition: `${position.x}% ${position.y}%`
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-20 w-20 rounded-[1.5rem] bg-background border-4 border-background flex items-center justify-center font-display font-bold text-primary text-3xl shadow-sm">
+                        {(displayName || "?")[0]?.toUpperCase()}
+                      </div>
+                    )}
                     <div className={`absolute -bottom-1 -right-1 h-6 w-6 rounded-lg ${activityStatus.color} border-2 border-background shadow-sm flex items-center justify-center`}>
                       <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                     </div>
