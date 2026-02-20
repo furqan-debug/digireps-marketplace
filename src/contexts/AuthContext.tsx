@@ -4,10 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 
 type AppRole = "client" | "freelancer" | "admin";
 
+interface Certification {
+  name: string;
+  issuer: string;
+  year: number;
+  verified: boolean;
+}
+
 interface Profile {
   id: string;
   user_id: string;
   display_name: string;
+  headline: string | null;
   country: string;
   timezone: string;
   company: string;
@@ -19,6 +27,8 @@ interface Profile {
   application_status: "pending" | "approved" | "rejected" | null;
   is_suspended: boolean;
   avatar_url: string;
+  last_active_at: string | null;
+  certifications: Certification[];
 }
 
 interface AuthContextType {
@@ -66,6 +76,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) await fetchProfileAndRole(user.id);
   };
 
+  // Activity heartbeat — update last_active_at every 5 minutes
+  useEffect(() => {
+    if (!user) return;
+    const beat = () =>
+      supabase
+        .from("profiles")
+        .update({ last_active_at: new Date().toISOString() } as any)
+        .eq("user_id", user.id)
+        .then();
+
+    beat(); // immediate
+    const interval = setInterval(beat, 5 * 60 * 1000);
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") beat();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [user]);
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
@@ -73,7 +107,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Defer to avoid deadlock with Supabase auth
           setTimeout(() => fetchProfileAndRole(session.user.id), 0);
         } else {
           setProfile(null);
@@ -96,11 +129,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signUp = async (email: string, password: string, displayName: string, role: "client" | "freelancer") => {
+    const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName, role },
+        data: { display_name: displayName, role, timezone: detectedTz },
         emailRedirectTo: window.location.origin,
       },
     });

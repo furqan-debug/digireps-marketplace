@@ -165,6 +165,7 @@ export type Database = {
             | null
           avatar_url: string | null
           bio: string | null
+          certifications: Json | null
           company: string | null
           country: string | null
           created_at: string
@@ -173,9 +174,11 @@ export type Database = {
           freelancer_level:
             | Database["public"]["Enums"]["freelancer_level"]
             | null
+          headline: string | null
           hourly_rate: number | null
           id: string
           is_suspended: boolean
+          last_active_at: string | null
           skills: string[] | null
           timezone: string | null
           updated_at: string
@@ -187,6 +190,7 @@ export type Database = {
             | null
           avatar_url?: string | null
           bio?: string | null
+          certifications?: Json | null
           company?: string | null
           country?: string | null
           created_at?: string
@@ -195,9 +199,11 @@ export type Database = {
           freelancer_level?:
             | Database["public"]["Enums"]["freelancer_level"]
             | null
+          headline?: string | null
           hourly_rate?: number | null
           id?: string
           is_suspended?: boolean
+          last_active_at?: string | null
           skills?: string[] | null
           timezone?: string | null
           updated_at?: string
@@ -209,6 +215,7 @@ export type Database = {
             | null
           avatar_url?: string | null
           bio?: string | null
+          certifications?: Json | null
           company?: string | null
           country?: string | null
           created_at?: string
@@ -217,9 +224,11 @@ export type Database = {
           freelancer_level?:
             | Database["public"]["Enums"]["freelancer_level"]
             | null
+          headline?: string | null
           hourly_rate?: number | null
           id?: string
           is_suspended?: boolean
+          last_active_at?: string | null
           skills?: string[] | null
           timezone?: string | null
           updated_at?: string
