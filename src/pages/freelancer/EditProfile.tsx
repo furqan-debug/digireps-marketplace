@@ -420,8 +420,8 @@ const EditProfile = () => {
           return (
             <motion.div key="step0" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
               <div className="space-y-3">
-                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">The Core Identity</h2>
-                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Your identity is the foundation of your elite presence. Establish your commercial persona.</p>
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Personal Information</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Start by introducing yourself to the community. Your name and photo help clients recognize you.</p>
               </div>
 
               <div className="grid md:grid-cols-[200px_1fr] gap-12 items-start pt-4">
@@ -457,7 +457,7 @@ const EditProfile = () => {
                     </div>
                   </div>
                   <div className="text-center space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-primary">Headshot Portfolio</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-primary">Profile Photo</p>
                     <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-relaxed">JPG/PNG &bull; Max 5MB</p>
                   </div>
                 </div>
@@ -465,25 +465,25 @@ const EditProfile = () => {
                 {/* Fields Section */}
                 <div className="space-y-8 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Commercial Display Name *</Label>
-                    <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Full name or elite persona" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-lg focus:ring-primary/20" />
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Full Name *</Label>
+                    <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Enter your full name" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-lg focus:ring-primary/20" />
                   </div>
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Professional Focus / Headline</Label>
-                    <Input value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="e.g. Master Copywriter & Content Strategist" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-lg focus:ring-primary/20" />
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Professional Title</Label>
+                    <Input value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="e.g. Lead Content Strategist" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-lg focus:ring-primary/20" />
                   </div>
                   <div className="grid sm:grid-cols-2 gap-6 pt-4 border-t border-border/5">
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 ml-1">
                         <Globe className="h-3.5 w-3.5 text-primary/40" />
-                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Base of Operations</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Location</Label>
                       </div>
                       <Input value={country} readOnly className="h-14 rounded-2xl bg-muted/30 border-border/20 px-6 font-bold text-muted-foreground/60 cursor-not-allowed" />
                     </div>
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 ml-1">
                         <Clock className="h-3.5 w-3.5 text-primary/40" />
-                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Network Timezone</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Timezone</Label>
                       </div>
                       <Input value={timezone} readOnly className="h-14 rounded-2xl bg-muted/30 border-border/20 px-6 font-bold text-muted-foreground/60 cursor-not-allowed" />
                     </div>
@@ -496,31 +496,31 @@ const EditProfile = () => {
           return (
             <motion.div key="step1" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
               <div className="space-y-3">
-                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">The Professional Arsenal</h2>
-                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Define your domain of excellence and technical stack.</p>
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Expertise & Skills</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Tell us about your background and the skills you bring to the table.</p>
               </div>
 
               <div className="space-y-10 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
                 <div className="grid sm:grid-cols-2 gap-8 items-end">
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Commercial Experience (Years)</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Years of Experience</Label>
                     <div className="relative">
-                      <Input type="number" min="0" max="50" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} placeholder="8" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-xl focus:ring-primary/20" />
+                      <Input type="number" min="0" max="50" value={experienceYears} onChange={(e) => setExperienceYears(e.target.value)} placeholder="5" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-xl focus:ring-primary/20" />
                       <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-primary/40">Years</div>
                     </div>
                   </div>
                   <div className="h-16 flex items-center px-6 rounded-2xl bg-primary/5 border border-primary/10 italic text-xs font-medium text-primary/60">
-                    "Elite partners typically possess 5+ years of demonstrable expertise."
+                    "Highlighting your experience helps clients understand your seniority."
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Commercial Bio / Value Proposition</Label>
-                  <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={5} placeholder="Translate your technical expertise into commercial value..." className="rounded-2xl bg-white border-border/40 p-6 font-medium text-lg resize-none focus:ring-primary/20 leading-relaxed" />
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Professional Summary</Label>
+                  <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={5} placeholder="Briefly describe your expertise and the value you provide..." className="rounded-2xl bg-white border-border/40 p-6 font-medium text-lg resize-none focus:ring-primary/20 leading-relaxed" />
                 </div>
 
                 <div className="space-y-4">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Technical Stack *</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Key Skills *</Label>
                   <div className="flex gap-3">
                     <Input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} placeholder="Add a skill (e.g. Next.js, Strategic Writing)" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-lg focus:ring-primary/20" />
                     <Button type="button" onClick={addSkill} className="h-16 w-16 rounded-2xl shrink-0 bg-primary/10 text-primary hover:bg-primary/20 border-0 shadow-none"><Plus className="h-6 w-6" /></Button>
@@ -539,7 +539,7 @@ const EditProfile = () => {
 
                 <div className="space-y-4 pt-6 border-t border-border/5">
                   <div className="flex items-center justify-between">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Elite Network Segments *</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Service Categories *</Label>
                     <span className="text-[9px] font-bold text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-md">Required</span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -562,14 +562,14 @@ const EditProfile = () => {
           return (
             <motion.div key="step2" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
               <div className="space-y-3">
-                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">The Commercial Seal</h2>
-                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Add certifications and industry credentials to solidify your authority.</p>
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Qualifications</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Add certifications and industry credentials to build credibility.</p>
               </div>
 
               <div className="space-y-10 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
                 <div className="grid sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1">Credential Name</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1">Certification Name</Label>
                     <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Google Cloud Architect" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold focus:ring-primary/20" />
                   </div>
                   <div className="space-y-2">
@@ -874,8 +874,8 @@ const EditProfile = () => {
               <ShieldCheck className="h-16 w-16 text-primary" />
             </div>
             <div className="space-y-4">
-              <h1 className="font-display text-5xl font-black tracking-tight">Protocol Engaged</h1>
-              <p className="text-muted-foreground/60 text-lg font-medium max-w-md mx-auto">Your identity has been broadcasted to the elite network. Prepare for high-tier execution.</p>
+              <h1 className="font-display text-5xl font-black tracking-tight">Application Submitted</h1>
+              <p className="text-muted-foreground/60 text-lg font-medium max-w-md mx-auto">Your profile has been submitted for review. We'll notify you once you're approved.</p>
             </div>
           </motion.div>
 
@@ -927,21 +927,21 @@ const EditProfile = () => {
               <div className="space-y-3">
                 <div className="inline-flex items-center gap-2 rounded-full bg-white border border-black/[0.03] px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] shadow-sm">
                   <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                  Terminal Identity
+                  Profile Setup
                 </div>
-                <h1 className="font-display text-5xl font-black tracking-tight leading-none">Elite Command</h1>
-                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Optimize your commercial presence for the global marketplace.</p>
+                <h1 className="font-display text-5xl font-black tracking-tight leading-none">Edit Profile</h1>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Update your professional presence and portfolio.</p>
               </div>
               <div className="flex flex-wrap items-center gap-4">
                 {!profile?.application_status && (
                   <Button onClick={handleSubmitApplication} disabled={submitting} variant="outline" className="h-16 px-10 rounded-2xl bg-white border-primary/20 text-primary hover:bg-primary/5 shadow-sm font-black uppercase tracking-widest text-xs gap-3">
                     {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                    Broadcast Application
+                    Submit Application
                   </Button>
                 )}
                 <Button onClick={() => handleSaveProfile()} disabled={saving} className="h-16 px-12 rounded-2xl bg-primary text-primary-foreground shadow-elegant hover:scale-[1.03] transition-all font-black uppercase tracking-widest text-xs gap-3 border-0">
                   {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}
-                  Commit Changes
+                  Save Changes
                 </Button>
               </div>
             </div>
@@ -953,7 +953,7 @@ const EditProfile = () => {
               <section className="space-y-8">
                 <div className="flex items-center gap-4">
                   <div className="h-px flex-1 bg-black/5" />
-                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Identity Matrix</h2>
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Profile Information</h2>
                   <div className="h-px flex-1 bg-black/5" />
                 </div>
 
@@ -962,7 +962,7 @@ const EditProfile = () => {
                     <div className="relative group cursor-pointer" onClick={() => avatarFileRef.current?.click()}>
                       <div className="h-40 w-40 rounded-[2.5rem] bg-white border-[6px] border-white shadow-2xl overflow-hidden group-hover:scale-105 transition-all duration-500">
                         {(avatarPreview || avatarUrl) ? (
-                          <img src={avatarPreview || avatarUrl} alt="Identity Preview" className="w-full h-full object-cover" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
+                          <img src={avatarPreview || avatarUrl} alt="Profile" className="w-full h-full object-cover" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
                         ) : (
                           <div className="h-full w-full bg-primary/5 flex items-center justify-center"><User className="h-12 w-12 text-primary/20" /></div>
                         )}
@@ -974,39 +974,39 @@ const EditProfile = () => {
                       <input ref={avatarFileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                     </div>
                     <div className="space-y-3 text-center sm:text-left flex-1">
-                      <h3 className="text-xl font-black tracking-tight">Biological Proxy</h3>
-                      <p className="text-muted-foreground/60 text-sm font-medium leading-relaxed">High-tier engagements require a verified human presence. Upload a high-fidelity headshot.</p>
+                      <h3 className="text-xl font-black tracking-tight">Profile Photo</h3>
+                      <p className="text-muted-foreground/60 text-sm font-medium leading-relaxed">A professional photo helps you build trust with potential clients.</p>
                       <div className="flex gap-3 justify-center sm:justify-start pt-2">
-                        <Button variant="ghost" size="sm" onClick={() => avatarFileRef.current?.click()} className="rounded-xl font-black text-[10px] uppercase tracking-widest h-10 px-6 border border-black/5 hover:bg-white bg-white/40">Adjust Signal</Button>
-                        <Button variant="ghost" size="sm" onClick={() => setIsAdjustingAvatar(true)} className="rounded-xl font-black text-[10px] uppercase tracking-widest h-10 px-6 border border-black/5 hover:bg-white bg-white/40">Recalibrate</Button>
+                        <Button variant="ghost" size="sm" onClick={() => avatarFileRef.current?.click()} className="rounded-xl font-black text-[10px] uppercase tracking-widest h-10 px-6 border border-black/5 hover:bg-white bg-white/40">Upload New</Button>
+                        <Button variant="ghost" size="sm" onClick={() => setIsAdjustingAvatar(true)} className="rounded-xl font-black text-[10px] uppercase tracking-widest h-10 px-6 border border-black/5 hover:bg-white bg-white/40">Adjust Photo</Button>
                       </div>
                     </div>
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-8 pt-4">
                     <div className="space-y-3">
-                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Legal Designation</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Full Name</Label>
                       <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Full Name" className="h-16 rounded-[1.5rem] bg-white border-black/[0.03] px-6 font-bold text-lg shadow-inner-sm focus:ring-primary/20" />
                     </div>
                     <div className="space-y-3">
-                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Commercial Title</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Professional Title</Label>
                       <Input value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="e.g. Lead System Architect" className="h-16 rounded-[1.5rem] bg-white border-black/[0.03] px-6 font-bold text-lg shadow-inner-sm focus:ring-primary/20" />
                     </div>
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-8">
                     <div className="space-y-3">
-                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Operational Territory</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Location</Label>
                       <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country" className="h-16 rounded-[1.5rem] bg-white border-black/[0.03] px-6 font-bold text-lg shadow-inner-sm focus:ring-primary/20" />
                     </div>
                     <div className="space-y-3">
-                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Temporal Offset</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Local Timezone</Label>
                       <div className="h-16 rounded-[1.5rem] bg-black/[0.02] border border-black/[0.03] px-6 flex items-center font-bold text-muted-foreground/60">{timezone}</div>
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Commercial Bio</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Professional Summary</Label>
                     <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={6} className="rounded-[2rem] bg-white border-black/[0.03] p-8 font-medium text-lg resize-none shadow-inner-sm focus:ring-primary/20 leading-relaxed" />
                   </div>
                 </div>
@@ -1015,15 +1015,15 @@ const EditProfile = () => {
               <section className="space-y-8">
                 <div className="flex items-center gap-4">
                   <div className="h-px flex-1 bg-black/5" />
-                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Technical Repository</h2>
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Portfolio & Skills</h2>
                   <div className="h-px flex-1 bg-black/5" />
                 </div>
 
                 <div className="bg-white/60 backdrop-blur-xl rounded-[3rem] p-12 border border-white shadow-sm space-y-10">
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Skills Arsenal</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Skills</Label>
                     <div className="flex gap-3">
-                      <Input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} placeholder="Add Tech Skill" className="h-16 rounded-[1.5rem] bg-white border-black/[0.03] px-6 font-bold text-lg shadow-inner-sm focus:ring-primary/20" />
+                      <Input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} placeholder="Add Skill" className="h-16 rounded-[1.5rem] bg-white border-black/[0.03] px-6 font-bold text-lg shadow-inner-sm focus:ring-primary/20" />
                       <Button onClick={addSkill} className="h-16 w-16 rounded-[1.5rem] bg-primary/5 text-primary hover:bg-primary/10 border-0"><Plus /></Button>
                     </div>
                     <div className="flex flex-wrap gap-2 pt-4">
@@ -1037,7 +1037,7 @@ const EditProfile = () => {
                   </div>
 
                   <div className="pt-10 border-t border-black/[0.03] space-y-6">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Commercial Certifications</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Certifications</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {certifications.map((c, i) => (
                         <div key={i} className="flex items-center justify-between p-6 rounded-[2rem] bg-white border border-black/[0.03] shadow-sm">
@@ -1052,7 +1052,7 @@ const EditProfile = () => {
                         </div>
                       ))}
                       <button onClick={() => setWizardStep(2)} className="flex items-center justify-center p-6 rounded-[2rem] border-2 border-dashed border-black/5 hover:border-primary/20 bg-white/40 hover:bg-white transition-all text-[10px] font-black uppercase tracking-widest text-primary/40 hover:text-primary">
-                        <Plus className="h-4 w-4 mr-2" /> Add Credential
+                        <Plus className="h-4 w-4 mr-2" /> Add Certification
                       </button>
                     </div>
                   </div>
@@ -1060,25 +1060,24 @@ const EditProfile = () => {
               </section>
             </div>
 
-            {/* Identity Hologram */}
+            {/* Live Preview */}
             <div className="lg:sticky lg:top-12 space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-px flex-1 bg-black/5" />
-                <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Hologram Preview</h2>
+                <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Live Preview</h2>
                 <div className="h-px flex-1 bg-black/5" />
               </div>
 
               <Card className="relative rounded-[3.5rem] border-0 bg-white shadow-2xl overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
                 <div className="h-32 bg-gradient-to-r from-primary via-indigo-600 to-primary/80 relative">
-                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
                 </div>
                 <CardContent className="px-10 pb-12">
                   <div className="-mt-16 mb-8 relative z-10">
                     <div className="inline-block relative">
                       <div className="h-32 w-32 rounded-[2.5rem] bg-white border-[6px] border-white shadow-2xl overflow-hidden shadow-elegant-dark">
                         {(avatarPreview || avatarUrl) ? (
-                          <img src={avatarPreview || avatarUrl} alt="Hologram" className="w-full h-full object-cover" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
+                          <img src={avatarPreview || avatarUrl} alt="Preview" className="w-full h-full object-cover" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
                         ) : (
                           <div className="h-full w-full bg-primary/10 flex items-center justify-center font-display font-black text-primary text-4xl">{(displayName || "?")[0]}</div>
                         )}
@@ -1092,10 +1091,9 @@ const EditProfile = () => {
                   <div className="space-y-8">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
-                        <h3 className="font-display text-3xl font-black tracking-tight">{displayName || "Anonymous Partner"}</h3>
-                        <Crown className="h-5 w-5 text-primary" />
+                        <h3 className="font-display text-3xl font-black tracking-tight">{displayName || "Freelancer Name"}</h3>
                       </div>
-                      <p className="font-bold text-muted-foreground leading-snug">{headline || "Operational Executive"}</p>
+                      <p className="font-bold text-muted-foreground leading-snug">{headline || "Professional Headline"}</p>
                       <div className="flex items-center gap-4 pt-1 font-black text-[9px] uppercase tracking-widest text-muted-foreground/40">
                         <span className="flex items-center gap-2"><Globe className="h-3.5 w-3.5" />{country}</span>
                         <span className="h-1 w-1 rounded-full bg-black/10" />
@@ -1104,7 +1102,7 @@ const EditProfile = () => {
                     </div>
 
                     <div className="space-y-4 pt-8 border-t border-black/[0.03]">
-                      <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">Technical Segments</h4>
+                      <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">Service Categories</h4>
                       <div className="flex flex-wrap gap-2">
                         {selectedCategories.map(id => (
                           <Badge key={id} className="bg-black/5 text-black hover:bg-black/10 border-0 rounded-lg px-3 py-1.5 text-[9px] font-black uppercase tracking-widest">
@@ -1116,7 +1114,7 @@ const EditProfile = () => {
 
                     <div className="pt-8 border-t border-black/[0.03]">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Identity Strength</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Profile Strength</span>
                         <span className="text-[10px] font-black text-primary">{Math.round(strength)}%</span>
                       </div>
                       <div className="h-2 rounded-full bg-black/5 overflow-hidden">
@@ -1125,7 +1123,7 @@ const EditProfile = () => {
                     </div>
 
                     <Button onClick={() => navigate(`/freelancer/${user?.id}`)} variant="ghost" className="w-full h-14 rounded-2xl border border-black/5 font-black uppercase tracking-widest text-[10px] hover:bg-black/5 mt-4 group">
-                      Review Public Transmission
+                      View Public Profile
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </div>
@@ -1151,35 +1149,35 @@ const EditProfile = () => {
         <DialogContent className="sm:max-w-md rounded-[3rem] border-0 shadow-2xl p-0 overflow-hidden">
           <div className="p-10 space-y-10">
             <DialogHeader>
-              <DialogTitle className="font-display text-4xl font-black tracking-tight text-center">Refine Identity</DialogTitle>
+              <DialogTitle className="font-display text-4xl font-black tracking-tight text-center">Adjust Photo</DialogTitle>
             </DialogHeader>
             <div className="space-y-12">
               <div className="flex justify-center">
                 <div className="h-56 w-56 rounded-[2.5rem] overflow-hidden border-[8px] border-black/5 shadow-inner-lg relative isolate">
                   <div className="absolute inset-0 bg-primary/5" />
                   {avatarPreview && (
-                    <img src={avatarPreview} alt="Crop Signal" className="w-full h-full object-cover relative z-10" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
+                    <img src={avatarPreview} alt="Crop" className="w-full h-full object-cover relative z-10" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
                   )}
                 </div>
               </div>
               <div className="space-y-8">
                 <div className="space-y-4">
                   <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                    <span className="flex items-center gap-2"><ZoomIn className="h-3 w-3" /> Amplitude (Zoom)</span>
+                    <span className="flex items-center gap-2"><ZoomIn className="h-3 w-3" /> Zoom</span>
                     <span>{Math.round(zoom * 100)}%</span>
                   </div>
                   <Slider value={[zoom]} min={1} max={3} step={0.01} onValueChange={([v]) => setZoom(v)} className="py-2" />
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                    <span className="flex items-center gap-2"><Move className="h-3 w-3" /> Lateral Offset (X)</span>
+                    <span className="flex items-center gap-2"><Move className="h-3 w-3" /> Horizontal</span>
                     <span>{position.x}%</span>
                   </div>
                   <Slider value={[position.x]} min={0} max={100} step={1} onValueChange={([v]) => setPosition(p => ({ ...p, x: v }))} className="py-2" />
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                    <span className="flex items-center gap-2"><Move className="h-3 w-3" /> Vertical Offset (Y)</span>
+                    <span className="flex items-center gap-2"><Move className="h-3 w-3" /> Vertical</span>
                     <span>{position.y}%</span>
                   </div>
                   <Slider value={[position.y]} min={0} max={100} step={1} onValueChange={([v]) => setPosition(p => ({ ...p, y: v }))} className="py-2" />
@@ -1188,8 +1186,8 @@ const EditProfile = () => {
             </div>
           </div>
           <div className="flex p-4 gap-2 bg-black/5">
-            <Button variant="ghost" onClick={() => setIsAdjustingAvatar(false)} className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px]">Abort</Button>
-            <Button onClick={saveAvatarAdjusted} className="flex-[2] h-14 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-[10px] shadow-lg">Commit Identity</Button>
+            <Button variant="ghost" onClick={() => setIsAdjustingAvatar(false)} className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px]">Cancel</Button>
+            <Button onClick={saveAvatarAdjusted} className="flex-[2] h-14 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-[10px] shadow-lg">Save Changes</Button>
           </div>
         </DialogContent>
       </Dialog>

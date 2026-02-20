@@ -78,14 +78,14 @@ const FreelancerDashboard = () => {
           >
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 rounded-xl bg-white/60 backdrop-blur-sm border border-primary/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary shadow-sm">
-                <Sparkles className="h-3.5 w-3.5" /> Elite Workspace
+                <Sparkles className="h-3.5 w-3.5" /> Freelancer Dashboard
               </div>
               <h1 className="font-display text-5xl sm:text-7xl font-black tracking-tight leading-[0.9]">
                 Welcome Back,<br />
                 <span className="text-primary italic">{profile?.display_name?.split(" ")[0] || "Partner"}</span>
               </h1>
               <p className="text-muted-foreground/80 text-lg sm:text-xl font-medium max-w-xl leading-relaxed">
-                Your command center for elite project execution and commercial growth.
+                Your personal dashboard for managing projects and growing your business.
               </p>
             </div>
 
@@ -122,9 +122,9 @@ const FreelancerDashboard = () => {
                         <User className="h-10 w-10 text-primary" />
                       </div>
                       <div className="space-y-3">
-                        <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-foreground">Finalize Your Presence</h2>
+                        <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-foreground">Complete Your Profile</h2>
                         <p className="text-muted-foreground font-medium max-w-lg mx-auto leading-relaxed">
-                          Your profile is currently <span className="text-primary font-bold">Incomplete</span>. Craft your high-end portfolio to unlock the global network.
+                          Your profile is currently <span className="text-primary font-bold">Incomplete</span>. Finish setting up your profile to start receiving orders.
                         </p>
                       </div>
                       <Button
@@ -151,12 +151,10 @@ const FreelancerDashboard = () => {
                         </div>
                         <div className="space-y-4">
                           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-warning/10 text-[10px] font-black uppercase tracking-widest text-warning border border-warning/10">
-                            Elite Verification in Progress
+                            Application Under Review
                           </div>
-                          <h2 className="text-3xl font-display font-black tracking-tight text-warning">Strict Quality Vetting</h2>
-                          <p className="text-muted-foreground font-medium leading-relaxed max-w-2xl text-lg">
-                            Our team is meticulously reviewing your credentials. Maintaining a 100% vetted network ensures premium project flow. Expect verification within 24-48 hours.
-                          </p>
+                          <h4 className="font-display text-xl sm:text-2xl font-black tracking-tight text-warning">Review in Progress</h4>
+                          <p className="text-warning/70 font-medium leading-relaxed max-w-md">Our team is reviewing your profile. You'll receive a notification once you are approved.</p>
                           <div className="pt-4 flex items-center gap-4">
                             <Button onClick={() => navigate("/freelancer/profile")} variant="ghost" className="rounded-xl h-12 text-xs font-black uppercase tracking-widest hover:bg-warning/5">
                               Edit Application
@@ -258,21 +256,21 @@ const FreelancerDashboard = () => {
                 transition={{ delay: 0.3 }}
               >
                 <Card className="rounded-[3rem] border-border/40 bg-gradient-to-br from-card to-muted/20 p-10 space-y-8 shadow-sm">
-                  <div className="space-y-6">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] shadow-xl border border-border/10 m-auto" style={{ backgroundColor: 'white' }}>
+                  <div className="space-y-6 text-center">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-[2.5rem] bg-white border border-border/10 shadow-xl mx-auto">
                       <LevelIcon className={`h-8 w-8 ${levelCfg.color}`} />
                     </div>
-                    <div className="text-center space-y-2">
-                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Elite Tier</p>
-                      <h3 className="font-display text-3xl font-black tracking-tight">
-                        {levelCfg.label} Specialist
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Freelancer Level</p>
+                      <h3 className="font-display text-3xl font-black tracking-tight capitalize">
+                        {levelCfg.label}
                       </h3>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div className="flex justify-between text-[11px] font-black uppercase tracking-widest">
-                      <span className="text-muted-foreground/60">Tier Progression</span>
+                      <span className="text-muted-foreground/60">Level Progress</span>
                       <span className="text-primary">{levelCfg.progress}%</span>
                     </div>
                     <div className="h-3 rounded-full bg-white border border-border/10 overflow-hidden p-0.5">
@@ -286,7 +284,7 @@ const FreelancerDashboard = () => {
                   </div>
 
                   <p className="text-xs font-medium text-center text-muted-foreground/60 leading-relaxed italic">
-                    "Consistent excellence in execution unlocks the next elite tier and global perks."
+                    "Consistent high-quality work unlocks higher levels and more benefits."
                   </p>
                 </Card>
               </motion.div>
@@ -296,25 +294,25 @@ const FreelancerDashboard = () => {
                   <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm">
                     <AlertCircle className="h-5 w-5 text-primary" />
                   </div>
-                  <h3 className="text-xs font-black uppercase tracking-widest">Quick Support</h3>
+                  <h3 className="text-xs font-black uppercase tracking-widest">Support</h3>
                 </div>
                 <div className="space-y-4">
                   <p className="text-sm font-medium leading-relaxed text-muted-foreground">
-                    Need assistance with a brief or have a technical query? Our partner success team is online.
+                    Need assistance with an order or have a question? Our support team is here to help.
                   </p>
                   <Button variant="outline" className="w-full rounded-xl h-12 text-[10px] font-black uppercase tracking-widest border-border/60 hover:bg-white/60">
-                    Contact Partner Support
+                    Contact Support
                   </Button>
                 </div>
               </Card>
             </div>
           </div>
         </div>
-
-        {/* Floating Decorative Elements */}
-        <div className="fixed -bottom-48 -right-48 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-        <div className="fixed -top-48 -left-48 h-[500px] w-[500px] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
       </div>
+
+      {/* Floating Decorative Elements */}
+      <div className="fixed -bottom-48 -right-48 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+      <div className="fixed -top-48 -left-48 h-[500px] w-[500px] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
     </AppShell>
   );
 };
