@@ -75,10 +75,10 @@ function calculateCompleteness(data: {
 
 // ─── Section wrapper for edit mode ───
 const SectionHeader = ({ title }: { title: string }) => (
-  <div className="flex items-center gap-4">
-    <div className="h-px flex-1 bg-border/30" />
-    <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">{title}</h2>
-    <div className="h-px flex-1 bg-border/30" />
+  <div className="flex items-center gap-4 mb-4">
+    <div className="h-px flex-1 bg-border/40" />
+    <h2 className="font-display text-sm font-bold uppercase tracking-[0.2em] text-primary whitespace-nowrap">{title}</h2>
+    <div className="h-px flex-1 bg-border/40" />
   </div>
 );
 
@@ -448,19 +448,19 @@ const EditProfile = () => {
   // ─── Shared sub-components ───
   const AvatarSection = ({ size = "lg" }: { size?: "sm" | "lg" }) => {
     const dim = size === "lg" ? "h-44 w-44" : "h-40 w-40";
-    const rounded = size === "lg" ? "rounded-[2.5rem]" : "rounded-[2.5rem]";
+    const rounded = size === "lg" ? "rounded-[2rem]" : "rounded-[2rem]";
     return (
       <div className="relative group cursor-pointer" onClick={() => avatarFileRef.current?.click()}>
         <input ref={avatarFileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-        <div className={`${dim} ${rounded} bg-card border-4 border-card shadow-2xl overflow-hidden ring-1 ring-border/20`}>
+        <div className={`${dim} ${rounded} bg-white border border-border/40 shadow-sm overflow-hidden group-hover:shadow-elegant transition-all duration-300`}>
           {(avatarPreview || avatarUrl) ? (
             <img src={avatarPreview || avatarUrl} alt="Avatar" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
           ) : (
             <div className="h-full w-full bg-primary/5 flex items-center justify-center font-display font-bold text-primary text-5xl">{(displayName || "?")[0]?.toUpperCase()}</div>
           )}
-          {uploadingAvatar && <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
+          {uploadingAvatar && <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
         </div>
-        <div className="absolute -bottom-3 -right-3 h-12 w-12 rounded-2xl bg-primary text-primary-foreground shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform"><Plus className="h-6 w-6" /></div>
+        <div className="absolute -bottom-3 -right-3 h-12 w-12 rounded-[1.25rem] bg-primary text-primary-foreground shadow-glow flex items-center justify-center group-hover:scale-110 transition-transform"><Plus className="h-6 w-6" /></div>
       </div>
     );
   };
@@ -468,13 +468,13 @@ const EditProfile = () => {
   const WorkExperienceList = () => (
     <div className="space-y-4">
       {workExperience.map((we, idx) => (
-        <div key={idx} className="flex items-start justify-between p-5 rounded-2xl border border-border/30 bg-card shadow-sm">
+        <div key={idx} className="flex items-start justify-between p-6 rounded-[1.5rem] border border-border/40 bg-white shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
           <div className="space-y-1">
-            <p className="font-black text-base tracking-tight">{we.title}</p>
+            <p className="font-display text-lg font-bold tracking-tight">{we.title}</p>
             <p className="text-xs font-bold text-muted-foreground">{we.company} · {we.start_year} – {we.is_current ? "Present" : we.end_year}</p>
-            {we.description && <p className="text-sm text-muted-foreground mt-2">{we.description}</p>}
+            {we.description && <p className="text-sm text-muted-foreground/80 mt-2 leading-relaxed">{we.description}</p>}
           </div>
-          <button onClick={() => setWorkExperience(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
+          <button onClick={() => setWorkExperience(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 rounded-xl transition-colors"><X className="h-4 w-4" /></button>
         </div>
       ))}
     </div>
@@ -504,9 +504,17 @@ const EditProfile = () => {
   const EducationList = () => (
     <div className="space-y-3">
       {education.map((ed, idx) => (
-        <div key={idx} className="flex items-center justify-between p-4 rounded-2xl border border-border/30 bg-card">
-          <div><p className="font-black text-sm">{ed.degree}</p><p className="text-[10px] font-bold text-muted-foreground uppercase">{ed.institution} · {ed.year}</p></div>
-          <button onClick={() => setEducation(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
+        <div key={idx} className="flex items-center justify-between p-5 rounded-[1.25rem] border border-border/40 bg-white shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
+          <div className="flex gap-4 items-center">
+            <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-primary/5 text-primary">
+              <GraduationCap className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-display font-bold text-sm tracking-tight">{ed.degree}</p>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{ed.institution} · {ed.year}</p>
+            </div>
+          </div>
+          <button onClick={() => setEducation(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 rounded-xl transition-colors"><X className="h-4 w-4" /></button>
         </div>
       ))}
     </div>
@@ -526,15 +534,17 @@ const EditProfile = () => {
   const LanguageList = () => (
     <div className="space-y-3">
       {languages.map((lang, idx) => (
-        <div key={idx} className="flex items-center justify-between p-4 rounded-2xl border border-border/30 bg-card">
+        <div key={idx} className="flex items-center justify-between p-5 rounded-[1.25rem] border border-border/40 bg-white shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
           <div className="flex items-center gap-4">
-            <Globe className="h-5 w-5 text-primary/40" />
+            <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-primary/5 text-primary">
+              <Globe className="h-5 w-5" />
+            </div>
             <div>
-              <p className="font-black text-sm">{lang.language}</p>
+              <p className="font-display font-bold text-sm tracking-tight">{lang.language}</p>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest capitalize">{lang.proficiency}</p>
             </div>
           </div>
-          <button onClick={() => setLanguages(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
+          <button onClick={() => setLanguages(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 rounded-xl transition-colors"><X className="h-4 w-4" /></button>
         </div>
       ))}
     </div>
@@ -555,15 +565,15 @@ const EditProfile = () => {
   const CertificationList = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {certifications.map((c, i) => (
-        <div key={i} className="flex items-center justify-between p-5 rounded-2xl bg-card border border-border/30 shadow-sm">
+        <div key={i} className="flex items-center justify-between p-5 rounded-[1.25rem] bg-white border border-border/40 shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary"><Award className="h-6 w-6" /></div>
+            <div className="h-10 w-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary"><Award className="h-5 w-5" /></div>
             <div>
-              <p className="font-black text-xs uppercase tracking-tight truncate max-w-[120px]">{c.name}</p>
+              <p className="font-display font-bold text-sm tracking-tight truncate max-w-[120px]">{c.name}</p>
               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{c.issuer}</p>
             </div>
           </div>
-          <button onClick={() => setCertifications(prev => prev.filter((_, idx) => idx !== i))} className="p-2 text-muted-foreground/20 hover:text-destructive"><X className="h-4 w-4" /></button>
+          <button onClick={() => setCertifications(prev => prev.filter((_, idx) => idx !== i))} className="p-2 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 rounded-xl transition-colors"><X className="h-4 w-4" /></button>
         </div>
       ))}
     </div>
@@ -582,26 +592,26 @@ const EditProfile = () => {
 
   const PortfolioSection = () => (
     <div className="space-y-6">
-      <button onClick={() => setIsPortfolioFormOpen(true)} className="w-full group relative rounded-2xl border-2 border-dashed border-border/40 bg-card/40 hover:bg-primary/5 transition-all py-16 flex flex-col items-center gap-4 shadow-sm">
-        <div className="h-14 w-14 rounded-2xl bg-card border border-border/30 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-          <Plus className="h-5 w-5 text-primary" />
+      <button onClick={() => setIsPortfolioFormOpen(true)} className="w-full group relative rounded-[1.5rem] border-2 border-dashed border-border/40 bg-card/40 hover:bg-white hover:border-primary/40 hover:shadow-elegant transition-all duration-300 py-16 flex flex-col items-center gap-4">
+        <div className="h-14 w-14 rounded-2xl bg-white border border-border/40 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500 group-hover:bg-primary/5">
+          <Plus className="h-6 w-6 text-primary" />
         </div>
-        <span className="text-xs font-black uppercase tracking-[0.2em] text-primary">Add Project</span>
+        <span className="font-display text-sm font-bold uppercase tracking-[0.2em] text-primary">Add Project</span>
       </button>
       {portfolio.length > 0 && (
         <div className="grid gap-6 sm:grid-cols-2">
           {portfolio.map(item => (
-            <div key={item.id} className="relative group aspect-video rounded-2xl overflow-hidden border border-border/30 shadow-sm bg-card">
+            <div key={item.id} className="relative group aspect-video rounded-[1.5rem] overflow-hidden border border-border/40 shadow-sm bg-white hover:shadow-elegant transition-all duration-300">
               {item.image_url ? (
                 <img src={item.image_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-primary/20"><ImageIcon className="h-16 w-16" /></div>
+                <div className="w-full h-full flex items-center justify-center text-primary/20 bg-muted/20"><ImageIcon className="h-16 w-16" /></div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 p-6 flex flex-col justify-between">
+              <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 p-6 flex flex-col justify-between">
                 <div className="flex justify-end">
-                  <Button size="icon" variant="destructive" onClick={e => { e.stopPropagation(); deletePortfolioItem(item); }} className="h-10 w-10 rounded-xl"><Trash2 className="h-5 w-5" /></Button>
+                  <Button size="icon" variant="destructive" onClick={e => { e.stopPropagation(); deletePortfolioItem(item); }} className="h-10 w-10 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive hover:text-white transition-colors border-0"><Trash2 className="h-5 w-5" /></Button>
                 </div>
-                <p className="font-black text-lg text-primary-foreground tracking-tight truncate">{item.title}</p>
+                <p className="font-display font-bold text-xl text-white tracking-tight truncate drop-shadow-md">{item.title}</p>
               </div>
             </div>
           ))}
@@ -611,39 +621,39 @@ const EditProfile = () => {
   );
 
   const PricingSection = () => (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div className="space-y-3">
-        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Hourly Rate (USD)</Label>
+        <Label className="font-display text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Hourly Rate (USD)</Label>
         <div className="relative">
-          <Input type="number" min="0" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} placeholder="75" className="h-16 rounded-2xl border-border/30 px-6 font-bold text-xl" />
-          <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-primary/40">$/hr</div>
+          <Input type="number" min="0" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} placeholder="0.00" className="h-16 rounded-[1.25rem] border-border/40 px-6 font-display font-bold text-2xl transition-all hover:border-primary/30 focus-visible:border-primary/50" />
+          <div className="absolute right-6 top-1/2 -translate-y-1/2 font-display text-sm font-bold uppercase tracking-widest text-primary/40">$/hr</div>
         </div>
       </div>
       <div className="space-y-3">
-        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Preferred Pricing Model</Label>
+        <Label className="font-display text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Preferred Pricing Model</Label>
         <div className="grid grid-cols-3 gap-4">
           {["hourly", "fixed", "both"].map(model => (
-            <button key={model} onClick={() => setPreferredPricingModel(model)} className={`p-5 rounded-2xl border-2 text-xs font-black uppercase tracking-widest transition-all ${preferredPricingModel === model ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border/30 text-muted-foreground hover:border-primary/40"}`}>
+            <button key={model} onClick={() => setPreferredPricingModel(model)} className={`p-4 rounded-[1.25rem] border-2 font-display text-xs font-bold uppercase tracking-[0.1em] transition-all duration-300 ${preferredPricingModel === model ? "bg-primary text-white border-primary shadow-sm scale-[1.02]" : "bg-white border-border/40 text-muted-foreground hover:border-primary/40 hover:-translate-y-0.5"}`}>
               {model === "both" ? "Both" : model.charAt(0).toUpperCase() + model.slice(1)}
             </button>
           ))}
         </div>
       </div>
       <div className="space-y-3">
-        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Availability</Label>
+        <Label className="font-display text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Availability</Label>
         <div className="grid grid-cols-3 gap-4">
           {[{ key: "available", label: "Available" }, { key: "limited", label: "Limited" }, { key: "unavailable", label: "Unavailable" }].map(opt => (
-            <button key={opt.key} onClick={() => setAvailabilityStatus(opt.key)} className={`p-5 rounded-2xl border-2 text-xs font-black uppercase tracking-widest transition-all ${availabilityStatus === opt.key ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border/30 text-muted-foreground hover:border-primary/40"}`}>
+            <button key={opt.key} onClick={() => setAvailabilityStatus(opt.key)} className={`p-4 rounded-[1.25rem] border-2 font-display text-xs font-bold uppercase tracking-[0.1em] transition-all duration-300 ${availabilityStatus === opt.key ? "bg-primary text-white border-primary shadow-sm scale-[1.02]" : "bg-white border-border/40 text-muted-foreground hover:border-primary/40 hover:-translate-y-0.5"}`}>
               {opt.label}
             </button>
           ))}
         </div>
       </div>
       <div className="space-y-3">
-        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Response Time</Label>
+        <Label className="font-display text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Response Time</Label>
         <div className="grid grid-cols-3 gap-4">
           {["<1h", "<24h", "2-3 days"].map(rt => (
-            <button key={rt} onClick={() => setResponseTimeExpectation(rt)} className={`p-5 rounded-2xl border-2 text-xs font-black uppercase tracking-widest transition-all ${responseTimeExpectation === rt ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border/30 text-muted-foreground hover:border-primary/40"}`}>
+            <button key={rt} onClick={() => setResponseTimeExpectation(rt)} className={`p-4 rounded-[1.25rem] border-2 font-display text-xs font-bold uppercase tracking-[0.1em] transition-all duration-300 ${responseTimeExpectation === rt ? "bg-primary text-white border-primary shadow-sm scale-[1.02]" : "bg-white border-border/40 text-muted-foreground hover:border-primary/40 hover:-translate-y-0.5"}`}>
               {rt}
             </button>
           ))}
@@ -1183,13 +1193,13 @@ const EditProfile = () => {
             {/* Live Preview Sidebar */}
             <div className="lg:sticky lg:top-12 space-y-6">
               <SectionHeader title="Live Preview" />
-              <Card className="relative rounded-3xl border-0 bg-card shadow-2xl overflow-hidden">
+              <Card className="dossier-card relative rounded-[2rem] border-0 bg-white shadow-elegant overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-                <div className="h-28 bg-gradient-to-r from-primary via-primary/80 to-primary/60" />
+                <div className="h-32 bg-gradient-to-br from-primary via-primary/80 to-primary-glow" />
                 <CardContent className="px-8 pb-10">
-                  <div className="-mt-14 mb-6 relative z-10">
+                  <div className="-mt-16 mb-6 relative z-10 flex justify-center">
                     <div className="inline-block relative">
-                      <div className="h-28 w-28 rounded-3xl bg-card border-4 border-card shadow-2xl overflow-hidden">
+                      <div className="h-32 w-32 rounded-[1.5rem] bg-white border-4 border-white shadow-md overflow-hidden">
                         {(avatarPreview || avatarUrl) ? (
                           <img src={avatarPreview || avatarUrl} alt="Preview" className="w-full h-full object-cover" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
                         ) : (
@@ -1200,43 +1210,43 @@ const EditProfile = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-6">
+                  <div className="space-y-6 text-center">
                     <div className="space-y-1">
-                      <h3 className="text-2xl font-black tracking-tight">{displayName || "Your Name"}</h3>
+                      <h3 className="font-display text-2xl font-bold tracking-tight">{displayName || "Your Name"}</h3>
                       <p className="font-bold text-muted-foreground text-sm">{headline || "Professional Headline"}</p>
-                      <div className="flex items-center gap-3 pt-1 font-black text-[9px] uppercase tracking-widest text-muted-foreground/40">
+                      <div className="flex items-center justify-center gap-3 pt-2 font-display text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">
                         <span className="flex items-center gap-1"><Globe className="h-3 w-3" />{country || "Location"}</span>
-                        <span className="h-1 w-1 rounded-full bg-border" />
+                        <span className="h-1 w-1 rounded-full bg-border/40" />
                         <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{timezone}</span>
                       </div>
                     </div>
 
                     {/* Preview stats */}
                     <div className="grid grid-cols-2 gap-3 text-center">
-                      <div className="p-3 rounded-xl bg-muted/30">
-                        <p className="text-lg font-black text-primary">{workExperience.length}</p>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Experience</p>
+                      <div className="p-4 rounded-[1.25rem] bg-muted/20 border border-border/40">
+                        <p className="font-display text-xl font-bold text-primary">{workExperience.length}</p>
+                        <p className="font-display text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Experience</p>
                       </div>
-                      <div className="p-3 rounded-xl bg-muted/30">
-                        <p className="text-lg font-black text-primary">{languages.length}</p>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Languages</p>
+                      <div className="p-4 rounded-[1.25rem] bg-muted/20 border border-border/40">
+                        <p className="font-display text-xl font-bold text-primary">{languages.length}</p>
+                        <p className="font-display text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Languages</p>
                       </div>
-                      <div className="p-3 rounded-xl bg-muted/30">
-                        <p className="text-lg font-black text-primary">{hourlyRate ? `$${hourlyRate}` : "—"}</p>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Per Hour</p>
+                      <div className="p-4 rounded-[1.25rem] bg-muted/20 border border-border/40">
+                        <p className="font-display text-xl font-bold text-primary">{hourlyRate ? `$${hourlyRate}` : "—"}</p>
+                        <p className="font-display text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Per Hour</p>
                       </div>
-                      <div className="p-3 rounded-xl bg-muted/30">
-                        <p className="text-lg font-black text-primary capitalize">{availabilityStatus}</p>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Status</p>
+                      <div className="p-4 rounded-[1.25rem] bg-muted/20 border border-border/40">
+                        <p className="font-display text-xl font-bold text-primary capitalize">{availabilityStatus}</p>
+                        <p className="font-display text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Status</p>
                       </div>
                     </div>
 
                     {selectedCategories.length > 0 && (
-                      <div className="space-y-2 pt-4 border-t border-border/20">
-                        <h4 className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">Categories</h4>
-                        <div className="flex flex-wrap gap-1.5">
+                      <div className="space-y-3 pt-6 border-t border-border/40 text-left">
+                        <h4 className="font-display text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Categories</h4>
+                        <div className="flex flex-wrap gap-2">
                           {selectedCategories.map(id => (
-                            <Badge key={id} className="bg-muted text-foreground hover:bg-muted border-0 rounded-lg px-2.5 py-1 text-[9px] font-black uppercase tracking-widest">
+                            <Badge key={id} className="bg-muted text-foreground border border-border/40 rounded-lg px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest hover:border-primary/30 transition-colors">
                               {allCategories.find(c => c.id === id)?.name}
                             </Badge>
                           ))}
@@ -1244,18 +1254,18 @@ const EditProfile = () => {
                       </div>
                     )}
 
-                    <div className="pt-4 border-t border-border/20">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Profile Strength</span>
-                        <span className="text-[10px] font-black text-primary">{completeness}%</span>
+                    <div className="pt-6 border-t border-border/40">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-display text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Profile Strength</span>
+                        <span className="font-display text-[10px] font-bold text-primary">{completeness}%</span>
                       </div>
-                      <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
-                        <motion.div initial={{ width: 0 }} animate={{ width: `${completeness}%` }} className="h-full bg-primary" />
+                      <div className="h-3 rounded-full bg-muted/50 overflow-hidden border border-border/50">
+                        <motion.div initial={{ width: 0 }} animate={{ width: `${completeness}%` }} className="h-full bg-gradient-to-r from-primary to-primary-glow" />
                       </div>
                     </div>
 
-                    <Button onClick={() => navigate(`/freelancer/${user?.id}`)} variant="ghost" className="w-full h-12 rounded-2xl border border-border/30 font-black uppercase tracking-widest text-[10px] mt-2 group">
-                      View Public Profile <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    <Button onClick={() => navigate(`/freelancer/${user?.id}`)} variant="ghost" className="w-full h-14 rounded-[1.25rem] border border-border/40 bg-white font-display font-bold uppercase tracking-[0.1em] text-xs mt-4 group hover:border-primary/40 hover:shadow-elegant transition-all duration-300">
+                      View Public Profile <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 group-hover:text-primary transition-all" />
                     </Button>
                   </div>
                 </CardContent>

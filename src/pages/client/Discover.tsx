@@ -54,7 +54,7 @@ const containerVariants = {
 };
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } },
 };
 
 type SortOption = "recently_active" | "most_experienced" | "highest_rated";
@@ -168,61 +168,71 @@ const Discover = () => {
 
   return (
     <AppShell>
-      <div className="max-w-6xl mx-auto space-y-12">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex flex-wrap items-end justify-between gap-6 pb-2 border-b border-border/40">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 border border-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary mb-2">
-                <Sparkles className="h-3 w-3" /> Talent Acquisition
+      <div className="max-w-7xl mx-auto space-y-16 pb-20">
+        {/* Header Section */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-border/40">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 border border-primary/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                <Sparkles className="h-3.5 w-3.5" /> Talent Acquisition
               </div>
-              <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight">Source <span className="gradient-text">Talent</span></h1>
-              <p className="text-muted-foreground text-base max-w-lg">Access our curated network of the world's most elite freelancers, vetted for excellence.</p>
+              <h1 className="font-display text-5xl sm:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
+                Source <span className="text-primary italic">Intelligence</span>
+              </h1>
+              <p className="text-muted-foreground/60 text-lg sm:text-xl font-medium max-w-2xl">
+                Access our curated network of the world's most elite freelancers, rigorously vetted for excellence.
+              </p>
             </div>
           </div>
         </motion.div>
 
-        {/* Search Bar */}
-        <div className="relative">
-          <div className="card-glass rounded-2xl p-1">
-            <div className="flex items-center gap-3 px-5">
-              <Search className="h-5 w-5 text-muted-foreground shrink-0" />
+        {/* Search Bar - Dossier Style */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }} className="relative">
+          <div className="dossier-card p-2 rounded-[2rem] border-primary/20 bg-primary/5 shadow-inner">
+            <div className="flex items-center gap-4 px-6 bg-white rounded-[1.5rem] border border-border/40 shadow-sm transition-all focus-within:border-primary/50 focus-within:shadow-elegant">
+              <Search className="h-6 w-6 text-primary shrink-0" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, headline, skills, or bio..."
-                className="h-14 border-0 bg-transparent shadow-none focus-visible:ring-0 text-base font-medium placeholder:text-muted-foreground/40"
+                placeholder="Search candidates by name, specialization, skills, or biography..."
+                className="h-16 border-0 bg-transparent shadow-none focus-visible:ring-0 text-lg font-medium placeholder:text-muted-foreground/40 font-display"
               />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Filter chips & sort */}
-        {selectedCategory && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-wrap items-center gap-3">
-            <Filter className="h-4 w-4 text-muted-foreground/60" />
-            {([["online", "Online Now"], ["pro_plus", "Pro+"], ["elite_only", "Elite Only"]] as [FilterChip, string][]).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => toggleFilter(key)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border ${activeFilters.has(key) ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border/40 text-muted-foreground hover:border-primary/30"}`}
-              >
-                {label}
-              </button>
-            ))}
-            <div className="ml-auto flex gap-2">
-              {([["recently_active", "Recent"], ["highest_rated", "Top Rated"], ["most_experienced", "Experienced"]] as [SortOption, string][]).map(([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => setSortBy(key)}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${sortBy === key ? "bg-primary/10 text-primary" : "text-muted-foreground/60 hover:text-foreground"}`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
+        <AnimatePresence>
+          {selectedCategory && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex flex-col sm:flex-row flex-wrap items-center justify-between gap-4 py-4 border-b border-border/40 overflow-hidden">
+              <div className="flex items-center gap-4 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 shrink-0">
+                  <Filter className="h-4 w-4 inline mr-2" /> Filters
+                </span>
+                {([["online", "Active Now"], ["pro_plus", "Pro & Elite"], ["elite_only", "Elite Exclusive"]] as [FilterChip, string][]).map(([key, label]) => (
+                  <button
+                    key={key}
+                    onClick={() => toggleFilter(key)}
+                    className={`px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-[0.1em] transition-all whitespace-nowrap shrink-0 border ${activeFilters.has(key) ? "bg-primary text-white border-primary shadow-sm" : "bg-muted/30 border-border/40 text-muted-foreground hover:border-primary/30 hover:bg-white"}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 shrink-0 bg-muted/30 p-1.5 rounded-2xl border border-border/40">
+                {([["recently_active", "Recent"], ["highest_rated", "Top Rated"], ["most_experienced", "Veteran"]] as [SortOption, string][]).map(([key, label]) => (
+                  <button
+                    key={key}
+                    onClick={() => setSortBy(key)}
+                    className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.1em] transition-all ${sortBy === key ? "bg-white text-primary shadow-sm border border-border/50" : "text-muted-foreground/60 hover:text-foreground"}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Categories */}
         {catLoading ? (
@@ -236,11 +246,11 @@ const Discover = () => {
               const colorClass = CATEGORY_COLORS[cat.name] ?? "from-primary/20 to-primary/10";
               const active = selectedCategory?.id === cat.id;
               return (
-                <motion.button key={cat.id} variants={itemVariants} onClick={() => handleSelectCategory(cat)} className={`group flex flex-col items-center gap-4 rounded-[1.5rem] border-2 p-6 text-sm font-bold transition-all ${active ? "border-primary bg-primary text-primary-foreground shadow-elegant" : "border-border/40 bg-card hover:border-primary/40 hover:shadow-sm text-foreground"}`}>
-                  <div className={`flex h-14 w-14 items-center justify-center rounded-[1rem] transition-all group-hover:scale-110 ${active ? "bg-white/20" : `bg-gradient-to-br ${colorClass} border border-primary/10`}`}>
-                    <Icon className={`h-7 w-7 ${active ? "text-white" : "text-primary"}`} />
+                <motion.button key={cat.id} variants={itemVariants} onClick={() => handleSelectCategory(cat)} className={`group flex flex-col items-center gap-5 rounded-[2rem] border p-8 transition-all duration-300 ${active ? "border-primary bg-primary text-primary-foreground shadow-elegant scale-[1.02]" : "border-border/40 bg-white hover:border-primary/40 hover:shadow-elegant text-foreground hover:-translate-y-1"}`}>
+                  <div className={`flex h-16 w-16 items-center justify-center rounded-[1.25rem] transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 ${active ? "bg-white/20" : `bg-primary/5 border border-primary/10 text-primary group-hover:bg-primary group-hover:text-white`}`}>
+                    <Icon className="h-8 w-8" />
                   </div>
-                  <span className="text-center leading-tight tracking-tight">{cat.name}</span>
+                  <span className="text-center font-display font-bold text-base tracking-tight leading-tight">{cat.name}</span>
                 </motion.button>
               );
             })}
@@ -282,72 +292,75 @@ const Discover = () => {
 
                     return (
                       <motion.div key={f.id} variants={itemVariants}>
-                        <Card className="group hover:shadow-elegant hover:border-primary/30 transition-all rounded-[2.5rem] overflow-hidden border-border/40 h-full p-2">
-                          <CardHeader className="p-6">
-                            <div className="flex items-center gap-4">
-                              <div className="relative shrink-0">
-                                <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary to-primary/40 blur-sm opacity-20 group-hover:opacity-40 transition-opacity" />
-                                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 font-display font-bold text-primary text-2xl shadow-sm">
-                                  {initials}
+                        <Card className="dossier-card group h-full flex flex-col p-2 hover:-translate-y-1 transition-all duration-500 cursor-pointer" onClick={() => navigate(`/client/freelancer/${f.user_id}?category=${selectedCategory.id}`)}>
+                          <CardHeader className="p-6 pb-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-center gap-4">
+                                <div className="relative shrink-0">
+                                  <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary to-primary-glow blur-sm opacity-20 group-hover:opacity-60 transition-opacity duration-500" />
+                                  <div className="relative flex h-16 w-16 items-center justify-center rounded-[1.25rem] bg-white border border-primary/20 font-display font-bold text-primary text-2xl shadow-sm z-10">
+                                    {initials}
+                                  </div>
+                                  {/* Activity status dot */}
+                                  <div className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full ${activity.color} border-2 border-white z-20`} title={activity.label} />
+                                  <div className="absolute -top-2 -left-2 flex h-7 w-7 items-center justify-center rounded-xl bg-white border border-border/60 shadow-sm z-20 group-hover:scale-110 transition-transform duration-300">
+                                    <LvlIcon className={`h-3.5 w-3.5 ${lvlCfg.className.includes('text-primary') ? 'text-primary' : lvlCfg.className.includes('text-warning') ? 'text-warning' : 'text-muted-foreground'}`} />
+                                  </div>
                                 </div>
-                                {/* Activity status dot */}
-                                <div className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full ${activity.color} border-2 border-background`} title={activity.label} />
-                                <div className="absolute -top-1 -left-1 flex h-6 w-6 items-center justify-center rounded-lg bg-background border border-border/60 shadow-sm">
-                                  <LvlIcon className={`h-3 w-3 ${lvlCfg.className.includes('text-primary') ? 'text-primary' : lvlCfg.className.includes('text-warning') ? 'text-warning' : 'text-muted-foreground'}`} />
-                                </div>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <CardTitle className="font-display text-xl font-bold tracking-tight mb-1">{f.display_name}</CardTitle>
-                                {f.headline && <p className="text-xs text-muted-foreground font-medium truncate mb-1">{f.headline}</p>}
-                                <div className="flex items-center gap-2">
-                                  <Badge className={`${lvlCfg.className} rounded-lg px-2 py-0 h-5 text-[9px] font-bold uppercase tracking-wider border-0 shadow-sm`}>
-                                    {lvlCfg.label}
-                                  </Badge>
-                                  {hasCerts && (
-                                    <Badge className="bg-primary/10 text-primary rounded-lg px-2 py-0 h-5 text-[9px] font-bold border-0">
-                                      <Award className="h-3 w-3 mr-1" /> Certified
+                                <div className="flex-1 min-w-0">
+                                  <CardTitle className="font-display text-xl font-bold tracking-tight mb-1 group-hover:text-primary transition-colors">{f.display_name}</CardTitle>
+                                  {f.headline && <p className="text-xs text-muted-foreground font-medium truncate mb-2">{f.headline}</p>}
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Badge className={`${lvlCfg.className} rounded-md px-1.5 py-0 h-4 text-[9px] font-bold uppercase tracking-wider border-0 shadow-none`}>
+                                      {lvlCfg.label}
                                     </Badge>
-                                  )}
-                                  {f.country && (
-                                    <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
-                                      <MapPin className="h-3 w-3 opacity-60" />{f.country}
-                                    </div>
-                                  )}
+                                    {hasCerts && (
+                                      <Badge className="bg-primary/5 text-primary rounded-md px-1.5 py-0 h-4 text-[9px] font-bold border border-primary/10">
+                                        <Award className="h-3 w-3 mr-1" /> Certified
+                                      </Badge>
+                                    )}
+                                    {f.country && (
+                                      <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
+                                        <MapPin className="h-3 w-3 opacity-60" />{f.country}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </CardHeader>
-                          <CardContent className="p-6 pt-0 space-y-6">
-                            {f.bio && <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-2">{f.bio}</p>}
-                            <div className="flex flex-wrap gap-2">
-                              {(f.skills ?? []).slice(0, 4).map((skill) => (
-                                <Badge key={skill} variant="secondary" className="rounded-xl px-3 py-1 text-[10px] font-bold bg-muted/40 border-border/20 text-muted-foreground">{skill}</Badge>
-                              ))}
+                          <CardContent className="p-6 pt-0 flex flex-col flex-1 justify-between gap-6">
+                            <div className="space-y-4">
+                              {f.bio && <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-2 italic">"{f.bio}"</p>}
+                              <div className="flex flex-wrap gap-2">
+                                {(f.skills ?? []).slice(0, 3).map((skill) => (
+                                  <Badge key={skill} variant="secondary" className="rounded-lg px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-muted/50 border border-border/40 text-muted-foreground/80">{skill}</Badge>
+                                ))}
+                                {(f.skills?.length ?? 0) > 3 && (
+                                  <span className="text-[10px] font-bold text-muted-foreground/60 flex items-center px-1">+{f.skills!.length - 3} more</span>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between pt-4 border-t border-border/40">
+                            <div className="flex items-center justify-between pt-4 border-t border-border/40 mt-auto">
                               <div className="flex items-center gap-4">
                                 {f.avg_rating != null ? (
-                                  <div className="flex items-center gap-1.5">
-                                    <Star className="h-4 w-4 fill-warning text-warning" />
-                                    <span className="font-bold text-sm">{f.avg_rating.toFixed(1)}</span>
+                                  <div className="flex items-center gap-1.5 bg-warning/5 px-2 py-1 rounded-md border border-warning/10">
+                                    <Star className="h-3.5 w-3.5 fill-warning text-warning" />
+                                    <span className="font-bold text-xs text-warning-foreground">{f.avg_rating.toFixed(1)}</span>
                                   </div>
                                 ) : (
-                                  <div className="flex items-center gap-1.5 opacity-40">
-                                    <Star className="h-4 w-4" />
-                                    <span className="text-[10px] font-bold uppercase italic">N/A</span>
+                                  <div className="flex items-center gap-1.5 opacity-40 px-2 py-1">
+                                    <Star className="h-3.5 w-3.5" />
+                                    <span className="text-[10px] font-bold uppercase italic">New</span>
                                   </div>
                                 )}
                                 {f.experience_years != null && (
-                                  <div className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">{f.experience_years}Y Exp</div>
+                                  <div className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">{f.experience_years}Y Exp</div>
                                 )}
-                                <div className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${activity.status === "online" ? "text-emerald-500" : activity.status === "away" ? "text-amber-500" : "text-muted-foreground/40"}`}>
-                                  <div className={`h-2 w-2 rounded-full ${activity.color}`} />
-                                  {activity.label}
-                                </div>
                               </div>
-                              <Button size="lg" className="rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant text-xs font-bold" onClick={() => navigate(`/client/freelancer/${f.user_id}?category=${selectedCategory.id}`)}>
-                                View <ArrowRight className="h-4 w-4" />
-                              </Button>
+                              <div className="h-8 w-8 rounded-xl bg-primary/5 flex items-center justify-center group-hover:bg-primary text-primary group-hover:text-white transition-all duration-300">
+                                <ArrowRight className="h-4 w-4 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
+                              </div>
                             </div>
                           </CardContent>
                         </Card>

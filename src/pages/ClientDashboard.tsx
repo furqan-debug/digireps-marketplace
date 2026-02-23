@@ -3,19 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Search, FileText, MessageSquare, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
+import { Search, FileText, MessageSquare, ArrowRight, Sparkles, TrendingUp, CheckCircle, Clock } from "lucide-react";
 import { motion } from "framer-motion";
-
-const containerVariants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.05 } },
-};
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-};
 
 const ClientDashboard = () => {
   const { profile, user } = useAuth();
@@ -41,122 +31,111 @@ const ClientDashboard = () => {
 
   return (
     <AppShell>
-      <div className="max-w-5xl mx-auto space-y-12">
-        {/* Greeting */}
+      <div className="max-w-7xl mx-auto space-y-12 pb-20">
+
+        {/* Mission Control Header */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-border/40">
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 border border-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
-                <Sparkles className="h-3 w-3" /> Talent Network
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-border/40">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 border border-primary/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                <Sparkles className="h-3.5 w-3.5" /> Mission Control
               </div>
-              <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-tight text-foreground">
-                Hello, <span className="text-primary">{firstName}</span>
+              <h1 className="font-display text-5xl sm:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
+                Welcome, {firstName}
               </h1>
-              <p className="text-muted-foreground text-base sm:text-lg font-medium max-w-xl">
-                Source world-class talent and manage your active workstreams.
+              <p className="text-muted-foreground/60 text-lg sm:text-xl font-medium max-w-2xl italic">
+                Manage your active workstreams and discover elite talent for your next project.
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Button onClick={() => navigate("/client/discover")} className="rounded-xl h-11 px-6 bg-primary text-white font-bold text-xs uppercase tracking-widest shadow-sm hover:scale-[1.02] transition-all">
-                <Search className="h-4 w-4 mr-2" /> Find Talent
+            <div className="flex items-center gap-4">
+              <Button onClick={() => navigate("/client/discover")} className="h-14 px-8 rounded-2xl bg-primary text-primary-foreground font-bold text-xs uppercase tracking-[0.2em] hover:scale-[1.02] hover:shadow-glow transition-all duration-300">
+                <Search className="h-4 w-4 mr-3 opacity-70" /> Find Talent
               </Button>
             </div>
           </div>
         </motion.div>
 
-        {/* Stats Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.4 }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-6"
-        >
-          {[
-            { label: "Total Engagements", value: stats.total, icon: TrendingUp },
-            { label: "Active Workstreams", value: stats.active, icon: FileText },
-            { label: "Deliveries Received", value: stats.completed, icon: MessageSquare },
-          ].map(({ label, value, icon: Icon }) => (
-            <div key={label} className="group relative rounded-2xl border border-border/40 bg-white p-8 transition-all hover:border-primary/20 hover:shadow-sm">
-              <div className="absolute top-6 right-8 text-primary/10 group-hover:text-primary/20 transition-colors">
-                <Icon className="h-10 w-10" />
+        {/* The Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[160px]">
+
+          {/* Main Stats - Span 8 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}
+            className="md:col-span-8 row-span-2 dossier-card p-10 flex flex-col justify-between group cursor-pointer hover:border-primary/30 transition-colors duration-500"
+            onClick={() => navigate("/client/orders")}
+          >
+            <div className="flex justify-between items-start">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
+                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" /> Active Workstreams
+                </div>
+                <h2 className="font-display text-3xl font-bold tracking-tight">Project Overview</h2>
               </div>
-              <div className="text-5xl font-bold mb-1 tracking-tight text-foreground">{value}</div>
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</div>
+              <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                <ArrowRight className="h-5 w-5 -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
+              </div>
             </div>
-          ))}
-        </motion.div>
 
-        {/* Main Actions */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          <motion.div variants={itemVariants}>
-            <Card
-              className="group cursor-pointer rounded-2xl border-border/40 hover:border-primary/20 transition-all hover:shadow-sm h-full bg-white"
-              onClick={() => navigate("/client/discover")}
-            >
-              <CardHeader className="p-8 pb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 mb-6 text-primary group-hover:bg-primary/10 transition-colors">
-                  <Search className="h-6 w-6" />
+            <div className="grid grid-cols-3 gap-8 pt-8 border-t border-border/40">
+              <div>
+                <div className="text-5xl font-display font-bold tracking-tighter text-foreground mb-2">{stats.active}</div>
+                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 flex items-center gap-2">
+                  <Clock className="h-3 w-3" /> In Progress
                 </div>
-                <CardTitle className="text-xl font-bold tracking-tight">Source Talent</CardTitle>
-                <CardDescription className="text-sm font-medium pt-1">
-                  Access our curated network of the world's top 1% freelancers.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-8 pt-0 flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Discover</span>
-                <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
-              </CardContent>
-            </Card>
+              </div>
+              <div>
+                <div className="text-5xl font-display font-bold tracking-tighter text-foreground mb-2">{stats.completed}</div>
+                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 flex items-center gap-2">
+                  <CheckCircle className="h-3 w-3" /> Delivered
+                </div>
+              </div>
+              <div>
+                <div className="text-5xl font-display font-bold tracking-tighter text-primary mb-2">{stats.total}</div>
+                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary/60 flex items-center gap-2">
+                  <TrendingUp className="h-3 w-3" /> Total Engagements
+                </div>
+              </div>
+            </div>
           </motion.div>
 
-          <motion.div variants={itemVariants}>
-            <Card
-              className="group cursor-pointer rounded-2xl border-border/40 hover:border-primary/20 transition-all hover:shadow-sm h-full bg-white"
-              onClick={() => navigate("/client/orders")}
-            >
-              <CardHeader className="p-8 pb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 mb-6 text-primary group-hover:bg-primary/10 transition-colors">
-                  <FileText className="h-6 w-6" />
-                </div>
-                <CardTitle className="text-xl font-bold tracking-tight">Management</CardTitle>
-                <CardDescription className="text-sm font-medium pt-1">
-                  Oversee active workstreams, track milestones, and payments.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-8 pt-0 flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">View Briefs</span>
-                <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
-              </CardContent>
-            </Card>
+          {/* Quick Action: Find Talent - Span 4 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
+            className="md:col-span-4 row-span-1 rounded-[2rem] bg-gradient-to-br from-primary to-primary-glow p-8 text-white flex flex-col justify-between group cursor-pointer hover:shadow-glow-lg transition-all duration-500 relative overflow-hidden"
+            onClick={() => navigate("/client/discover")}
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform duration-700 group-hover:scale-150" />
+            <div className="h-10 w-10 text-white/80 mb-4 z-10">
+              <Search className="h-8 w-8" />
+            </div>
+            <div className="z-10">
+              <h3 className="font-display text-xl font-bold tracking-tight mb-1">Source Elite Talent</h3>
+              <p className="text-xs text-white/70 font-medium">Access the top 1% network &rarr;</p>
+            </div>
           </motion.div>
 
-          <motion.div variants={itemVariants}>
-            <Card className="group cursor-pointer rounded-2xl border-border/40 bg-muted/20 hover:bg-muted/30 transition-all h-full" onClick={() => navigate("/client/orders")}>
-              <CardHeader className="p-8">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white border border-border/20 mb-6 text-muted-foreground/60 group-hover:text-primary transition-colors">
-                  <MessageSquare className="h-6 w-6" />
-                </div>
-                <CardTitle className="text-xl font-bold tracking-tight">Communication</CardTitle>
-                <CardDescription className="text-sm font-medium pt-1">
-                  Secure channels established for every engagement.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-8 pt-0">
-                <Button variant="outline" size="sm" className="rounded-xl font-bold text-[10px] uppercase tracking-widest border-border/60 hover:bg-white bg-transparent">
-                  Active Chats
-                </Button>
-              </CardContent>
-            </Card>
+          {/* Quick Action: Messages - Span 4 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }}
+            className="md:col-span-4 row-span-1 border border-border/40 bg-white rounded-[2rem] p-8 flex flex-col justify-between group cursor-pointer hover:border-primary/30 hover:shadow-elegant transition-all duration-500"
+            onClick={() => navigate("/client/orders")}
+          >
+            <div className="flex justify-between items-start">
+              <div className="h-10 w-10 text-muted-foreground/40 group-hover:text-primary transition-colors duration-300">
+                <MessageSquare className="h-8 w-8" />
+              </div>
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
+                {stats.active > 0 ? stats.active : 0}
+              </span>
+            </div>
+            <div>
+              <h3 className="font-display text-lg font-bold tracking-tight mb-1 text-foreground">Communications</h3>
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground/50">Active Channels &rarr;</p>
+            </div>
           </motion.div>
-        </motion.div>
 
-        <div className="fixed inset-0 bg-[radial-gradient(45%_40%_at_50%_0%,rgba(var(--primary),0.02)_0%,transparent_100%)] pointer-events-none" />
+        </div>
       </div>
     </AppShell>
   );

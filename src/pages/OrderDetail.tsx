@@ -191,24 +191,24 @@ const OrderDetail = () => {
 
         {/* Order Header — Elite Workspace style */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <Card className="rounded-[2.5rem] border-border/40 overflow-hidden shadow-sm">
+          <Card className="dossier-card rounded-[2.5rem] bg-white border border-border/40 overflow-hidden shadow-sm hover:shadow-elegant transition-all">
             <CardContent className="p-10">
               <div className="flex flex-col lg:flex-row lg:items-center gap-10">
                 {/* Left: Branding + Info */}
                 <div className="space-y-6 flex-1 border-b lg:border-b-0 lg:border-r border-border/40 pb-10 lg:pb-0 lg:pr-10">
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <Badge className={`${statusCfg.className} rounded-xl px-3 py-1 text-[10px] font-bold uppercase tracking-wider border-0 shadow-sm`}>
+                      <Badge className={`${statusCfg.className} rounded-xl px-3 py-1 text-[9px] font-bold uppercase tracking-wider border-0 shadow-sm`}>
                         {statusCfg.label}
                       </Badge>
-                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Workspace ID: #{orderId?.slice(-6).toUpperCase()}</span>
+                      <span className="font-display text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Workspace ID: #{orderId?.slice(-6).toUpperCase()}</span>
                     </div>
                     <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">{order.title}</h1>
                   </div>
 
                   <div className="flex items-center gap-4 text-sm font-bold flex-wrap">
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">Contract Budget</span>
+                      <span className="font-display text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-1">Contract Budget</span>
                       <span className="flex items-center gap-2 text-xl text-primary font-display font-bold">
                         <DollarSign className="h-4 w-4" />{order.budget.toLocaleString()}
                       </span>
@@ -217,7 +217,7 @@ const OrderDetail = () => {
                     <div className="h-10 w-px bg-border/40 mx-2" />
 
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">Timeline</span>
+                      <span className="font-display text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-1">Timeline</span>
                       <span className="flex items-center gap-2 text-foreground font-display font-medium">
                         <Clock className="h-4 w-4 text-muted-foreground/40" />
                         {order.deadline ? new Date(order.deadline).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : "Flexible"}
@@ -228,7 +228,7 @@ const OrderDetail = () => {
                       <>
                         <div className="h-10 w-px bg-border/40 mx-2" />
                         <div className="flex flex-col">
-                          <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">Escrow Status</span>
+                          <span className="font-display text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-1">Escrow Status</span>
                           <span className="flex items-center gap-2 text-warning font-display font-bold">
                             <ShieldCheck className="h-4 w-4" /> {order.escrow_status.toUpperCase()}
                           </span>
@@ -237,17 +237,17 @@ const OrderDetail = () => {
                     )}
                   </div>
 
-                  <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">{order.description}</p>
+                  <p className="text-sm text-foreground/80 leading-relaxed max-w-2xl">{order.description}</p>
                 </div>
 
                 {/* Right: Actions Context */}
                 <div className="lg:w-64 space-y-6 flex flex-col items-center lg:items-stretch text-center lg:text-left">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">Engagement Phase</span>
+                    <span className="font-display text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40">Engagement Phase</span>
                     {stepLabel ? (
-                      <p className="text-sm font-bold text-primary leading-tight">{stepLabel}</p>
+                      <p className="font-display text-sm font-bold text-primary leading-tight">{stepLabel}</p>
                     ) : (
-                      <p className="text-sm font-bold text-muted-foreground leading-tight">Project active. Maintain regular updates.</p>
+                      <p className="font-display text-sm font-bold text-muted-foreground leading-tight">Project active. Maintain regular updates.</p>
                     )}
                   </div>
 
@@ -351,16 +351,16 @@ const OrderDetail = () => {
         </AnimatePresence>
 
         {/* Chat - Elite Interface */}
-        <Card className="rounded-[2.5rem] border-border/40 overflow-hidden shadow-sm flex flex-col bg-card/60 backdrop-blur-sm">
-          <CardHeader className="px-8 py-6 border-b border-border/40 bg-white/20">
+        <Card className="dossier-card rounded-[2.5rem] border border-border/40 overflow-hidden shadow-sm hover:shadow-elegant transition-all flex flex-col bg-white">
+          <CardHeader className="px-8 py-6 border-b border-border/40 bg-muted/5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
+                <div className="h-10 w-10 flex items-center justify-center rounded-[1.25rem] bg-primary/10 border border-primary/20 text-primary">
                   <MessageSquare className="h-5 w-5" />
                 </div>
                 <div>
-                  <CardTitle className="font-display text-lg font-bold">Secure Command Center</CardTitle>
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
+                  <CardTitle className="font-display text-lg font-bold tracking-tight">Secure Command Center</CardTitle>
+                  <div className="flex items-center gap-1.5 font-display text-[9px] font-bold text-emerald-500 uppercase tracking-widest">
                     <ShieldCheck className="h-3 w-3" /> Encrypted Protocol Active
                   </div>
                 </div>
@@ -389,23 +389,23 @@ const OrderDetail = () => {
                 return (
                   <div key={m.id} className={`flex group/msg ${isOwn ? "flex-row-reverse" : "flex-row"} gap-4 items-end`}>
                     {/* Avatar (only on last in group) */}
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold shadow-sm transition-all
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[1.25rem] font-display text-xs font-bold shadow-sm transition-all
                       ${isLastInGroup ? "opacity-100 scale-100" : "opacity-0 scale-90 select-none"}
-                      ${isOwn ? "bg-primary text-primary-foreground" : "bg-card border border-border/60 text-muted-foreground"}`}>
+                      ${isOwn ? "bg-primary text-primary-foreground" : "bg-white border border-border/40 text-muted-foreground"}`}>
                       {isOwn ? "ME" : "RP"}
                     </div>
 
                     <div className={`flex flex-col gap-1.5 max-w-[75%] ${isOwn ? "items-end" : "items-start"}`}>
-                      <div className={`relative px-5 py-4 text-sm leading-relaxed shadow-sm transition-all hover:shadow-md
+                      <div className={`relative px-6 py-4 text-sm font-medium leading-relaxed shadow-sm transition-all hover:shadow-elegant
                         ${isOwn
-                          ? "bg-gradient-to-br from-primary to-primary-glow text-primary-foreground rounded-[1.5rem] rounded-br-sm"
-                          : "bg-white border border-border/40 text-foreground rounded-[1.5rem] rounded-bl-sm"
+                          ? "bg-gradient-to-br from-primary to-primary-glow text-primary-foreground rounded-[2rem] rounded-br-[0.5rem]"
+                          : "bg-white border border-border/40 text-foreground rounded-[2rem] rounded-bl-[0.5rem]"
                         }`}>
                         {m.content}
                       </div>
-                      <div className="flex items-center gap-2 px-1 text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest opacity-0 group-hover/msg:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2 px-2 font-display text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest opacity-0 group-hover/msg:opacity-100 transition-opacity">
                         {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        {isOwn && <ShieldCheck className="h-2.5 w-2.5 text-primary/40" />}
+                        {isOwn && <ShieldCheck className="h-3 w-3 text-primary/40" />}
                       </div>
                     </div>
                   </div>
@@ -434,8 +434,8 @@ const OrderDetail = () => {
             </AnimatePresence>
 
             {/* Input - Elite Interface */}
-            <div className="p-6 border-t border-border/40 bg-white/40">
-              <div className="relative group/input flex items-end gap-3 rounded-[2rem] bg-card border-2 border-border/40 p-2 pl-6 pr-2 focus-within:border-primary/40 transition-all focus-within:shadow-elegant">
+            <div className="p-6 border-t border-border/40 bg-muted/5">
+              <div className="relative group/input flex items-end gap-3 rounded-[2rem] bg-white border border-border/40 p-2 pl-6 pr-2 focus-within:border-primary/40 transition-all focus-within:shadow-elegant">
                 <Textarea
                   placeholder="Transmission protocol... (No external contact allowed)"
                   value={msgContent}
@@ -449,12 +449,12 @@ const OrderDetail = () => {
                 <Button
                   onClick={handleSend}
                   disabled={sending || !msgContent.trim()}
-                  className="shrink-0 h-11 w-11 rounded-2xl bg-gradient-to-br from-primary to-primary-glow border-0 text-primary-foreground hover:scale-105 transition-transform shadow-elegant overflow-hidden p-0"
+                  className="shrink-0 h-11 w-11 rounded-[1.25rem] bg-gradient-to-br from-primary to-primary-glow border-0 text-primary-foreground hover:scale-105 transition-transform shadow-elegant overflow-hidden p-0"
                 >
                   {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
                 </Button>
               </div>
-              <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest text-center mt-3">
+              <p className="font-display text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest text-center mt-4">
                 Commercial communication is monitored for security and compliance.
               </p>
             </div>

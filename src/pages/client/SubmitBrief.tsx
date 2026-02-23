@@ -136,7 +136,7 @@ const SubmitBrief = () => {
                 <div className="h-px flex-1 bg-border/40" />
               </div>
 
-              <Card className="rounded-[2.5rem] border border-border/40 bg-white shadow-2xl shadow-black/[0.02] overflow-hidden relative">
+              <Card className="dossier-card rounded-[2.5rem] border border-border/40 bg-white shadow-2xl shadow-black/[0.02] overflow-hidden relative">
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary/5" />
                 <CardContent className="p-10 sm:p-14 space-y-12">
                   <div className="space-y-4">
@@ -208,7 +208,7 @@ const SubmitBrief = () => {
               <div className="h-px flex-1 bg-border/40" />
             </div>
 
-            <Card className="rounded-[2.5rem] border border-border/40 bg-white overflow-hidden shadow-sm relative">
+            <Card className="dossier-card rounded-[2.5rem] border border-border/40 bg-white overflow-hidden shadow-sm relative">
               <div className="absolute top-0 right-0 w-16 h-1 w-full bg-primary/10" />
               <CardContent className="p-8">
                 <div className="flex items-center gap-5">
@@ -233,7 +233,7 @@ const SubmitBrief = () => {
               <div className="h-px flex-1 bg-border/40" />
             </div>
 
-            <Card className="rounded-[2.5rem] border border-border/40 bg-white overflow-hidden p-10 shadow-sm">
+            <Card className="dossier-card rounded-[2.5rem] border border-border/40 bg-white overflow-hidden p-10 shadow-sm">
               <CardContent className="p-0 space-y-8">
                 {nextSteps.map(({ icon: Icon, text }, i) => (
                   <div key={i} className="flex gap-6 group">
@@ -255,7 +255,7 @@ const SubmitBrief = () => {
               <div className="h-px flex-1 bg-border/40" />
             </div>
 
-            <div className="p-10 rounded-[2.5rem] bg-white border border-border/40 shadow-sm text-center space-y-4 relative overflow-hidden group">
+            <div className="dossier-card p-10 rounded-[2.5rem] bg-white border border-border/40 shadow-sm text-center space-y-4 relative overflow-hidden group">
               <div className="absolute inset-0 bg-primary/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="h-12 w-12 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto shadow-inner group-hover:scale-110 transition-transform duration-500">
                 <ShieldCheck className="h-6 w-6 text-primary shadow-sm" />

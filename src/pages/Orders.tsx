@@ -161,64 +161,56 @@ const Orders = () => {
               variants={containerVariants}
               initial="hidden"
               animate="show"
-              className="grid gap-6"
+              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
             >
               {filtered.map((order) => {
                 const s = STATUS_BADGE[order.status] ?? STATUS_BADGE.pending;
                 return (
-                  <motion.div key={order.id} variants={itemVariants}>
-                    <Card className="group relative overflow-hidden rounded-[2.5rem] border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant bg-card/60 backdrop-blur-sm">
+                  <motion.div key={order.id} variants={itemVariants} className="h-full">
+                    <Card className="dossier-card group relative h-full flex flex-col p-8 bg-white border border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant">
                       <div className={`absolute left-0 top-0 bottom-0 w-1 ${s.borderColor?.replace('border-l-', 'bg-')}`} />
-                      <CardContent className="p-10">
-                        <div className="flex flex-col lg:flex-row lg:items-center gap-10 justify-between">
-                          <div className="space-y-6 flex-1">
-                            <div className="space-y-3">
-                              <div className="flex flex-wrap items-center gap-3">
-                                <Badge className={`${s.className} rounded-xl px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider border-0 shadow-sm`}>
-                                  {s.label}
-                                </Badge>
-                                {order.escrow_status !== "none" && (
-                                  <Badge className={`${ESCROW_BADGE[order.escrow_status] ?? ""} rounded-xl px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider border-0 shadow-sm bg-success/10 text-success`}>
-                                    Escrow: Secured
-                                  </Badge>
-                                )}
-                              </div>
-                              <h3 className="font-display text-2xl font-bold group-hover:text-primary transition-colors">{order.title}</h3>
-                            </div>
+                      <div className="flex-1 space-y-6">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <Badge className={`${s.className} rounded-xl px-3 py-1 text-[9px] font-bold uppercase tracking-widest border-0 shadow-sm`}>
+                            {s.label}
+                          </Badge>
+                          {order.escrow_status !== "none" && (
+                            <Badge className={`${ESCROW_BADGE[order.escrow_status] ?? ""} rounded-xl px-3 py-1 text-[9px] font-bold uppercase tracking-widest border-0 shadow-sm bg-success/10 text-success`}>
+                              Secured
+                            </Badge>
+                          )}
+                        </div>
+                        <h3 className="font-display text-xl font-bold group-hover:text-primary transition-colors leading-tight line-clamp-2">{order.title}</h3>
 
-                            <div className="flex flex-wrap items-center gap-8 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                              <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-xl bg-primary/5 flex items-center justify-center">
-                                  <DollarSign className="h-4 w-4 text-primary" />
-                                </div>
-                                <span className="text-foreground">${order.budget.toLocaleString()} Contract</span>
-                              </div>
-                              {order.deadline && (
-                                <div className="flex items-center gap-2">
-                                  <div className="h-8 w-8 rounded-xl bg-primary/5 flex items-center justify-center">
-                                    <Clock className="h-4 w-4 text-primary" />
-                                  </div>
-                                  <span className="text-foreground">Deadline: {new Date(order.deadline).toLocaleDateString()}</span>
-                                </div>
-                              )}
-                              <div className="flex items-center gap-2 opacity-60">
-                                <div className="h-8 w-8 rounded-xl bg-muted/40 flex items-center justify-center">
-                                  <FileText className="h-4 w-4" />
-                                </div>
-                                <span>Ref: {order.id.slice(0, 8).toUpperCase()}</span>
-                              </div>
+                        <div className="grid grid-cols-2 gap-4 text-left">
+                          <div className="space-y-1">
+                            <span className="font-display text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Budget</span>
+                            <div className="flex items-center gap-2 font-display text-sm font-bold">
+                              <DollarSign className="h-3.5 w-3.5 text-primary" />
+                              ${order.budget.toLocaleString()}
                             </div>
                           </div>
-                          <Button
-                            size="lg"
-                            className="rounded-2xl h-16 px-10 gap-3 shrink-0 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant text-sm font-bold"
-                            onClick={() => navigate(`/orders/${order.id}`)}
-                          >
-                            <MessageSquare className="h-5 w-5" />
-                            Command Centre
-                          </Button>
+                          {order.deadline && (
+                            <div className="space-y-1">
+                              <span className="font-display text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Deadline</span>
+                              <div className="flex items-center gap-2 font-display text-sm font-bold">
+                                <Clock className="h-3.5 w-3.5 text-primary" />
+                                {new Date(order.deadline).toLocaleDateString()}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </CardContent>
+                      </div>
+                      <div className="mt-8 pt-6 border-t border-border/40">
+                        <Button
+                          size="lg"
+                          className="w-full rounded-[1.25rem] h-12 gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant text-[10px] font-bold uppercase tracking-widest"
+                          onClick={() => navigate(`/orders/${order.id}`)}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          War Room
+                        </Button>
+                      </div>
                     </Card>
                   </motion.div>
                 );

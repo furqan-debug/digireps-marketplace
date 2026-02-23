@@ -201,7 +201,7 @@ const FreelancerProfile = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative bg-white border border-border/40 rounded-[2.5rem] p-10 sm:p-14 flex flex-col md:flex-row gap-12 items-center md:items-start text-center md:text-left shadow-2xl shadow-black/[0.02]"
+                className="dossier-card relative bg-white border border-border/40 rounded-[2.5rem] p-10 sm:p-14 flex flex-col md:flex-row gap-12 items-center md:items-start text-center md:text-left shadow-2xl shadow-black/[0.02]"
               >
                 {/* Level Specific Glow Background */}
                 <div className={`absolute -top-24 -left-24 h-96 w-96 rounded-full blur-[120px] opacity-20 ${config.glow} transition-colors duration-1000`} />
@@ -273,7 +273,7 @@ const FreelancerProfile = () => {
                     </h2>
                     <div className="h-px flex-1 bg-border/40" />
                   </div>
-                  <div className="p-10 sm:p-14 rounded-[2rem] bg-white border border-border/40 shadow-xl shadow-black/[0.01] relative overflow-hidden">
+                  <div className="dossier-card p-10 sm:p-14 rounded-[2rem] bg-white border border-border/40 shadow-xl shadow-black/[0.01] relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-1 h-full bg-primary/10" />
                     <p className="text-xl text-foreground font-medium leading-relaxed whitespace-pre-wrap italic">
                       "{profile.bio || "Excellence in every pixel, code line, and strategy implementation."}"
@@ -314,13 +314,13 @@ const FreelancerProfile = () => {
                     </div>
                     <div className="grid gap-4">
                       {workExp.map((we, i) => (
-                        <div key={i} className="p-8 rounded-[2rem] bg-white border border-border/40 group hover:border-primary/30 transition-all shadow-sm hover:shadow-xl hover:shadow-black/[0.02]">
+                        <div key={i} className="dossier-card p-8 rounded-[2rem] bg-white border border-border/40 group hover:border-primary/30 transition-all shadow-sm hover:shadow-xl hover:shadow-black/[0.02]">
                           <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                             <div className="space-y-1">
                               <h3 className="font-bold text-lg text-foreground tracking-tight">{we.title}</h3>
                               <p className="text-[11px] font-bold text-primary uppercase tracking-[0.1em]">{we.company}</p>
                             </div>
-                            <span className="text-[10px] font-bold text-muted-foreground/60 border border-border/60 px-4 py-1.5 rounded-full shrink-0">
+                            <span className="text-[10px] font-bold text-muted-foreground/60 border border-border/60 px-4 py-1.5 rounded-[1.25rem] shrink-0">
                               {we.start_year} – {we.is_current ? "Present" : we.end_year}
                             </span>
                           </div>
@@ -343,7 +343,7 @@ const FreelancerProfile = () => {
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
                       {eduList.map((ed, i) => (
-                        <div key={i} className="p-8 rounded-[2rem] bg-white border border-border/40 shadow-sm">
+                        <div key={i} className="dossier-card p-8 rounded-[2rem] bg-white border border-border/40 shadow-sm">
                           <h3 className="font-bold text-base tracking-tight">{ed.degree}</h3>
                           <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-2">{ed.institution} &bull; {ed.year}</p>
                         </div>
@@ -456,7 +456,7 @@ const FreelancerProfile = () => {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-white border border-border/40 rounded-[2.5rem] p-10 space-y-10 shadow-2xl shadow-black/[0.03] relative overflow-hidden"
+                className="dossier-card bg-white border border-border/40 rounded-[2.5rem] p-10 space-y-10 shadow-2xl shadow-black/[0.03] relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16" />
 
@@ -492,10 +492,10 @@ const FreelancerProfile = () => {
                   ))}
                 </div>
 
-                <div className="space-y-4 pt-2">
+                <div className="space-y-4 pt-4">
                   <Button
                     size="lg"
-                    className="w-full rounded-2xl h-16 bg-primary text-white font-bold uppercase tracking-[0.2em] text-[10px] hover:scale-[1.03] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/20"
+                    className="w-full rounded-[1.25rem] h-16 bg-gradient-to-r from-primary to-primary-glow hover:brightness-110 text-primary-foreground font-bold uppercase tracking-[0.2em] text-[10px] transition-all flex items-center justify-center gap-3 shadow-elegant border-0"
                     onClick={() => navigate(`/client/brief/${profile.user_id}${categoryId ? `?category=${categoryId}` : ""}`)}
                   >
                     Initiate Engagement <Zap className="h-4 w-4 fill-white" />
@@ -503,7 +503,7 @@ const FreelancerProfile = () => {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="w-full rounded-2xl h-16 border-border/60 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary/5 transition-all flex items-center justify-center gap-3"
+                    className="w-full rounded-[1.25rem] h-16 border-2 border-border/60 text-[10px] font-bold uppercase tracking-[0.2em] hover:border-primary/30 hover:bg-primary/5 transition-all flex items-center justify-center gap-3"
                   >
                     Send Inquiry <MessageSquare className="h-4 w-4" />
                   </Button>
@@ -517,7 +517,7 @@ const FreelancerProfile = () => {
               </motion.div>
 
               {/* Vetting Status Card - Elite Branding */}
-              <Card className="rounded-[2rem] border border-border/40 bg-white p-10 space-y-8 shadow-sm relative overflow-hidden">
+              <Card className="dossier-card rounded-[2rem] border border-border/40 bg-white p-10 space-y-8 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-16 h-1 w-full bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary shadow-inner">
