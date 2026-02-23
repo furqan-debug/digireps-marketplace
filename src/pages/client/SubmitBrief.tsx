@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2, Send, CheckCircle, Shield, Clock, Star, Sparkles, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Loader2, Send, CheckCircle, Shield, Clock, Star, Sparkles, ShieldCheck, Zap, MessageSquare, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 type Category = { id: string; name: string };
@@ -104,13 +104,25 @@ const SubmitBrief = () => {
           </div>
         </div>
 
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary mb-2">
-              <Sparkles className="h-3 w-3" /> Project Initiation
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="relative"
+        >
+          {/* Background Atmosphere Glow */}
+          <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
+
+          <div className="space-y-6 relative">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 border border-primary/20 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-4">
+              <Sparkles className="h-3.5 w-3.5" /> Project Initiation
             </div>
-            <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight">Deploy Engagement</h1>
-            <p className="text-muted-foreground/60 text-sm font-medium">Drafting a strategic project brief for <strong className="text-foreground">{freelancerName}</strong></p>
+            <h1 className="font-display text-5xl sm:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
+              Deploy Engagement
+            </h1>
+            <p className="text-muted-foreground/50 text-base sm:text-lg font-medium leading-relaxed max-w-2xl italic">
+              "Drafting a mission-critical strategic brief to align objectives with <strong className="text-primary font-bold">{freelancerName}</strong>'s expertise."
+            </p>
           </div>
         </motion.div>
 
@@ -118,60 +130,70 @@ const SubmitBrief = () => {
           {/* Form */}
           <div className="space-y-10">
             <section className="space-y-8">
-              <div className="flex items-center gap-3">
-                <div className="h-px w-8 bg-primary/40" />
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">Brief Parameters</h2>
+              <div className="flex items-center gap-6">
+                <div className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">01</div>
+                <h2 className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">Brief Parameters</h2>
+                <div className="h-px flex-1 bg-border/40" />
               </div>
 
-              <Card className="rounded-[2.5rem] border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden">
-                <CardContent className="p-10 space-y-8">
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Service Domain</Label>
+              <Card className="rounded-[2.5rem] border border-border/40 bg-white shadow-2xl shadow-black/[0.02] overflow-hidden relative">
+                <div className="absolute top-0 left-0 w-1 h-full bg-primary/5" />
+                <CardContent className="p-10 sm:p-14 space-y-12">
+                  <div className="space-y-4">
+                    <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Strategic Service Domain</Label>
                     <Select value={categoryId} onValueChange={setCategoryId}>
-                      <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium focus:ring-primary/20">
+                      <SelectTrigger className="h-16 rounded-2xl bg-muted/20 border-border/10 px-8 font-bold text-sm tracking-tight focus:ring-primary/10 transition-all">
                         <SelectValue placeholder="Define category" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-2xl border-border/40 backdrop-blur-xl">
+                      <SelectContent className="rounded-2xl border-border/40 backdrop-blur-3xl">
                         {categories.map((c) => (
-                          <SelectItem key={c.id} value={c.id} className="rounded-xl focus:bg-primary/5">{c.name}</SelectItem>
+                          <SelectItem key={c.id} value={c.id} className="rounded-xl focus:bg-primary/5 py-3 font-medium">{c.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Engagement Title</Label>
-                    <Input id="title" placeholder="e.g. Design Elite Visual Identity for FinTech Series A" value={title} onChange={(e) => setTitle(e.target.value)} required className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium focus:ring-primary/20" />
+                  <div className="space-y-4">
+                    <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Engagement Title</Label>
+                    <Input id="title" placeholder="e.g. Design Elite Visual Identity for FinTech Series A" value={title} onChange={(e) => setTitle(e.target.value)} required className="h-16 rounded-2xl bg-muted/20 border-border/10 px-8 font-bold text-sm tracking-tight focus:ring-primary/10 placeholder:text-muted-foreground/20" />
                   </div>
 
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Operational Scope</Label>
-                    <Textarea id="description" placeholder="Articulate the primary objectives, key deliverables, and critical success factors..." value={description} onChange={(e) => setDescription(e.target.value)} rows={6} required className="rounded-2xl bg-muted/20 border-border/40 p-6 font-medium resize-none focus:ring-primary/20 leading-relaxed" />
+                  <div className="space-y-4">
+                    <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Operational Scope & Objectives</Label>
+                    <Textarea id="description" placeholder="Articulate the primary objectives, key deliverables, and critical success factors..." value={description} onChange={(e) => setDescription(e.target.value)} rows={8} required className="rounded-3xl bg-muted/20 border-border/10 p-8 font-medium text-sm resize-none focus:ring-primary/10 leading-relaxed placeholder:text-muted-foreground/20 italic" />
                   </div>
 
-                  <div className="grid sm:grid-cols-2 gap-8">
-                    <div className="space-y-3">
-                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Allocated Capital (USD, min $100)</Label>
-                      <div className="relative">
-                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground/40 font-bold">$</span>
-                        <Input id="budget" type="number" min="100" step="50" className="pl-10 h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium focus:ring-primary/20" placeholder="0.00" value={budget} onChange={(e) => setBudget(e.target.value)} required />
+                  <div className="grid sm:grid-cols-2 gap-10">
+                    <div className="space-y-4">
+                      <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Allocated Capital (USD, min $100)</Label>
+                      <div className="relative group">
+                        <span className="absolute left-8 top-1/2 -translate-y-1/2 text-muted-foreground/30 font-bold text-lg pointer-events-none group-focus-within:text-primary transition-colors">$</span>
+                        <Input id="budget" type="number" min="100" step="50" className="pl-14 h-16 rounded-2xl bg-muted/20 border-border/10 px-8 font-bold text-sm tracking-tight focus:ring-primary/10" placeholder="0.00" value={budget} onChange={(e) => setBudget(e.target.value)} required />
                       </div>
                     </div>
-                    <div className="space-y-3">
-                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 ml-1">Target Completion</Label>
-                      <Input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} min={new Date().toISOString().split("T")[0]} className="h-14 rounded-2xl bg-muted/20 border-border/40 px-6 font-medium focus:ring-primary/20 appearance-none" />
+                    <div className="space-y-4">
+                      <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Deployment Deadline</Label>
+                      <div className="relative">
+                        <Input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} min={new Date().toISOString().split("T")[0]} className="h-16 rounded-2xl bg-muted/20 border-border/10 px-8 font-bold text-sm tracking-tight focus:ring-primary/10 appearance-none w-full" />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="pt-6 border-t border-border/20">
-                    <Button type="submit" onClick={handleSubmit} className="w-full h-16 rounded-[1.5rem] gap-3 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant text-sm font-bold uppercase tracking-widest" disabled={isSubmitting}>
+                  <div className="pt-10 border-t border-border/10 space-y-6">
+                    <Button type="submit" onClick={handleSubmit} className="w-full h-20 rounded-[1.5rem] gap-4 bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20 text-[10px] font-bold uppercase tracking-[0.25em]" disabled={isSubmitting}>
                       {isSubmitting ? (
-                        <><Loader2 className="h-5 w-5 animate-spin" /> Transmitting...</>
+                        <><Loader2 className="h-6 w-6 animate-spin" /> Protocol Initiation...</>
                       ) : (
-                        <><Send className="h-5 w-5" /> Dispatch Project Brief</>
+                        <><Zap className="h-6 w-6 fill-white" /> Dispatch Project Brief</>
                       )}
                     </Button>
-                    <p className="text-[9px] font-bold text-muted-foreground/40 text-center uppercase tracking-widest mt-4">Security Protocol: Secured by DigiReps Merchant Escrow</p>
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-[9px] font-bold text-muted-foreground/30 text-center uppercase tracking-[0.15em]">Security Protocol: 256-bit Encrypted Transaction Chain</p>
+                      <div className="flex items-center gap-1.5 opacity-20 grayscale">
+                        <Shield className="h-3 w-3" />
+                        <span className="text-[8px] font-black uppercase tracking-widest">DigiReps Merchant Escrow Verified</span>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -180,57 +202,67 @@ const SubmitBrief = () => {
 
           {/* Side Info */}
           <div className="lg:sticky lg:top-12 space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="h-px w-6 bg-primary/40" />
-              <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">Engagement Target</h2>
+            <div className="flex items-center gap-6">
+              <div className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">01</div>
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">Target Asset</h2>
+              <div className="h-px flex-1 bg-border/40" />
             </div>
 
-            <Card className="rounded-[2.5rem] border-primary/20 bg-gradient-to-b from-card to-muted/20 overflow-hidden shadow-elegant border-2 border-dashed">
+            <Card className="rounded-[2.5rem] border border-border/40 bg-white overflow-hidden shadow-sm relative">
+              <div className="absolute top-0 right-0 w-16 h-1 w-full bg-primary/10" />
               <CardContent className="p-8">
-                <div className="flex items-center gap-4">
-                  <div className="relative h-16 w-16 shrink-0 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center font-display font-bold text-primary text-2xl shadow-sm overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
+                <div className="flex items-center gap-5">
+                  <div className="relative h-20 w-20 shrink-0 rounded-2xl bg-muted border-[4px] border-white shadow-lg flex items-center justify-center font-display font-bold text-primary text-3xl overflow-hidden ring-4 ring-primary/5 transition-transform hover:scale-105 duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
                     {freelancerName[0]?.toUpperCase()}
                   </div>
-                  <div>
-                    <h3 className="font-display font-bold text-lg leading-tight">{freelancerName}</h3>
-                    <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-primary mt-1">
-                      <ShieldCheck className="h-3 w-3" />
-                      Verified Elite
+                  <div className="space-y-2">
+                    <h3 className="font-display font-bold text-xl tracking-tight leading-tight">{freelancerName}</h3>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-500/5 border border-blue-500/10">
+                      <ShieldCheck className="h-3 w-3 text-blue-500" />
+                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-600">Verified Elite</span>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <div className="flex items-center gap-3">
-              <div className="h-px w-6 bg-primary/40" />
-              <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary">Operational Protocol</h2>
+            <div className="flex items-center gap-6">
+              <div className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">02</div>
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">Governance Protocol</h2>
+              <div className="h-px flex-1 bg-border/40" />
             </div>
 
-            <Card className="rounded-[2.5rem] border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden p-8">
-              <CardContent className="p-0 space-y-6">
+            <Card className="rounded-[2.5rem] border border-border/40 bg-white overflow-hidden p-10 shadow-sm">
+              <CardContent className="p-0 space-y-8">
                 {nextSteps.map(({ icon: Icon, text }, i) => (
-                  <div key={i} className="flex gap-4 group">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/10 text-primary group-hover:scale-110 transition-transform">
-                      <Icon className="h-4 w-4" />
+                  <div key={i} className="flex gap-6 group">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-muted border border-border/20 text-muted-foreground/40 group-hover:bg-primary group-hover:text-white group-hover:border-primary group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-500">
+                      <Icon className="h-5 w-5" />
                     </div>
-                    <div className="space-y-1 pt-1">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-foreground">Phase {i + 1}</p>
-                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-relaxed">{text}</p>
+                    <div className="space-y-1.5 pt-1.5">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground transition-colors group-hover:text-primary">Phase 0{i + 1}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.1em] leading-relaxed group-hover:text-muted-foreground transition-colors">{text}</p>
                     </div>
                   </div>
                 ))}
               </CardContent>
             </Card>
 
-            <div className="p-8 rounded-[2rem] border-2 border-dashed border-border/20 text-center space-y-4">
-              <div className="h-10 w-10 rounded-full bg-success/10 border border-success/20 flex items-center justify-center mx-auto">
-                <ShieldCheck className="h-5 w-5 text-success" />
+            <div className="flex items-center gap-6">
+              <div className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">03</div>
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">Security Protocol</h2>
+              <div className="h-px flex-1 bg-border/40" />
+            </div>
+
+            <div className="p-10 rounded-[2.5rem] bg-white border border-border/40 shadow-sm text-center space-y-4 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-primary/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="h-12 w-12 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto shadow-inner group-hover:scale-110 transition-transform duration-500">
+                <ShieldCheck className="h-6 w-6 text-primary shadow-sm" />
               </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-foreground">Payment Protection</p>
-                <p className="text-[10px] font-medium text-muted-foreground/40 uppercase tracking-widest leading-relaxed italic">Funds are held in high-security escrow until you approve the final delivery.</p>
+              <div className="space-y-2 relative">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground">Merchant Escrow Guaranteed</p>
+                <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-[0.1em] leading-relaxed italic px-4">Funds are held in high-security escrow until the final asset delivery is approved by the client.</p>
               </div>
             </div>
           </div>
