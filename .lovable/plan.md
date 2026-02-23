@@ -1,221 +1,150 @@
 
 
-# Freelancer Profile Creation and Manual Verification Workflow -- Full Upgrade
+# Fix Freelancer Onboarding Flow -- Complete Overhaul
 
-## Overview
+## Critical Bugs Found
 
-This upgrade adds new application statuses (draft, submitted, under_review, revision_required, suspended), structured work experience/education/languages as JSONB columns, pricing/availability fields, admin feedback with revision workflow, profile completeness scoring, verified badge UI, and admin-only field protection via a database trigger.
+### Bug 1: Application submission silently fails (SHOWSTOPPER)
+The `protect_admin_fields` database trigger blocks ALL non-admin users from changing `application_status`. When a freelancer clicks "Submit for Verification", the trigger resets the status back to its old value. The submission appears to succeed but nothing actually changes.
 
----
+**Fix:** Update the trigger to allow freelancers to set their OWN status to `submitted` (but nothing else).
 
-## Phase 1: Database Migration
+### Bug 2: Wrong column in submission query
+Line 283 uses `.eq('id', user.id)` but `user.id` is `auth.uid()` which maps to the `user_id` column, not `id`. The update silently matches zero rows.
 
-A single migration that performs the following:
+**Fix:** Change to `.eq('user_id', user.id)`.
 
-### 1.1 Extend `application_status` enum
-Add four new values:
-- `draft`
-- `submitted`
-- `under_review`
-- `revision_required`
-- `suspended`
+### Bug 3: Wizard detection logic is broken
+`isNewProfile` checks `!profile?.bio && (!profile?.skills || profile.skills.length === 0)`. If a user saves progress on step 1-2 (name + skills), they get kicked to edit mode and lose the wizard forever -- even though they never submitted.
 
-### 1.2 New columns on `profiles`
-| Column | Type | Default |
-|--------|------|---------|
-| `work_experience` | jsonb | `'[]'` |
-| `education` | jsonb | `'[]'` |
-| `languages` | jsonb | `'[]'` |
-| `availability_status` | text | `'available'` |
-| `preferred_pricing_model` | text | null |
-| `response_time_expectation` | text | null |
-| `admin_feedback` | text | null |
-| `profile_completion_score` | integer | 0 |
+**Fix:** Base wizard mode on `application_status` being null, `draft`, or `revision_required` instead of content checks.
 
-### 1.3 Admin field protection trigger
-Create a `protect_admin_fields()` trigger function that fires BEFORE UPDATE on `profiles`. If the caller is NOT admin (checked via `is_admin()`), the trigger silently resets these fields to their OLD values:
-- `application_status`
-- `is_suspended`
-- `freelancer_level`
-- `admin_feedback`
+### Bug 4: Submit button ignores blocking validation
+The "Engage Elite Network" button on the Review step has no `disabled` check for `allBlockingPass`. Users can submit incomplete profiles.
 
-This prevents non-admin users from escalating their own status while keeping the existing RLS policy intact.
+**Fix:** Disable the button when blocking requirements are not met.
 
-### 1.4 Profile completeness function and trigger
-Create `calculate_profile_completeness()` that computes a 0-100 score:
+### Bug 5: Profile completeness score always shows 0
+The Review step reads `profile.profile_completion_score` from the database. But since the user hasn't saved yet when they reach Review, it shows 0. The local `calculateProfileStrength` function uses a completely different scoring system than the DB trigger.
 
-| Field | Points |
-|-------|--------|
-| display_name filled | 10 |
-| avatar_url filled | 10 |
-| bio >= 50 chars | 15 |
-| headline filled | 5 |
-| skills >= 3 items | 15 |
-| At least 1 work_experience entry | 15 |
-| At least 1 education entry | 5 |
-| At least 1 language entry | 5 |
-| At least 1 certification entry | 5 |
-| At least 1 portfolio item (subquery) | 15 |
-
-A trigger `update_profile_completeness` runs BEFORE INSERT OR UPDATE on `profiles` to auto-calculate and store the score.
+**Fix:** Replace the local scoring with a single client-side function that mirrors the DB logic, and use it everywhere consistently.
 
 ---
 
-## Phase 2: Fix Build Errors + Update Types
+## UX Issues Found
 
-### 2.1 Fix PortfolioItem type errors
-The build errors are caused by `project_data: Json` not being assignable to `any[]`. Fix by casting in both `FreelancerProfile.tsx` (line 74) and `EditProfile.tsx` (line 177) -- cast `portfolioRes.data` with `as unknown as PortfolioItem[]`.
+### Issue 1: Confusing button labels
+"Execute Next Phase" and "Engage Elite Network" are jargon. Should be "Continue" and "Submit for Review".
 
-### 2.2 Update `types.ts`
-Update the `application_status` enum to include the new values. Add the new profile columns to the Row/Insert/Update types.
+### Issue 2: Step labels overflow on mobile
+All 8 wizard step names shown horizontally will overflow on small screens.
 
-### 2.3 Update `AuthContext.tsx` Profile interface
-Add: `work_experience`, `education`, `languages`, `availability_status`, `preferred_pricing_model`, `response_time_expectation`, `admin_feedback`, `profile_completion_score`.
-Update `application_status` union type to include new statuses.
+### Issue 3: No "is_current" toggle for work experience
+Users can't mark a job as current -- they have to leave end year blank, which isn't intuitive.
 
----
+### Issue 4: DOM getElementById pattern is fragile
+Work experience, education, and language forms use `document.getElementById` instead of React state. This is error-prone and breaks React conventions.
 
-## Phase 3: Wizard Restructure (EditProfile.tsx)
+### Issue 5: Edit mode missing key sections
+- No service categories editor
+- No experience years field
+- Live preview sidebar doesn't show new fields (work experience, languages, pricing)
 
-Expand from 5 steps to 8:
+### Issue 6: No "Save as Draft" in wizard
+Users can't save progress and return later without advancing steps.
 
-1. **Identity** -- Name, headline, photo, country, timezone (existing, unchanged)
-2. **Expertise and Summary** -- Skills, categories, experience years, bio (existing, unchanged)
-3. **Work Experience** -- Add/remove structured entries (title, company, description, start_year, end_year, is_current)
-4. **Education and Certifications** -- Education entries (degree, institution, year) + existing certifications module
-5. **Languages** -- Add/remove language + proficiency level (native/fluent/conversational/basic)
-6. **Pricing and Availability** -- Hourly rate, preferred pricing model, availability status, response time expectation
-7. **Portfolio** -- Existing functionality preserved
-8. **Review and Submit** -- Completeness checklist with blocking/warning validation, submit button
-
-### Pre-submission validation (on Review step):
-**Blocking (prevents submission):**
-- Display name required
-- Bio >= 50 characters
-- >= 3 skills
-- >= 1 service category
-- >= 1 work experience OR experience_years >= 2
-- Profile completion score >= 60%
-
-**Warnings (shown but non-blocking):**
-- Profile photo
-- Education entries
-- Certifications
-- Languages
-- >= 1 portfolio item
-
-### Save logic update
-`handleSaveProfile` will include the new JSONB fields: `work_experience`, `education`, `languages`, `availability_status`, `preferred_pricing_model`, `response_time_expectation`.
+### Issue 7: Avatar adjust dialog broken in edit mode
+The "Adjust Photo" button opens the modal even when there's no preview image to adjust.
 
 ---
 
-## Phase 4: Admin Review Enhancements (Applications.tsx)
+## Implementation Plan
 
-### 4.1 New status badges
-Add to `STATUS_BADGE` config:
-- `submitted` -- blue/info
-- `under_review` -- indigo
-- `revision_required` -- amber with feedback icon
-- `suspended` -- red/destructive
+### Phase 1: Database Migration Fix
+Create a new migration to update the `protect_admin_fields` trigger. Allow the profile owner to set `application_status` to `submitted` only (from null, draft, or revision_required).
 
-### 4.2 New action buttons
-For each applicant card, show contextual buttons:
-- **Submitted**: "Start Review" (sets `under_review`), "Approve", "Reject"
-- **Under Review**: "Approve", "Request Revision", "Reject", "Suspend"
-- **Revision Required**: "Approve", "Reject"
-- **Approved**: "Suspend"
+### Phase 2: Complete EditProfile.tsx Rewrite
+This file has accumulated too many intertwined issues to patch individually. A clean rewrite addressing all issues:
 
-### 4.3 Admin feedback
-When clicking "Request Revision" or "Suspend", a textarea appears for the admin to type feedback. This saves to `admin_feedback` along with the status change.
+**Wizard mode detection:**
+- Show wizard when `application_status` is null, `draft`, or `revision_required`
+- Show edit mode when `approved`, `submitted`, `under_review`, etc.
 
-### 4.4 Richer applicant cards
-Display additional fields: headline, work_experience count, languages, hourly_rate, profile_completion_score (as a small progress bar).
+**Form state management:**
+- Replace all `document.getElementById` patterns with proper React controlled state for work experience, education, and language forms
+- Each "add" form gets its own state object
 
----
+**Unified completeness scoring:**
+- Single `calculateCompleteness()` function used everywhere
+- Mirrors the DB trigger logic exactly (10 + 10 + 15 + 5 + 15 + 15 + 5 + 5 + 5 + 15 = 100)
+- Updates in real-time as user fills fields
 
-## Phase 5: Freelancer Dashboard Updates (FreelancerDashboard.tsx)
+**Wizard UX improvements:**
+- Step labels: show only current step name on mobile, show dots for progress
+- Button labels: "Continue" / "Back" / "Submit for Review"
+- "Save Draft" button on every step
+- Review step submit button disabled when blocking requirements fail
+- "is_current" checkbox on work experience form
 
-### 5.1 New status banners
-Add to `STATUS_CONFIG`:
-- `submitted` -- blue, "Profile Submitted"
-- `under_review` -- indigo, "Under Review"
-- `revision_required` -- amber, "Revision Required" with admin feedback displayed
-- `suspended` -- red, "Account Suspended" with admin feedback
+**Edit mode improvements:**
+- Add service categories section
+- Add experience years field
+- Live preview shows work experience count, languages, hourly rate, availability
+- "Adjust Photo" only available when avatar exists
 
-### 5.2 Revision Required banner
-Shows the admin feedback text and a "Revise Profile" CTA button that navigates to EditProfile.
+**Submission fix:**
+- Use `.eq('user_id', user.id)` instead of `.eq('id', user.id)`
+- Save profile data first, then update status in same call (not separate query)
+- Validate blocking requirements before submission
 
-### 5.3 Suspended banner
-Shows the admin feedback and a support contact note. No edit access.
-
-### 5.4 Profile completeness bar
-Display `profile_completion_score` from the profile in the sidebar card.
-
----
-
-## Phase 6: Verified Badge
-
-### 6.1 Helper utility
-New file `src/lib/verified-badge.ts`:
-```text
-Criteria: application_status === 'approved' 
-          AND !is_suspended 
-          AND profile_completion_score >= 80
-```
-Returns `{ isVerified, label, icon }`.
-
-### 6.2 Badge UI
-A small blue shield icon (ShieldCheck from lucide) with "Verified" text. Appears on:
-- Freelancer cards in Discover page (next to name)
-- FreelancerProfile hero section
-- Admin applicant cards
+### Phase 3: Minor Dashboard Cleanup
+- No code changes needed for FreelancerDashboard.tsx -- it's already well-structured
 
 ---
 
-## Phase 7: Discovery and Public Profile Enhancements
-
-### 7.1 Discover.tsx
-- Add verified badge on freelancer cards
-- Add "Verified" filter chip
-- Add "Available Now" filter chip (checks `availability_status === 'available'`)
-- Show response time on cards when available
-- Show language count/badges on cards
-- Fetch new fields: `availability_status`, `languages`, `response_time_expectation`, `profile_completion_score`
-
-### 7.2 FreelancerProfile.tsx
-- Add verified badge in hero section
-- Add **Work Experience** section with timeline layout
-- Add **Education** section
-- Add **Languages** section with proficiency badges
-- Show availability status and hourly rate in sidebar
-- Show response time indicator
-- Show pricing model preference
-
----
-
-## Files Summary
+## Files Changed
 
 | File | Action | Description |
 |------|--------|-------------|
-| New migration SQL | Create | Enum changes, new columns, triggers, completeness function |
-| `src/integrations/supabase/types.ts` | Edit | Add new enum values, new profile columns |
-| `src/contexts/AuthContext.tsx` | Edit | Expand Profile interface with new fields |
-| `src/pages/freelancer/EditProfile.tsx` | Major edit | 8-step wizard, work history/education/languages/pricing steps, validation |
-| `src/pages/FreelancerDashboard.tsx` | Edit | New status banners, revision feedback, completeness bar |
-| `src/pages/admin/Applications.tsx` | Edit | New action buttons, feedback textarea, richer cards |
-| `src/pages/client/Discover.tsx` | Edit | Verified badge, availability filter, language badges |
-| `src/pages/client/FreelancerProfile.tsx` | Edit | Work experience timeline, education, languages, verified badge, fix build error |
-| `src/lib/verified-badge.ts` | Create | Verified badge helper |
-| `src/lib/activity-status.ts` | No change | Already complete |
+| New migration SQL | Create | Fix protect_admin_fields trigger to allow self-submission |
+| `src/pages/freelancer/EditProfile.tsx` | Major rewrite | Fix all 5 bugs + all 7 UX issues |
 
 ---
 
-## Technical Notes
+## Technical Details
 
-- `ALTER TYPE ... ADD VALUE` is non-reversible in PostgreSQL -- standard and safe for enum extension.
-- The `protect_admin_fields()` trigger uses `is_admin()` which internally calls `auth.uid()`. Non-admins silently have sensitive fields reset to OLD values without breaking the UPDATE.
-- Profile completeness is materialized as an integer column updated by trigger, avoiding runtime computation on every read.
-- All new data uses JSONB columns on `profiles` consistent with existing `certifications` pattern. Arrays are small (< 20 items each).
-- No new npm dependencies required.
-- No routing changes needed -- wizard steps are purely frontend state.
+### Migration SQL
+```text
+The trigger will be updated to:
+- Allow setting application_status to 'submitted' when the caller owns the profile
+  AND the current status is NULL, 'draft', or 'revision_required'
+- Continue blocking all other status changes for non-admins
+```
+
+### Completeness Score (client-side mirror of DB function)
+```text
+display_name filled     = 10
+avatar_url filled       = 10  
+bio >= 50 chars         = 15
+headline filled         = 5
+skills >= 3             = 15
+work_experience >= 1    = 15
+education >= 1          = 5
+languages >= 1          = 5
+certifications >= 1     = 5
+portfolio >= 1          = 15
+Total                   = 100
+```
+
+### Wizard Step Flow (cleaned up)
+```text
+Step 1: Personal Info (name, headline, photo, location)
+Step 2: Expertise (skills, categories, experience, bio)
+Step 3: Work Experience (controlled form with is_current toggle)
+Step 4: Education & Certifications
+Step 5: Languages  
+Step 6: Pricing & Availability
+Step 7: Portfolio
+Step 8: Review & Submit (real-time score, blocking/warning checklist)
+```
 
