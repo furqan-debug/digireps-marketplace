@@ -10,11 +10,11 @@ import { motion } from "framer-motion";
 
 const containerVariants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
+  show: { transition: { staggerChildren: 0.05 } },
 };
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
 };
 
 const ClientDashboard = () => {
@@ -43,20 +43,22 @@ const ClientDashboard = () => {
     <AppShell>
       <div className="max-w-5xl mx-auto space-y-12">
         {/* Greeting */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex flex-wrap items-end justify-between gap-6 pb-2 border-b border-border/40">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 border border-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary mb-2">
-                <Sparkles className="h-3 w-3" /> Workspace Overview
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-border/40">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 border border-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
+                <Sparkles className="h-3 w-3" /> Talent Network
               </div>
-              <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight">
-                Welcome, <span className="gradient-text">{firstName}</span>
+              <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-tight text-foreground">
+                Hello, <span className="text-primary">{firstName}</span>
               </h1>
-              <p className="text-muted-foreground text-base max-w-lg">Manage your elite network and projects from one central command center.</p>
+              <p className="text-muted-foreground text-base sm:text-lg font-medium max-w-xl">
+                Source world-class talent and manage your active workstreams.
+              </p>
             </div>
 
             <div className="flex items-center gap-3">
-              <Button onClick={() => navigate("/client/discover")} className="rounded-2xl h-12 px-6 bg-gradient-to-r from-primary to-primary-glow border-0 shadow-elegant">
+              <Button onClick={() => navigate("/client/discover")} className="rounded-xl h-11 px-6 bg-primary text-white font-bold text-xs uppercase tracking-widest shadow-sm hover:scale-[1.02] transition-all">
                 <Search className="h-4 w-4 mr-2" /> Find Talent
               </Button>
             </div>
@@ -65,22 +67,22 @@ const ClientDashboard = () => {
 
         {/* Stats Grid */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.4 }}
           className="grid grid-cols-1 sm:grid-cols-3 gap-6"
         >
           {[
-            { label: "Total Engagements", value: stats.total, icon: TrendingUp, color: "text-primary" },
-            { label: "Active Workstreams", value: stats.active, icon: FileText, color: "text-indigo-500" },
-            { label: "Deliveries Completed", value: stats.completed, icon: MessageSquare, color: "text-emerald-500" },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div key={label} className="group relative rounded-[2rem] border border-border/40 bg-card p-8 transition-all hover:shadow-elegant hover:border-primary/20">
-              <div className="absolute top-6 right-8">
-                <Icon className={`h-6 w-6 opacity-20 group-hover:opacity-40 transition-opacity ${color}`} />
+            { label: "Total Engagements", value: stats.total, icon: TrendingUp },
+            { label: "Active Workstreams", value: stats.active, icon: FileText },
+            { label: "Deliveries Received", value: stats.completed, icon: MessageSquare },
+          ].map(({ label, value, icon: Icon }) => (
+            <div key={label} className="group relative rounded-2xl border border-border/40 bg-white p-8 transition-all hover:border-primary/20 hover:shadow-sm">
+              <div className="absolute top-6 right-8 text-primary/10 group-hover:text-primary/20 transition-colors">
+                <Icon className="h-10 w-10" />
               </div>
-              <div className={`text-5xl font-display font-bold mb-2 ${color}`}>{value}</div>
-              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">{label}</div>
+              <div className="text-5xl font-bold mb-1 tracking-tight text-foreground">{value}</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</div>
             </div>
           ))}
         </motion.div>
@@ -94,65 +96,59 @@ const ClientDashboard = () => {
         >
           <motion.div variants={itemVariants}>
             <Card
-              className="group cursor-pointer rounded-[2rem] border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant overflow-hidden h-full"
+              className="group cursor-pointer rounded-2xl border-border/40 hover:border-primary/20 transition-all hover:shadow-sm h-full bg-white"
               onClick={() => navigate("/client/discover")}
             >
-              <CardHeader className="p-8">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl icon-gradient mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Search className="h-6 w-6 text-primary" />
+              <CardHeader className="p-8 pb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 mb-6 text-primary group-hover:bg-primary/10 transition-colors">
+                  <Search className="h-6 w-6" />
                 </div>
-                <CardTitle className="font-display text-2xl font-bold bg-clip-text">
-                  Source Talent
-                </CardTitle>
-                <CardDescription className="text-sm leading-relaxed pt-2">
-                  Access our curated network of the world's top 1% freelancers across all domains.
+                <CardTitle className="text-xl font-bold tracking-tight">Source Talent</CardTitle>
+                <CardDescription className="text-sm font-medium pt-1">
+                  Access our curated network of the world's top 1% freelancers.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-8 pt-0">
-                <div className="flex items-center text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
-                  Get Started <ArrowRight className="h-4 w-4 ml-2" />
-                </div>
+              <CardContent className="p-8 pt-0 flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Discover</span>
+                <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
               </CardContent>
             </Card>
           </motion.div>
 
           <motion.div variants={itemVariants}>
             <Card
-              className="group cursor-pointer rounded-[2rem] border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant overflow-hidden h-full"
+              className="group cursor-pointer rounded-2xl border-border/40 hover:border-primary/20 transition-all hover:shadow-sm h-full bg-white"
               onClick={() => navigate("/client/orders")}
             >
-              <CardHeader className="p-8">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl icon-gradient mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <FileText className="h-6 w-6 text-primary" />
+              <CardHeader className="p-8 pb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 mb-6 text-primary group-hover:bg-primary/10 transition-colors">
+                  <FileText className="h-6 w-6" />
                 </div>
-                <CardTitle className="font-display text-2xl font-bold">
-                  Management
-                </CardTitle>
-                <CardDescription className="text-sm leading-relaxed pt-2">
-                  Oversee all active workstreams, track milestones, and manage secure escrow payments.
+                <CardTitle className="text-xl font-bold tracking-tight">Management</CardTitle>
+                <CardDescription className="text-sm font-medium pt-1">
+                  Oversee active workstreams, track milestones, and payments.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-8 pt-0">
-                <div className="flex items-center text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
-                  View Dashboard <ArrowRight className="h-4 w-4 ml-2" />
-                </div>
+              <CardContent className="p-8 pt-0 flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">View Briefs</span>
+                <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
               </CardContent>
             </Card>
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <Card className="rounded-[2rem] border-border/40 bg-muted/20 overflow-hidden h-full">
+            <Card className="group cursor-pointer rounded-2xl border-border/40 bg-muted/20 hover:bg-muted/30 transition-all h-full" onClick={() => navigate("/client/orders")}>
               <CardHeader className="p-8">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white borber border-border/20 mb-6 shadow-sm">
-                  <MessageSquare className="h-6 w-6 text-muted-foreground/60" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white border border-border/20 mb-6 text-muted-foreground/60 group-hover:text-primary transition-colors">
+                  <MessageSquare className="h-6 w-6" />
                 </div>
-                <CardTitle className="font-display text-2xl font-bold text-muted-foreground/60">Communication</CardTitle>
-                <CardDescription className="text-sm leading-relaxed pt-2">
-                  Secure, verified communication channels are automatically established for every engagement.
+                <CardTitle className="text-xl font-bold tracking-tight">Communication</CardTitle>
+                <CardDescription className="text-sm font-medium pt-1">
+                  Secure channels established for every engagement.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-8 pt-0">
-                <Button variant="outline" size="sm" className="rounded-xl font-bold border-2 hover:bg-white" onClick={() => navigate("/client/orders")}>
+                <Button variant="outline" size="sm" className="rounded-xl font-bold text-[10px] uppercase tracking-widest border-border/60 hover:bg-white bg-transparent">
                   Active Chats
                 </Button>
               </CardContent>
@@ -160,8 +156,7 @@ const ClientDashboard = () => {
           </motion.div>
         </motion.div>
 
-        {/* Decorative background element */}
-        <div className="fixed -bottom-24 -right-24 h-96 w-96 rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+        <div className="fixed inset-0 bg-[radial-gradient(45%_40%_at_50%_0%,rgba(var(--primary),0.02)_0%,transparent_100%)] pointer-events-none" />
       </div>
     </AppShell>
   );
