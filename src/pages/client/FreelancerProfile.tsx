@@ -8,10 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import {
   MapPin, ArrowLeft, Star, Crown, Shield, Award,
   Loader2, Globe, Sparkles, CheckCircle, ExternalLink,
-  MessageSquare, Briefcase, Calendar, Zap, FileText, PlayCircle, Image
+  MessageSquare, Briefcase, Calendar, Zap, FileText, PlayCircle, Image,
+  ShieldCheck as ShieldCheckIcon, GraduationCap, Languages, Clock, DollarSign
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getActivityStatus } from "@/lib/activity-status";
+import { getVerifiedStatus } from "@/lib/verified-badge";
 
 type Profile = {
   id: string;
@@ -29,6 +31,14 @@ type Profile = {
   created_at?: string;
   last_active_at: string | null;
   certifications: any[] | null;
+  hourly_rate?: number | null;
+  work_experience?: any[];
+  education?: any[];
+  languages?: any[];
+  availability_status?: string | null;
+  response_time_expectation?: string | null;
+  profile_completion_score?: number;
+  application_status?: string | null;
 };
 
 type PortfolioItem = {
@@ -71,7 +81,7 @@ const FreelancerProfile = () => {
         ]);
 
         if (profileRes.data) setProfile(profileRes.data as unknown as Profile);
-        if (portfolioRes.data) setPortfolio(portfolioRes.data ?? []);
+        if (portfolioRes.data) setPortfolio(portfolioRes.data as unknown as PortfolioItem[]);
         if (ratingsRes.data) setRatings(ratingsRes.data ?? []);
       } catch (err) {
         console.error("Error fetching freelancer details:", err);
@@ -116,6 +126,10 @@ const FreelancerProfile = () => {
   const initials = profile.display_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
   const activity = getActivityStatus(profile.last_active_at);
   const certs = (profile.certifications ?? []) as { name: string; issuer: string; year: number; verified: boolean }[];
+  const verified = getVerifiedStatus({ application_status: profile.application_status ?? null, is_suspended: profile.is_suspended ?? false, profile_completion_score: profile.profile_completion_score ?? 0 });
+  const workExp = (profile.work_experience ?? []) as { title: string; company: string; description: string; start_year: number; end_year: number | null; is_current: boolean }[];
+  const eduList = (profile.education ?? []) as { degree: string; institution: string; year: number }[];
+  const langList = (profile.languages ?? []) as { language: string; proficiency: string }[];
 
   const levelConfigs = {
     verified: { label: "Verified", color: "text-blue-500", icon: Shield, gradient: "from-blue-500/20 to-cyan-500/5" },
@@ -193,6 +207,11 @@ const FreelancerProfile = () => {
                       <Badge className={`rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-widest border-0 shadow-sm transition-transform cursor-default ${config.color} bg-white/80`}>
                         {config.label}
                       </Badge>
+                      {verified.isVerified && (
+                        <Badge className="rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-widest border-0 shadow-sm bg-blue-500/10 text-blue-600 gap-1">
+                          <ShieldCheckIcon className="h-3 w-3" /> Verified
+                        </Badge>
+                      )}
                       <div className={`flex items-center gap-2 px-3 py-1 rounded-lg border border-border/10 text-[10px] font-black uppercase tracking-widest ${activity.status === "online" ? "bg-emerald-50 text-emerald-600" : "bg-muted/30 text-muted-foreground"}`}>
                         <div className={`h-1.5 w-1.5 rounded-full ${activity.color} ${activity.status === "online" ? "animate-pulse" : ""}`} />
                         {activity.label}
@@ -265,7 +284,76 @@ const FreelancerProfile = () => {
                 </section>
               </div>
 
-              {/* Portfolio Grid */}
+              {/* Work Experience Timeline */}
+              {workExp.length > 0 && (
+                <section className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <Briefcase className="h-4 w-4 bg-primary/10 p-0.5 rounded" /> Work Experience
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-border/80 to-transparent" />
+                  </div>
+                  <div className="space-y-4">
+                    {workExp.map((we, i) => (
+                      <div key={i} className="relative pl-8 pb-6 border-l-2 border-primary/10 last:border-l-0 last:pb-0">
+                        <div className="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-primary/20 border-2 border-background" />
+                        <div className="p-6 rounded-[2rem] bg-white/50 border border-border/40 hover:shadow-sm transition-all">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-black text-base tracking-tight">{we.title}</h3>
+                              <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest mt-1">{we.company}</p>
+                            </div>
+                            <Badge variant="secondary" className="text-[9px] font-bold">{we.start_year} – {we.is_current ? "Present" : we.end_year}</Badge>
+                          </div>
+                          {we.description && <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{we.description}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Education */}
+              {eduList.length > 0 && (
+                <section className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4 bg-primary/10 p-0.5 rounded" /> Education
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-border/80 to-transparent" />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {eduList.map((ed, i) => (
+                      <div key={i} className="p-6 rounded-[2rem] bg-white/50 border border-border/40">
+                        <h3 className="font-black text-sm tracking-tight">{ed.degree}</h3>
+                        <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest mt-1">{ed.institution} &bull; {ed.year}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Languages */}
+              {langList.length > 0 && (
+                <section className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <Languages className="h-4 w-4 bg-primary/10 p-0.5 rounded" /> Languages
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-border/80 to-transparent" />
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {langList.map((lang, i) => (
+                      <div key={i} className="px-5 py-3 rounded-2xl bg-white/50 border border-border/40 flex items-center gap-3">
+                        <span className="font-black text-sm">{lang.language}</span>
+                        <Badge variant="secondary" className="text-[9px] font-bold capitalize">{lang.proficiency}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+
               {portfolio.length > 0 && (
                 <section className="space-y-10">
                   <div className="flex items-center justify-between">
@@ -386,13 +474,33 @@ const FreelancerProfile = () => {
                       </div>
                       <span className="text-sm font-black">{profile.experience_years || 0}+ Years</span>
                     </div>
+                    {profile.hourly_rate != null && profile.hourly_rate > 0 && (
+                      <div className="flex items-center justify-between p-5 rounded-[1.5rem] bg-muted/20 border border-border/10">
+                        <div className="flex items-center gap-3">
+                          <DollarSign className="h-5 w-5 text-primary/40" />
+                          <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Rate</span>
+                        </div>
+                        <span className="text-sm font-black">${profile.hourly_rate}/hr</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between p-5 rounded-[1.5rem] bg-muted/20 border border-border/10">
                       <div className="flex items-center gap-3">
                         <Globe className="h-5 w-5 text-primary/40" />
                         <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Availability</span>
                       </div>
-                      <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Full Time</span>
+                      <span className={`text-xs font-black uppercase tracking-widest ${profile.availability_status === "available" ? "text-emerald-600" : profile.availability_status === "limited" ? "text-amber-600" : "text-muted-foreground"}`}>
+                        {profile.availability_status === "available" ? "Available" : profile.availability_status === "limited" ? "Limited" : profile.availability_status === "unavailable" ? "Unavailable" : "Available"}
+                      </span>
                     </div>
+                    {profile.response_time_expectation && (
+                      <div className="flex items-center justify-between p-5 rounded-[1.5rem] bg-muted/20 border border-border/10">
+                        <div className="flex items-center gap-3">
+                          <Clock className="h-5 w-5 text-primary/40" />
+                          <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">Response</span>
+                        </div>
+                        <span className="text-sm font-black">{profile.response_time_expectation}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-4">
@@ -401,7 +509,7 @@ const FreelancerProfile = () => {
                       className="w-full rounded-[1.5rem] h-16 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg text-sm font-black uppercase tracking-[0.2em] transform transition hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3"
                       onClick={() => navigate(`/client/brief/${profile.user_id}${categoryId ? `?category=${categoryId}` : ""}`)}
                     >
-                      Secure Services <ShieldCheck className="h-5 w-5" />
+                      Secure Services <ShieldCheckIcon className="h-5 w-5" />
                     </Button>
                     <Button
                       variant="outline"
@@ -445,9 +553,5 @@ const FreelancerProfile = () => {
     </AppShell>
   );
 };
-
-const ShieldCheck = ({ className }: { className?: string }) => (
-  <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" /></svg>
-);
 
 export default FreelancerProfile;

@@ -181,9 +181,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          admin_feedback: string | null
           application_status:
             | Database["public"]["Enums"]["application_status"]
             | null
+          availability_status: string | null
           avatar_url: string | null
           bio: string | null
           certifications: Json | null
@@ -191,6 +193,7 @@ export type Database = {
           country: string | null
           created_at: string
           display_name: string
+          education: Json | null
           experience_years: number | null
           freelancer_level:
             | Database["public"]["Enums"]["freelancer_level"]
@@ -199,16 +202,23 @@ export type Database = {
           hourly_rate: number | null
           id: string
           is_suspended: boolean
+          languages: Json | null
           last_active_at: string | null
+          preferred_pricing_model: string | null
+          profile_completion_score: number | null
+          response_time_expectation: string | null
           skills: string[] | null
           timezone: string | null
           updated_at: string
           user_id: string
+          work_experience: Json | null
         }
         Insert: {
+          admin_feedback?: string | null
           application_status?:
             | Database["public"]["Enums"]["application_status"]
             | null
+          availability_status?: string | null
           avatar_url?: string | null
           bio?: string | null
           certifications?: Json | null
@@ -216,6 +226,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           display_name?: string
+          education?: Json | null
           experience_years?: number | null
           freelancer_level?:
             | Database["public"]["Enums"]["freelancer_level"]
@@ -224,16 +235,23 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           is_suspended?: boolean
+          languages?: Json | null
           last_active_at?: string | null
+          preferred_pricing_model?: string | null
+          profile_completion_score?: number | null
+          response_time_expectation?: string | null
           skills?: string[] | null
           timezone?: string | null
           updated_at?: string
           user_id: string
+          work_experience?: Json | null
         }
         Update: {
+          admin_feedback?: string | null
           application_status?:
             | Database["public"]["Enums"]["application_status"]
             | null
+          availability_status?: string | null
           avatar_url?: string | null
           bio?: string | null
           certifications?: Json | null
@@ -241,6 +259,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           display_name?: string
+          education?: Json | null
           experience_years?: number | null
           freelancer_level?:
             | Database["public"]["Enums"]["freelancer_level"]
@@ -249,11 +268,16 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           is_suspended?: boolean
+          languages?: Json | null
           last_active_at?: string | null
+          preferred_pricing_model?: string | null
+          profile_completion_score?: number | null
+          response_time_expectation?: string | null
           skills?: string[] | null
           timezone?: string | null
           updated_at?: string
           user_id?: string
+          work_experience?: Json | null
         }
         Relationships: []
       }
@@ -377,6 +401,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_profile_completeness: {
+        Args: { p: Database["public"]["Tables"]["profiles"]["Row"] }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -390,7 +418,15 @@ export type Database = {
     }
     Enums: {
       app_role: "client" | "freelancer" | "admin"
-      application_status: "pending" | "approved" | "rejected"
+      application_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "draft"
+        | "submitted"
+        | "under_review"
+        | "revision_required"
+        | "suspended"
       escrow_status: "none" | "held" | "released" | "refunded"
       freelancer_level: "verified" | "pro" | "elite"
       order_status:
@@ -529,7 +565,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["client", "freelancer", "admin"],
-      application_status: ["pending", "approved", "rejected"],
+      application_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "draft",
+        "submitted",
+        "under_review",
+        "revision_required",
+        "suspended",
+      ],
       escrow_status: ["none", "held", "released", "refunded"],
       freelancer_level: ["verified", "pro", "elite"],
       order_status: [
