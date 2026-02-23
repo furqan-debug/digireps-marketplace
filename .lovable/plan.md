@@ -1,174 +1,221 @@
 
 
-# High-End Profile Creation Engine
+# Freelancer Profile Creation and Manual Verification Workflow -- Full Upgrade
 
 ## Overview
 
-This plan introduces a structured profile creation wizard, automatic timezone detection, LinkedIn-style experience/certification modules, real-time activity status tracking, and an advanced search UI for clients to discover talent by verified credentials and availability.
+This upgrade adds new application statuses (draft, submitted, under_review, revision_required, suspended), structured work experience/education/languages as JSONB columns, pricing/availability fields, admin feedback with revision workflow, profile completeness scoring, verified badge UI, and admin-only field protection via a database trigger.
 
 ---
 
-## 1. Database Changes
+## Phase 1: Database Migration
 
-### New columns on `profiles` table
-- `headline` (text, nullable) — A short professional title like "Senior Full-Stack Engineer"
-- `last_active_at` (timestamptz, default now()) — Tracks real-time activity for online/away/offline status
-- `certifications` (jsonb, default '[]') — Array of structured certification objects
+A single migration that performs the following:
 
-Each certification object follows this structure:
+### 1.1 Extend `application_status` enum
+Add four new values:
+- `draft`
+- `submitted`
+- `under_review`
+- `revision_required`
+- `suspended`
+
+### 1.2 New columns on `profiles`
+| Column | Type | Default |
+|--------|------|---------|
+| `work_experience` | jsonb | `'[]'` |
+| `education` | jsonb | `'[]'` |
+| `languages` | jsonb | `'[]'` |
+| `availability_status` | text | `'available'` |
+| `preferred_pricing_model` | text | null |
+| `response_time_expectation` | text | null |
+| `admin_feedback` | text | null |
+| `profile_completion_score` | integer | 0 |
+
+### 1.3 Admin field protection trigger
+Create a `protect_admin_fields()` trigger function that fires BEFORE UPDATE on `profiles`. If the caller is NOT admin (checked via `is_admin()`), the trigger silently resets these fields to their OLD values:
+- `application_status`
+- `is_suspended`
+- `freelancer_level`
+- `admin_feedback`
+
+This prevents non-admin users from escalating their own status while keeping the existing RLS policy intact.
+
+### 1.4 Profile completeness function and trigger
+Create `calculate_profile_completeness()` that computes a 0-100 score:
+
+| Field | Points |
+|-------|--------|
+| display_name filled | 10 |
+| avatar_url filled | 10 |
+| bio >= 50 chars | 15 |
+| headline filled | 5 |
+| skills >= 3 items | 15 |
+| At least 1 work_experience entry | 15 |
+| At least 1 education entry | 5 |
+| At least 1 language entry | 5 |
+| At least 1 certification entry | 5 |
+| At least 1 portfolio item (subquery) | 15 |
+
+A trigger `update_profile_completeness` runs BEFORE INSERT OR UPDATE on `profiles` to auto-calculate and store the score.
+
+---
+
+## Phase 2: Fix Build Errors + Update Types
+
+### 2.1 Fix PortfolioItem type errors
+The build errors are caused by `project_data: Json` not being assignable to `any[]`. Fix by casting in both `FreelancerProfile.tsx` (line 74) and `EditProfile.tsx` (line 177) -- cast `portfolioRes.data` with `as unknown as PortfolioItem[]`.
+
+### 2.2 Update `types.ts`
+Update the `application_status` enum to include the new values. Add the new profile columns to the Row/Insert/Update types.
+
+### 2.3 Update `AuthContext.tsx` Profile interface
+Add: `work_experience`, `education`, `languages`, `availability_status`, `preferred_pricing_model`, `response_time_expectation`, `admin_feedback`, `profile_completion_score`.
+Update `application_status` union type to include new statuses.
+
+---
+
+## Phase 3: Wizard Restructure (EditProfile.tsx)
+
+Expand from 5 steps to 8:
+
+1. **Identity** -- Name, headline, photo, country, timezone (existing, unchanged)
+2. **Expertise and Summary** -- Skills, categories, experience years, bio (existing, unchanged)
+3. **Work Experience** -- Add/remove structured entries (title, company, description, start_year, end_year, is_current)
+4. **Education and Certifications** -- Education entries (degree, institution, year) + existing certifications module
+5. **Languages** -- Add/remove language + proficiency level (native/fluent/conversational/basic)
+6. **Pricing and Availability** -- Hourly rate, preferred pricing model, availability status, response time expectation
+7. **Portfolio** -- Existing functionality preserved
+8. **Review and Submit** -- Completeness checklist with blocking/warning validation, submit button
+
+### Pre-submission validation (on Review step):
+**Blocking (prevents submission):**
+- Display name required
+- Bio >= 50 characters
+- >= 3 skills
+- >= 1 service category
+- >= 1 work experience OR experience_years >= 2
+- Profile completion score >= 60%
+
+**Warnings (shown but non-blocking):**
+- Profile photo
+- Education entries
+- Certifications
+- Languages
+- >= 1 portfolio item
+
+### Save logic update
+`handleSaveProfile` will include the new JSONB fields: `work_experience`, `education`, `languages`, `availability_status`, `preferred_pricing_model`, `response_time_expectation`.
+
+---
+
+## Phase 4: Admin Review Enhancements (Applications.tsx)
+
+### 4.1 New status badges
+Add to `STATUS_BADGE` config:
+- `submitted` -- blue/info
+- `under_review` -- indigo
+- `revision_required` -- amber with feedback icon
+- `suspended` -- red/destructive
+
+### 4.2 New action buttons
+For each applicant card, show contextual buttons:
+- **Submitted**: "Start Review" (sets `under_review`), "Approve", "Reject"
+- **Under Review**: "Approve", "Request Revision", "Reject", "Suspend"
+- **Revision Required**: "Approve", "Reject"
+- **Approved**: "Suspend"
+
+### 4.3 Admin feedback
+When clicking "Request Revision" or "Suspend", a textarea appears for the admin to type feedback. This saves to `admin_feedback` along with the status change.
+
+### 4.4 Richer applicant cards
+Display additional fields: headline, work_experience count, languages, hourly_rate, profile_completion_score (as a small progress bar).
+
+---
+
+## Phase 5: Freelancer Dashboard Updates (FreelancerDashboard.tsx)
+
+### 5.1 New status banners
+Add to `STATUS_CONFIG`:
+- `submitted` -- blue, "Profile Submitted"
+- `under_review` -- indigo, "Under Review"
+- `revision_required` -- amber, "Revision Required" with admin feedback displayed
+- `suspended` -- red, "Account Suspended" with admin feedback
+
+### 5.2 Revision Required banner
+Shows the admin feedback text and a "Revise Profile" CTA button that navigates to EditProfile.
+
+### 5.3 Suspended banner
+Shows the admin feedback and a support contact note. No edit access.
+
+### 5.4 Profile completeness bar
+Display `profile_completion_score` from the profile in the sidebar card.
+
+---
+
+## Phase 6: Verified Badge
+
+### 6.1 Helper utility
+New file `src/lib/verified-badge.ts`:
 ```text
-{
-  "name": "AWS Solutions Architect",
-  "issuer": "Amazon Web Services",
-  "year": 2024,
-  "verified": false
-}
+Criteria: application_status === 'approved' 
+          AND !is_suspended 
+          AND profile_completion_score >= 80
 ```
+Returns `{ isVerified, label, icon }`.
 
-### Why JSONB instead of a separate table
-Certifications are tightly coupled to the profile, rarely queried independently, and the array is small (typically under 20 items). JSONB avoids JOIN overhead and keeps the profile fetch as a single query. Admin can mark items as `verified: true` in the future.
-
-### Activity tracking
-A lightweight approach: update `last_active_at` on the client side every 5 minutes while the user has the app open. No cron job or realtime channel needed — just a `setInterval` in the AuthProvider that calls a single UPDATE.
-
----
-
-## 2. Auto Timezone Detection
-
-Use the browser's `Intl.DateTimeFormat().resolvedOptions().timeZone` API (e.g., returns "America/New_York") to:
-- **On signup**: Automatically set the timezone in the profile via the `handle_new_user` trigger (passed as user metadata), removing the need for manual input.
-- **On profile edit**: Pre-fill the timezone field with the detected value if it's currently empty. Show it as a read-only display with a "Change" toggle for manual override.
+### 6.2 Badge UI
+A small blue shield icon (ShieldCheck from lucide) with "Verified" text. Appears on:
+- Freelancer cards in Discover page (next to name)
+- FreelancerProfile hero section
+- Admin applicant cards
 
 ---
 
-## 3. Multi-Step Profile Creation Wizard (Freelancers)
+## Phase 7: Discovery and Public Profile Enhancements
 
-Replace the current monolithic EditProfile form with a guided 4-step wizard that appears when a freelancer's profile is incomplete (no bio, no skills, no categories selected). The wizard is a single page component with step navigation — not separate routes.
+### 7.1 Discover.tsx
+- Add verified badge on freelancer cards
+- Add "Verified" filter chip
+- Add "Available Now" filter chip (checks `availability_status === 'available'`)
+- Show response time on cards when available
+- Show language count/badges on cards
+- Fetch new fields: `availability_status`, `languages`, `response_time_expectation`, `profile_completion_score`
 
-### Steps:
-1. **Identity** — Display name, headline, country (auto-detected timezone shown)
-2. **Expertise** — Skills input (tag-based), experience years, marketplace segments (categories)
-3. **Credentials** — Certifications module (add/remove structured entries: name, issuer, year)
-4. **Portfolio** — Upload images, add titles/descriptions
-5. **Review and Submit** — Preview card + submit application button
-
-Each step validates before allowing progression. Progress bar at the top shows completion.
-
-If the profile is already complete (returning freelancer), they see the current two-column edit layout with the new fields integrated.
-
----
-
-## 4. LinkedIn-Style Credentials Module
-
-A dedicated section in the profile editor and public profile view:
-- Each certification is a card showing: name, issuer, year
-- Admin-verified certifications get a blue checkmark badge
-- "Add Certification" button opens an inline form with 3 fields
-- Certifications display on the public FreelancerProfile page in a dedicated "Verified Credentials" section
+### 7.2 FreelancerProfile.tsx
+- Add verified badge in hero section
+- Add **Work Experience** section with timeline layout
+- Add **Education** section
+- Add **Languages** section with proficiency badges
+- Show availability status and hourly rate in sidebar
+- Show response time indicator
+- Show pricing model preference
 
 ---
 
-## 5. Activity Status System
+## Files Summary
 
-### How it works:
-- AuthProvider runs a `setInterval` (every 5 minutes) that updates `profiles.last_active_at = now()` for the current user
-- On `visibilitychange` (tab becomes visible again), immediately update
-- On sign out or tab close, stop the interval
-
-### Status logic (computed client-side from `last_active_at`):
-- **Online** (green dot): last active within 5 minutes
-- **Away** (amber dot): last active 5-30 minutes ago
-- **Offline** (gray dot): last active more than 30 minutes ago
-
-### Where it appears:
-- Freelancer cards on the Discover page (small colored dot next to avatar)
-- FreelancerProfile hero section (status pill next to name)
-- Identity Preview sidebar on EditProfile
+| File | Action | Description |
+|------|--------|-------------|
+| New migration SQL | Create | Enum changes, new columns, triggers, completeness function |
+| `src/integrations/supabase/types.ts` | Edit | Add new enum values, new profile columns |
+| `src/contexts/AuthContext.tsx` | Edit | Expand Profile interface with new fields |
+| `src/pages/freelancer/EditProfile.tsx` | Major edit | 8-step wizard, work history/education/languages/pricing steps, validation |
+| `src/pages/FreelancerDashboard.tsx` | Edit | New status banners, revision feedback, completeness bar |
+| `src/pages/admin/Applications.tsx` | Edit | New action buttons, feedback textarea, richer cards |
+| `src/pages/client/Discover.tsx` | Edit | Verified badge, availability filter, language badges |
+| `src/pages/client/FreelancerProfile.tsx` | Edit | Work experience timeline, education, languages, verified badge, fix build error |
+| `src/lib/verified-badge.ts` | Create | Verified badge helper |
+| `src/lib/activity-status.ts` | No change | Already complete |
 
 ---
 
-## 6. Enhanced Search UI for Clients (Discover Page)
+## Technical Notes
 
-Upgrade the Discover page with:
-- **Text search bar**: Filters freelancers by display_name, headline, bio, or skills (client-side filtering on the loaded result set for simplicity)
-- **Filter chips**: "Online Now", "Pro+", "Elite Only", experience range
-- **Sort options**: "Highest Rated", "Most Experienced", "Recently Active"
-- **Real-time availability indicators** on every freelancer card
-- **Credential badges** shown on cards when a freelancer has verified certifications
-
-The search bar is prominently placed at the top of the page with a glassmorphism style, replacing the current category-only navigation.
-
----
-
-## Files to Change
-
-### Database
-- **Migration**: Add `headline`, `last_active_at`, `certifications` columns to `profiles`
-
-### Backend (AuthContext)
-- `src/contexts/AuthContext.tsx` — Add `last_active_at` heartbeat interval, add timezone auto-detection on signup, update Profile interface with new fields
-
-### Profile Creation / Edit
-- `src/pages/freelancer/EditProfile.tsx` — Major rewrite: add step wizard for new profiles, integrate certifications module, auto-timezone, headline field
-- `src/pages/Auth.tsx` — Pass detected timezone as user metadata during signup
-
-### Discovery / Public Profile
-- `src/pages/client/Discover.tsx` — Add search bar, filter chips, sort controls, activity status dots, credential badges on cards
-- `src/pages/client/FreelancerProfile.tsx` — Add activity status pill, credentials section, headline display
-
-### Shared Utilities
-- `src/lib/activity-status.ts` (new) — Helper to compute online/away/offline from a timestamp, shared across components
-
----
-
-## Technical Details
-
-### Timezone detection code
-```text
-const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-// Returns e.g. "Europe/London", "America/New_York"
-```
-
-### Activity heartbeat (in AuthProvider)
-```text
-useEffect(() => {
-  if (!user) return;
-  const beat = () => supabase.from("profiles")
-    .update({ last_active_at: new Date().toISOString() })
-    .eq("user_id", user.id);
-  
-  beat(); // immediate
-  const interval = setInterval(beat, 5 * 60 * 1000);
-  
-  const onVisible = () => {
-    if (document.visibilityState === "visible") beat();
-  };
-  document.addEventListener("visibilitychange", onVisible);
-  
-  return () => {
-    clearInterval(interval);
-    document.removeEventListener("visibilitychange", onVisible);
-  };
-}, [user]);
-```
-
-### Certification JSONB structure
-```text
-[
-  { "name": "PMP", "issuer": "PMI", "year": 2023, "verified": false },
-  { "name": "AWS SAA", "issuer": "Amazon", "year": 2024, "verified": true }
-]
-```
-
-### Activity status helper
-```text
-export function getActivityStatus(lastActiveAt: string | null) {
-  if (!lastActiveAt) return { status: "offline", color: "bg-gray-400", label: "Offline" };
-  const diff = Date.now() - new Date(lastActiveAt).getTime();
-  const mins = diff / 60000;
-  if (mins < 5) return { status: "online", color: "bg-emerald-500", label: "Online" };
-  if (mins < 30) return { status: "away", color: "bg-amber-500", label: "Away" };
-  return { status: "offline", color: "bg-gray-400", label: "Offline" };
-}
-```
+- `ALTER TYPE ... ADD VALUE` is non-reversible in PostgreSQL -- standard and safe for enum extension.
+- The `protect_admin_fields()` trigger uses `is_admin()` which internally calls `auth.uid()`. Non-admins silently have sensitive fields reset to OLD values without breaking the UPDATE.
+- Profile completeness is materialized as an integer column updated by trigger, avoiding runtime computation on every read.
+- All new data uses JSONB columns on `profiles` consistent with existing `certifications` pattern. Arrays are small (< 20 items each).
+- No new npm dependencies required.
+- No routing changes needed -- wizard steps are purely frontend state.
 
