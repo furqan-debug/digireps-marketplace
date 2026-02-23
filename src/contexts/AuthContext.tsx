@@ -11,6 +11,26 @@ interface Certification {
   verified: boolean;
 }
 
+interface WorkExperience {
+  title: string;
+  company: string;
+  description: string;
+  start_year: number;
+  end_year: number | null;
+  is_current: boolean;
+}
+
+interface Education {
+  degree: string;
+  institution: string;
+  year: number;
+}
+
+interface Language {
+  language: string;
+  proficiency: "native" | "fluent" | "conversational" | "basic";
+}
+
 interface Profile {
   id: string;
   user_id: string;
@@ -24,11 +44,19 @@ interface Profile {
   experience_years: number;
   hourly_rate: number;
   freelancer_level: "verified" | "pro" | "elite";
-  application_status: "pending" | "approved" | "rejected" | null;
+  application_status: "pending" | "approved" | "rejected" | "draft" | "submitted" | "under_review" | "revision_required" | "suspended" | null;
   is_suspended: boolean;
   avatar_url: string;
   last_active_at: string | null;
   certifications: Certification[];
+  work_experience: WorkExperience[];
+  education: Education[];
+  languages: Language[];
+  availability_status: string;
+  preferred_pricing_model: string | null;
+  response_time_expectation: string | null;
+  admin_feedback: string | null;
+  profile_completion_score: number;
 }
 
 interface AuthContextType {

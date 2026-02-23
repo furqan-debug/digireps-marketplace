@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Loader2, X, Plus, Upload, Trash2, User, Eye, Sparkles, ShieldCheck, Globe, Crown, Send, Award, CheckCircle, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Move, Clock, Briefcase, ArrowRight, Image as ImageIcon } from "lucide-react";
+import { Loader2, X, Plus, Upload, Trash2, User, Eye, Sparkles, ShieldCheck, Globe, Crown, Send, Award, CheckCircle, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Move, Clock, Briefcase, ArrowRight, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getActivityStatus } from "@/lib/activity-status";
 import { PortfolioProjectForm } from "@/components/freelancer/PortfolioProjectForm";
@@ -27,9 +27,13 @@ type PortfolioItem = {
   skills_deliverables?: string[];
   project_data?: any[];
 };
+type WorkExperience = { title: string; company: string; description: string; start_year: number; end_year: number | null; is_current: boolean };
+type Education = { degree: string; institution: string; year: number };
+type Language = { language: string; proficiency: "native" | "fluent" | "conversational" | "basic" };
 type Certification = { name: string; issuer: string; year: number; verified: boolean };
 
-const WIZARD_STEPS = ["Identity", "Expertise", "Credentials", "Portfolio", "Review"];
+const WIZARD_STEPS = ["Identity", "Expertise", "Work Experience", "Education", "Languages", "Pricing", "Portfolio", "Review"];
+const PROFICIENCY_LEVELS = ["native", "fluent", "conversational", "basic"] as const;
 
 const EditProfile = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -46,6 +50,13 @@ const EditProfile = () => {
   const [skills, setSkills] = useState<string[]>(profile?.skills ?? []);
   const [skillInput, setSkillInput] = useState("");
   const [certifications, setCertifications] = useState<Certification[]>((profile as any)?.certifications ?? []);
+  const [workExperience, setWorkExperience] = useState<WorkExperience[]>((profile as any)?.work_experience ?? []);
+  const [education, setEducation] = useState<Education[]>((profile as any)?.education ?? []);
+  const [languages, setLanguages] = useState<Language[]>((profile as any)?.languages ?? []);
+  const [availabilityStatus, setAvailabilityStatus] = useState<string>((profile as any)?.availability_status ?? "available");
+  const [preferredPricingModel, setPreferredPricingModel] = useState<string>((profile as any)?.preferred_pricing_model ?? "");
+  const [responseTimeExpectation, setResponseTimeExpectation] = useState<string>((profile as any)?.response_time_expectation ?? "");
+  const [hourlyRate, setHourlyRate] = useState<string>((profile as any)?.hourly_rate?.toString() ?? "");
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -83,6 +94,13 @@ const EditProfile = () => {
       if (!experienceYears) setExperienceYears(profile.experience_years?.toString() ?? "");
       if (skills.length === 0) setSkills(profile.skills ?? []);
       if (certifications.length === 0) setCertifications((profile as any).certifications ?? []);
+      if (workExperience.length === 0) setWorkExperience((profile as any).work_experience ?? []);
+      if (education.length === 0) setEducation((profile as any).education ?? []);
+      if (languages.length === 0) setLanguages((profile as any).languages ?? []);
+      if (!availabilityStatus || availabilityStatus === "available") setAvailabilityStatus((profile as any).availability_status ?? "available");
+      if (!preferredPricingModel) setPreferredPricingModel((profile as any).preferred_pricing_model ?? "");
+      if (!responseTimeExpectation) setResponseTimeExpectation((profile as any).response_time_expectation ?? "");
+      if (!hourlyRate) setHourlyRate((profile as any).hourly_rate?.toString() ?? "");
       if (profile.avatar_url && avatarUrl !== profile.avatar_url && !avatarPreview && !uploadingAvatar) {
         setAvatarUrl(profile.avatar_url);
       }
@@ -174,7 +192,7 @@ const EditProfile = () => {
       supabase.from("service_categories").select("id, name"),
       supabase.from("freelancer_services").select("category_id").eq("freelancer_id", user.id),
     ]).then(([portRes, catRes, servRes]) => {
-      setPortfolio(portRes.data ?? []);
+      setPortfolio((portRes.data ?? []) as unknown as PortfolioItem[]);
       setAllCategories(catRes.data ?? []);
       setSelectedCategories(servRes.data?.map(s => s.category_id) ?? []);
     });
@@ -216,6 +234,13 @@ const EditProfile = () => {
         experience_years: experienceYears ? parseInt(experienceYears) : null,
         skills,
         certifications: certifications as any,
+        work_experience: workExperience as any,
+        education: education as any,
+        languages: languages as any,
+        hourly_rate: hourlyRate ? parseFloat(hourlyRate) : null,
+        availability_status: availabilityStatus,
+        preferred_pricing_model: preferredPricingModel || null,
+        response_time_expectation: responseTimeExpectation || null,
       } as any).eq("user_id", user.id);
 
       if (profErr) throw profErr;
@@ -252,7 +277,7 @@ const EditProfile = () => {
       const { error } = await supabase
         .from('profiles')
         .update({
-          application_status: 'pending',
+          application_status: 'submitted',
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
@@ -562,53 +587,47 @@ const EditProfile = () => {
           return (
             <motion.div key="step2" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
               <div className="space-y-3">
-                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Qualifications</h2>
-                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Add certifications and industry credentials to build credibility.</p>
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Work Experience</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Add your professional history to showcase your background.</p>
               </div>
-
-              <div className="space-y-10 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1">Certification Name</Label>
-                    <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Google Cloud Architect" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold focus:ring-primary/20" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1">Issuing Authority</Label>
-                    <Input value={certIssuer} onChange={(e) => setCertIssuer(e.target.value)} placeholder="Google" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold focus:ring-primary/20" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-1">Year</Label>
-                    <div className="flex gap-3">
-                      <Input type="number" value={certYear} onChange={(e) => setCertYear(e.target.value)} placeholder="2024" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold focus:ring-primary/20" />
-                      <Button type="button" onClick={addCertification} className="h-14 w-14 rounded-2xl shrink-0 bg-primary/10 text-primary hover:bg-primary/20 border-0 shadow-none"><Plus className="h-5 w-5" /></Button>
+              <div className="space-y-6 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
+                {workExperience.map((we, idx) => (
+                  <div key={idx} className="flex items-start justify-between p-6 rounded-[2rem] border border-white/60 bg-white/40 shadow-sm">
+                    <div className="space-y-1">
+                      <p className="font-black text-lg tracking-tight">{we.title}</p>
+                      <p className="text-xs font-bold text-muted-foreground/60">{we.company} &bull; {we.start_year} – {we.is_current ? "Present" : we.end_year}</p>
+                      {we.description && <p className="text-sm text-muted-foreground mt-2">{we.description}</p>}
                     </div>
+                    <button onClick={() => setWorkExperience(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
+                  </div>
+                ))}
+                <div className="space-y-4 pt-4 border-t border-border/5">
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <Input id="we-title" placeholder="Job Title *" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold" />
+                    <Input id="we-company" placeholder="Company *" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold" />
+                  </div>
+                  <Textarea id="we-desc" placeholder="Description (optional)" className="rounded-2xl bg-white border-border/40 p-5" rows={3} />
+                  <div className="grid sm:grid-cols-3 gap-4 items-end">
+                    <Input id="we-start" type="number" placeholder="Start Year" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold" />
+                    <Input id="we-end" type="number" placeholder="End Year" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold" />
+                    <Button type="button" onClick={() => {
+                      const title = (document.getElementById("we-title") as HTMLInputElement)?.value?.trim();
+                      const company = (document.getElementById("we-company") as HTMLInputElement)?.value?.trim();
+                      const desc = (document.getElementById("we-desc") as HTMLTextAreaElement)?.value?.trim();
+                      const startYear = parseInt((document.getElementById("we-start") as HTMLInputElement)?.value);
+                      const endYear = (document.getElementById("we-end") as HTMLInputElement)?.value?.trim();
+                      if (!title || !company || !startYear) return;
+                      setWorkExperience(prev => [...prev, { title, company, description: desc || "", start_year: startYear, end_year: endYear ? parseInt(endYear) : null, is_current: !endYear }]);
+                      (document.getElementById("we-title") as HTMLInputElement).value = "";
+                      (document.getElementById("we-company") as HTMLInputElement).value = "";
+                      (document.getElementById("we-desc") as HTMLTextAreaElement).value = "";
+                      (document.getElementById("we-start") as HTMLInputElement).value = "";
+                      (document.getElementById("we-end") as HTMLInputElement).value = "";
+                    }} className="h-14 rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 border-0 font-black text-xs uppercase tracking-widest">
+                      <Plus className="h-5 w-5 mr-2" /> Add
+                    </Button>
                   </div>
                 </div>
-
-                {certifications.length > 0 ? (
-                  <div className="space-y-4 pt-6 border-t border-border/5">
-                    {certifications.map((cert, idx) => (
-                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={idx} className="group flex items-center justify-between p-6 rounded-[2rem] border border-white/60 bg-white/40 backdrop-blur-sm transition-all hover:shadow-elegant hover:bg-white/80">
-                        <div className="flex items-center gap-5">
-                          <div className="h-14 w-14 rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10 shadow-sm group-hover:scale-110 transition-transform duration-500 text-primary">
-                            <Award className="h-7 w-7" />
-                          </div>
-                          <div>
-                            <p className="font-black text-lg tracking-tight leading-tight">{cert.name}</p>
-                            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mt-1">{cert.issuer} &bull; {cert.year}</p>
-                          </div>
-                        </div>
-                        <button onClick={() => removeCertification(idx)} className="h-10 w-10 rounded-xl bg-muted/20 flex items-center justify-center text-muted-foreground/40 hover:bg-destructive/10 hover:text-destructive transition-all"><X className="h-4 w-4" /></button>
-                      </motion.div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-20 bg-muted/10 rounded-[2rem] border border-dashed border-border/40">
-                    <Crown className="h-12 w-12 mx-auto mb-4 text-primary/20" />
-                    <p className="text-sm font-black uppercase tracking-widest text-muted-foreground/40">No Credentials Listed</p>
-                    <p className="text-xs font-bold text-muted-foreground/20 mt-1 uppercase tracking-widest">Optional Step &bull; Recommended for Elite Verification</p>
-                  </div>
-                )}
               </div>
             </motion.div>
           );
@@ -616,59 +635,59 @@ const EditProfile = () => {
           return (
             <motion.div key="step3" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
               <div className="space-y-3">
-                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">The Exhibition Gallery</h2>
-                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Showcase your most impactful commercial projects. High-tier clients demand visual proof of excellence.</p>
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Education & Certifications</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Add your educational background and professional certifications.</p>
               </div>
-
-              <div className="space-y-10">
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePortfolioUpload} />
-                <button
-                  onClick={() => setIsPortfolioFormOpen(true)}
-                  className="w-full group relative rounded-[2.5rem] border-2 border-dashed border-primary/20 bg-white/40 hover:bg-primary/5 transition-all py-24 flex flex-col items-center gap-6 shadow-sm overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative h-20 w-20 rounded-[2rem] bg-white border border-primary/10 flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <Plus className="h-6 w-6" />
+              <div className="space-y-10 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
+                {/* Education */}
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Education</Label>
+                  {education.map((ed, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-5 rounded-[1.5rem] border border-white/60 bg-white/40">
+                      <div><p className="font-black text-sm">{ed.degree}</p><p className="text-[10px] font-bold text-muted-foreground/60 uppercase">{ed.institution} &bull; {ed.year}</p></div>
+                      <button onClick={() => setEducation(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
+                    </div>
+                  ))}
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    <Input id="edu-degree" placeholder="Degree *" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold" />
+                    <Input id="edu-institution" placeholder="Institution *" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold" />
+                    <div className="flex gap-3">
+                      <Input id="edu-year" type="number" placeholder="Year" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold" />
+                      <Button type="button" onClick={() => {
+                        const degree = (document.getElementById("edu-degree") as HTMLInputElement)?.value?.trim();
+                        const institution = (document.getElementById("edu-institution") as HTMLInputElement)?.value?.trim();
+                        const year = parseInt((document.getElementById("edu-year") as HTMLInputElement)?.value);
+                        if (!degree || !institution || !year) return;
+                        setEducation(prev => [...prev, { degree, institution, year }]);
+                        (document.getElementById("edu-degree") as HTMLInputElement).value = "";
+                        (document.getElementById("edu-institution") as HTMLInputElement).value = "";
+                        (document.getElementById("edu-year") as HTMLInputElement).value = "";
+                      }} className="h-14 w-14 rounded-2xl shrink-0 bg-primary/10 text-primary hover:bg-primary/20 border-0"><Plus className="h-5 w-5" /></Button>
                     </div>
                   </div>
-                  <div className="relative text-center space-y-2">
-                    <span className="text-lg font-black uppercase tracking-[0.2em] text-primary">Ingest New Project</span>
-                    <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">Case studies &bull; Technical Blueprints &bull; Designs</p>
-                  </div>
-                </button>
+                </div>
 
-                {portfolio.length > 0 ? (
-                  <div className="grid gap-8 sm:grid-cols-2">
-                    {portfolio.map((item) => (
-                      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} key={item.id} className="relative group aspect-video rounded-[2rem] overflow-hidden border border-white/60 shadow-elegant bg-card/60 backdrop-blur-sm">
-                        {item.image_url ? (
-                          <img src={item.image_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-primary/20">
-                            <ImageIcon className="h-16 w-16" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 p-8 flex flex-col justify-between translate-y-4 group-hover:translate-y-0">
-                          <div className="flex justify-between items-start">
-                            <Badge className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border-0 rounded-lg py-1 px-3 text-[10px] font-black uppercase tracking-widest">{item.role || "Elite Project"}</Badge>
-                            <Button size="icon" variant="destructive" onClick={(e) => { e.stopPropagation(); deletePortfolioItem(item); }} className="h-10 w-10 rounded-xl bg-white/10 hover:bg-destructive shadow-lg transition-all">
-                              <Trash2 className="h-5 w-5" />
-                            </Button>
-                          </div>
-                          <div className="text-white space-y-2">
-                            <p className="font-black text-xl tracking-tight leading-tight truncate">{item.title}</p>
-                            <p className="text-[11px] font-medium text-white/60 line-clamp-2 leading-relaxed">{item.description || "Deep technical execution for high-tier enterprise partners."}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                {/* Certifications */}
+                <div className="space-y-4 pt-6 border-t border-border/5">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Certifications</Label>
+                  {certifications.map((cert, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-5 rounded-[1.5rem] border border-white/60 bg-white/40">
+                      <div className="flex items-center gap-4">
+                        <Award className="h-6 w-6 text-primary/40" />
+                        <div><p className="font-black text-sm">{cert.name}</p><p className="text-[10px] font-bold text-muted-foreground/60 uppercase">{cert.issuer} &bull; {cert.year}</p></div>
+                      </div>
+                      <button onClick={() => removeCertification(idx)} className="p-2 text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
+                    </div>
+                  ))}
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Certification Name" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold" />
+                    <Input value={certIssuer} onChange={(e) => setCertIssuer(e.target.value)} placeholder="Issuing Authority" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold" />
+                    <div className="flex gap-3">
+                      <Input type="number" value={certYear} onChange={(e) => setCertYear(e.target.value)} placeholder="Year" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold" />
+                      <Button type="button" onClick={addCertification} className="h-14 w-14 rounded-2xl shrink-0 bg-primary/10 text-primary hover:bg-primary/20 border-0"><Plus className="h-5 w-5" /></Button>
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center py-12 text-muted-foreground/20 italic font-medium uppercase tracking-[0.3em] text-[10px]">
-                    "Excellence is not an act, but a habit. Exhibit your best work."
-                  </div>
-                )}
+                </div>
               </div>
             </motion.div>
           );
@@ -676,103 +695,191 @@ const EditProfile = () => {
           return (
             <motion.div key="step4" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
               <div className="space-y-3">
-                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Elite Authentication</h2>
-                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Review your commercial hologram before engaging the network. This is how the global market sees you.</p>
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Languages</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">What languages do you speak? This helps match you with global clients.</p>
               </div>
-
-              <div className="relative group">
-                <div className="absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/20 to-transparent blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                <Card className="relative rounded-[3rem] border border-white/60 bg-white/40 backdrop-blur-md overflow-hidden shadow-2xl transition-all">
-                  <div className="h-40 bg-gradient-to-r from-primary via-indigo-600 to-primary/80 relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/10 to-transparent" />
+              <div className="space-y-6 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
+                {languages.map((lang, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-5 rounded-[1.5rem] border border-white/60 bg-white/40">
+                    <div className="flex items-center gap-4">
+                      <Globe className="h-5 w-5 text-primary/40" />
+                      <div>
+                        <p className="font-black text-sm">{lang.language}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest capitalize">{lang.proficiency}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => setLanguages(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
                   </div>
-                  <CardContent className="px-12 pb-12 pt-0">
-                    <div className="flex flex-col md:flex-row items-end gap-8 -mt-16 mb-10">
-                      <div className="relative h-40 w-40 rounded-[2.5rem] bg-card border-[6px] border-white shadow-2xl overflow-hidden shadow-elegant-dark">
-                        {(avatarPreview || avatarUrl) ? (
-                          <img
-                            src={avatarPreview || avatarUrl}
-                            alt={displayName}
-                            className="w-full h-full object-cover"
-                            style={{
-                              transform: `scale(${zoom})`,
-                              objectPosition: `${position.x}% ${position.y}%`
-                            }}
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-primary/10 flex items-center justify-center font-display font-black text-primary text-5xl">
-                            {(displayName || "?")[0]?.toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 space-y-2 pb-2">
-                        <div className="flex items-center gap-3">
-                          <h3 className="font-display text-4xl font-black tracking-tight">{displayName}</h3>
-                          <Badge className="bg-primary/10 text-primary border-primary/20 rounded-lg px-2 text-[8px] font-black uppercase tracking-widest">Awaiting Verification</Badge>
-                        </div>
-                        {headline && <p className="text-xl font-bold text-muted-foreground/80 tracking-tight">{headline}</p>}
-                        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
-                          <span className="flex items-center gap-1.5"><Globe className="h-3 w-3" /> {country}</span>
-                          <span className="h-1 w-1 rounded-full bg-muted-foreground/20" />
-                          <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> {timezone}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-[1fr_2fr] gap-12 items-start border-t border-border/5 pt-10">
-                      <div className="space-y-10">
-                        <div className="space-y-4">
-                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Technical Expertise</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {skills.slice(0, 10).map(s => <Badge key={s} variant="secondary" className="rounded-xl px-3 py-1.5 text-[10px] font-bold border-0 bg-muted/20 text-foreground/80">{s}</Badge>)}
-                          </div>
-                        </div>
-                        {certifications.length > 0 && (
-                          <div className="space-y-4">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Commercial Credentials</h4>
-                            <div className="space-y-3">
-                              {certifications.slice(0, 3).map((c, i) => (
-                                <div key={i} className="flex items-center gap-3">
-                                  <Award className="h-4 w-4 text-primary/40" />
-                                  <span className="text-xs font-bold truncate leading-tight">{c.name}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <div className="space-y-10">
-                        <div className="space-y-4">
-                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Commercial Narrative</h4>
-                          <p className="text-lg font-medium text-muted-foreground leading-relaxed italic border-l-4 border-primary/10 pl-6 py-2">"{bio}"</p>
-                        </div>
-                        <div className="space-y-4">
-                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Portfolio Statistics</h4>
-                          <div className="flex items-center gap-8">
-                            <div className="space-y-1">
-                              <p className="text-3xl font-black text-foreground">{portfolio.length}</p>
-                              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Exhibits</p>
-                            </div>
-                            <div className="h-8 w-px bg-border/10" />
-                            <div className="space-y-1">
-                              <p className="text-3xl font-black text-foreground">{selectedCategories.length}</p>
-                              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Market Slots</p>
-                            </div>
-                            <div className="h-8 w-px bg-border/10" />
-                            <div className="space-y-1">
-                              <p className="text-3xl font-black text-foreground">{experienceYears}+</p>
-                              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Domain Experience</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                ))}
+                <div className="grid sm:grid-cols-3 gap-4 items-end">
+                  <Input id="lang-name" placeholder="Language *" className="h-14 rounded-2xl bg-white border-border/40 px-5 font-bold" />
+                  <select id="lang-prof" className="h-14 rounded-2xl bg-white border border-border/40 px-5 font-bold text-sm">
+                    {PROFICIENCY_LEVELS.map(p => <option key={p} value={p} className="capitalize">{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
+                  </select>
+                  <Button type="button" onClick={() => {
+                    const language = (document.getElementById("lang-name") as HTMLInputElement)?.value?.trim();
+                    const proficiency = (document.getElementById("lang-prof") as HTMLSelectElement)?.value as Language["proficiency"];
+                    if (!language) return;
+                    setLanguages(prev => [...prev, { language, proficiency }]);
+                    (document.getElementById("lang-name") as HTMLInputElement).value = "";
+                  }} className="h-14 rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 border-0 font-black text-xs uppercase tracking-widest">
+                    <Plus className="h-5 w-5 mr-2" /> Add Language
+                  </Button>
+                </div>
               </div>
             </motion.div>
           );
+        case 5:
+          return (
+            <motion.div key="step5" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
+              <div className="space-y-3">
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Pricing & Availability</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Set your rates and availability so clients know what to expect.</p>
+              </div>
+              <div className="space-y-8 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Hourly Rate (USD)</Label>
+                  <div className="relative">
+                    <Input type="number" min="0" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} placeholder="75" className="h-16 rounded-2xl bg-white border-border/40 px-6 font-bold text-xl" />
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-primary/40">$/hr</div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Preferred Pricing Model</Label>
+                  <div className="grid grid-cols-3 gap-4">
+                    {["hourly", "fixed", "both"].map(model => (
+                      <button key={model} onClick={() => setPreferredPricingModel(model)} className={`p-6 rounded-[1.5rem] border-2 text-xs font-black uppercase tracking-widest transition-all ${preferredPricingModel === model ? "bg-primary text-primary-foreground border-primary" : "bg-white border-border/40 text-muted-foreground hover:border-primary/40"}`}>
+                        {model === "both" ? "Both" : model.charAt(0).toUpperCase() + model.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Availability Status</Label>
+                  <div className="grid grid-cols-3 gap-4">
+                    {[{ key: "available", label: "Available", color: "text-emerald-600" }, { key: "limited", label: "Limited", color: "text-amber-600" }, { key: "unavailable", label: "Unavailable", color: "text-muted-foreground" }].map(opt => (
+                      <button key={opt.key} onClick={() => setAvailabilityStatus(opt.key)} className={`p-6 rounded-[1.5rem] border-2 text-xs font-black uppercase tracking-widest transition-all ${availabilityStatus === opt.key ? "bg-primary text-primary-foreground border-primary" : "bg-white border-border/40 text-muted-foreground hover:border-primary/40"}`}>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Typical Response Time</Label>
+                  <div className="grid grid-cols-3 gap-4">
+                    {["<1h", "<24h", "2-3 days"].map(rt => (
+                      <button key={rt} onClick={() => setResponseTimeExpectation(rt)} className={`p-6 rounded-[1.5rem] border-2 text-xs font-black uppercase tracking-widest transition-all ${responseTimeExpectation === rt ? "bg-primary text-primary-foreground border-primary" : "bg-white border-border/40 text-muted-foreground hover:border-primary/40"}`}>
+                        {rt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          );
+        case 6:
+          return (
+            <motion.div key="step6" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
+              <div className="space-y-3">
+                <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Portfolio</h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Showcase your most impactful projects. Visual proof builds trust.</p>
+              </div>
+              <div className="space-y-10">
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePortfolioUpload} />
+                <button onClick={() => setIsPortfolioFormOpen(true)} className="w-full group relative rounded-[2.5rem] border-2 border-dashed border-primary/20 bg-white/40 hover:bg-primary/5 transition-all py-24 flex flex-col items-center gap-6 shadow-sm overflow-hidden">
+                  <div className="relative h-20 w-20 rounded-[2rem] bg-white border border-primary/10 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500">
+                    <Plus className="h-6 w-6 text-primary" />
+                  </div>
+                  <span className="text-lg font-black uppercase tracking-[0.2em] text-primary">Add Project</span>
+                </button>
+                {portfolio.length > 0 && (
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    {portfolio.map((item) => (
+                      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} key={item.id} className="relative group aspect-video rounded-[2rem] overflow-hidden border border-white/60 shadow-elegant bg-card/60">
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-primary/20"><ImageIcon className="h-16 w-16" /></div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 p-8 flex flex-col justify-between">
+                          <div className="flex justify-end">
+                            <Button size="icon" variant="destructive" onClick={(e) => { e.stopPropagation(); deletePortfolioItem(item); }} className="h-10 w-10 rounded-xl"><Trash2 className="h-5 w-5" /></Button>
+                          </div>
+                          <p className="font-black text-xl text-white tracking-tight truncate">{item.title}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          );
+        case 7:
+          {
+            const completionScore = (profile as any)?.profile_completion_score ?? 0;
+            const blocking = [
+              { label: "Display name", pass: displayName.trim().length > 0 },
+              { label: "Bio ≥ 50 characters", pass: bio.trim().length >= 50 },
+              { label: "≥ 3 skills", pass: skills.length >= 3 },
+              { label: "≥ 1 service category", pass: selectedCategories.length > 0 },
+              { label: "Work experience or 2+ years", pass: workExperience.length > 0 || parseInt(experienceYears) >= 2 },
+            ];
+            const warnings = [
+              { label: "Profile photo", pass: !!avatarUrl },
+              { label: "Education entries", pass: education.length > 0 },
+              { label: "Certifications", pass: certifications.length > 0 },
+              { label: "Languages", pass: languages.length > 0 },
+              { label: "Portfolio items", pass: portfolio.length > 0 },
+            ];
+            const allBlockingPass = blocking.every(b => b.pass);
+
+            return (
+              <motion.div key="step7" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="space-y-12">
+                <div className="space-y-3">
+                  <h2 className="font-display text-4xl font-black tracking-tight leading-[1.1]">Review & Submit</h2>
+                  <p className="text-muted-foreground font-medium text-lg leading-relaxed max-w-xl">Review your profile before submitting for verification.</p>
+                </div>
+                <div className="space-y-8 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-sm">
+                  {/* Completeness Score */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm font-bold">
+                      <span>Profile Completeness</span>
+                      <span className="text-primary">{completionScore}%</span>
+                    </div>
+                    <Progress value={completionScore} className="h-3" />
+                  </div>
+
+                  {/* Blocking Requirements */}
+                  <div className="space-y-3">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Required</h3>
+                    {blocking.map((b, i) => (
+                      <div key={i} className={`flex items-center gap-3 p-3 rounded-xl ${b.pass ? "bg-success/5 text-success" : "bg-destructive/5 text-destructive"}`}>
+                        {b.pass ? <CheckCircle className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                        <span className="text-sm font-bold">{b.label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Warnings */}
+                  <div className="space-y-3">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Recommended</h3>
+                    {warnings.map((w, i) => (
+                      <div key={i} className={`flex items-center gap-3 p-3 rounded-xl ${w.pass ? "bg-success/5 text-success" : "bg-amber-50 text-amber-600"}`}>
+                        {w.pass ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+                        <span className="text-sm font-bold">{w.label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {!allBlockingPass && (
+                    <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20 text-sm font-bold text-destructive">
+                      Please complete all required fields before submitting.
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            );
+          }
         default:
           return null;
       }
