@@ -133,28 +133,49 @@ export type Database = {
       }
       portfolio_items: {
         Row: {
+          content_type: string | null
           created_at: string
           description: string | null
+          external_link: string | null
+          file_url: string | null
           freelancer_id: string
           id: string
           image_url: string
+          project_data: Json | null
+          role: string | null
+          skills_deliverables: string[] | null
           title: string
+          video_url: string | null
         }
         Insert: {
+          content_type?: string | null
           created_at?: string
           description?: string | null
+          external_link?: string | null
+          file_url?: string | null
           freelancer_id: string
           id?: string
           image_url: string
+          project_data?: Json | null
+          role?: string | null
+          skills_deliverables?: string[] | null
           title?: string
+          video_url?: string | null
         }
         Update: {
+          content_type?: string | null
           created_at?: string
           description?: string | null
+          external_link?: string | null
+          file_url?: string | null
           freelancer_id?: string
           id?: string
           image_url?: string
+          project_data?: Json | null
+          role?: string | null
+          skills_deliverables?: string[] | null
           title?: string
+          video_url?: string | null
         }
         Relationships: []
       }
