@@ -1122,7 +1122,7 @@ const EditProfile = () => {
               <section className="space-y-8">
                 <div className="flex items-center gap-4">
                   <div className="h-px flex-1 bg-black/5" />
-                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Portfolio & Skills</h2>
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Skills & Certifications</h2>
                   <div className="h-px flex-1 bg-black/5" />
                 </div>
 
@@ -1158,11 +1158,220 @@ const EditProfile = () => {
                           <button onClick={() => removeCertification(i)} className="p-2 text-muted-foreground/20 hover:text-destructive transition-colors"><X className="h-4 w-4" /></button>
                         </div>
                       ))}
-                      <button onClick={() => setWizardStep(2)} className="flex items-center justify-center p-6 rounded-[2rem] border-2 border-dashed border-black/5 hover:border-primary/20 bg-white/40 hover:bg-white transition-all text-[10px] font-black uppercase tracking-widest text-primary/40 hover:text-primary">
-                        <Plus className="h-4 w-4 mr-2" /> Add Certification
-                      </button>
+                    </div>
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Certification Name" className="h-14 rounded-2xl bg-white border-black/[0.03] px-5 font-bold" />
+                      <Input value={certIssuer} onChange={(e) => setCertIssuer(e.target.value)} placeholder="Issuing Authority" className="h-14 rounded-2xl bg-white border-black/[0.03] px-5 font-bold" />
+                      <div className="flex gap-3">
+                        <Input type="number" value={certYear} onChange={(e) => setCertYear(e.target.value)} placeholder="Year" className="h-14 rounded-2xl bg-white border-black/[0.03] px-5 font-bold" />
+                        <Button type="button" onClick={addCertification} className="h-14 w-14 rounded-2xl shrink-0 bg-primary/10 text-primary hover:bg-primary/20 border-0"><Plus className="h-5 w-5" /></Button>
+                      </div>
                     </div>
                   </div>
+                </div>
+              </section>
+
+              {/* Work Experience */}
+              <section className="space-y-8">
+                <div className="flex items-center gap-4">
+                  <div className="h-px flex-1 bg-black/5" />
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Work Experience</h2>
+                  <div className="h-px flex-1 bg-black/5" />
+                </div>
+                <div className="bg-white/60 backdrop-blur-xl rounded-[3rem] p-12 border border-white shadow-sm space-y-6">
+                  {workExperience.map((we, idx) => (
+                    <div key={idx} className="flex items-start justify-between p-6 rounded-[2rem] border border-black/[0.03] bg-white shadow-sm">
+                      <div className="space-y-1">
+                        <p className="font-black text-lg tracking-tight">{we.title}</p>
+                        <p className="text-xs font-bold text-muted-foreground/60">{we.company} &bull; {we.start_year} – {we.is_current ? "Present" : we.end_year}</p>
+                        {we.description && <p className="text-sm text-muted-foreground mt-2">{we.description}</p>}
+                      </div>
+                      <button onClick={() => setWorkExperience(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
+                    </div>
+                  ))}
+                  <div className="space-y-4 pt-4 border-t border-black/[0.03]">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <Input id="edit-we-title" placeholder="Job Title *" className="h-14 rounded-2xl bg-white border-black/[0.03] px-5 font-bold" />
+                      <Input id="edit-we-company" placeholder="Company *" className="h-14 rounded-2xl bg-white border-black/[0.03] px-5 font-bold" />
+                    </div>
+                    <Textarea id="edit-we-desc" placeholder="Description (optional)" className="rounded-2xl bg-white border-black/[0.03] p-5" rows={3} />
+                    <div className="grid sm:grid-cols-3 gap-4 items-end">
+                      <Input id="edit-we-start" type="number" placeholder="Start Year" className="h-14 rounded-2xl bg-white border-black/[0.03] px-5 font-bold" />
+                      <Input id="edit-we-end" type="number" placeholder="End Year" className="h-14 rounded-2xl bg-white border-black/[0.03] px-5 font-bold" />
+                      <Button type="button" onClick={() => {
+                        const title = (document.getElementById("edit-we-title") as HTMLInputElement)?.value?.trim();
+                        const company = (document.getElementById("edit-we-company") as HTMLInputElement)?.value?.trim();
+                        const desc = (document.getElementById("edit-we-desc") as HTMLTextAreaElement)?.value?.trim();
+                        const startYear = parseInt((document.getElementById("edit-we-start") as HTMLInputElement)?.value);
+                        const endYear = (document.getElementById("edit-we-end") as HTMLInputElement)?.value?.trim();
+                        if (!title || !company || !startYear) return;
+                        setWorkExperience(prev => [...prev, { title, company, description: desc || "", start_year: startYear, end_year: endYear ? parseInt(endYear) : null, is_current: !endYear }]);
+                        (document.getElementById("edit-we-title") as HTMLInputElement).value = "";
+                        (document.getElementById("edit-we-company") as HTMLInputElement).value = "";
+                        (document.getElementById("edit-we-desc") as HTMLTextAreaElement).value = "";
+                        (document.getElementById("edit-we-start") as HTMLInputElement).value = "";
+                        (document.getElementById("edit-we-end") as HTMLInputElement).value = "";
+                      }} className="h-14 rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 border-0 font-black text-xs uppercase tracking-widest">
+                        <Plus className="h-5 w-5 mr-2" /> Add
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Education */}
+              <section className="space-y-8">
+                <div className="flex items-center gap-4">
+                  <div className="h-px flex-1 bg-black/5" />
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Education</h2>
+                  <div className="h-px flex-1 bg-black/5" />
+                </div>
+                <div className="bg-white/60 backdrop-blur-xl rounded-[3rem] p-12 border border-white shadow-sm space-y-6">
+                  {education.map((ed, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-5 rounded-[1.5rem] border border-black/[0.03] bg-white">
+                      <div><p className="font-black text-sm">{ed.degree}</p><p className="text-[10px] font-bold text-muted-foreground/60 uppercase">{ed.institution} &bull; {ed.year}</p></div>
+                      <button onClick={() => setEducation(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
+                    </div>
+                  ))}
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    <Input id="edit-edu-degree" placeholder="Degree *" className="h-14 rounded-2xl bg-white border-black/[0.03] px-5 font-bold" />
+                    <Input id="edit-edu-institution" placeholder="Institution *" className="h-14 rounded-2xl bg-white border-black/[0.03] px-5 font-bold" />
+                    <div className="flex gap-3">
+                      <Input id="edit-edu-year" type="number" placeholder="Year" className="h-14 rounded-2xl bg-white border-black/[0.03] px-5 font-bold" />
+                      <Button type="button" onClick={() => {
+                        const degree = (document.getElementById("edit-edu-degree") as HTMLInputElement)?.value?.trim();
+                        const institution = (document.getElementById("edit-edu-institution") as HTMLInputElement)?.value?.trim();
+                        const year = parseInt((document.getElementById("edit-edu-year") as HTMLInputElement)?.value);
+                        if (!degree || !institution || !year) return;
+                        setEducation(prev => [...prev, { degree, institution, year }]);
+                        (document.getElementById("edit-edu-degree") as HTMLInputElement).value = "";
+                        (document.getElementById("edit-edu-institution") as HTMLInputElement).value = "";
+                        (document.getElementById("edit-edu-year") as HTMLInputElement).value = "";
+                      }} className="h-14 w-14 rounded-2xl shrink-0 bg-primary/10 text-primary hover:bg-primary/20 border-0"><Plus className="h-5 w-5" /></Button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Languages */}
+              <section className="space-y-8">
+                <div className="flex items-center gap-4">
+                  <div className="h-px flex-1 bg-black/5" />
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Languages</h2>
+                  <div className="h-px flex-1 bg-black/5" />
+                </div>
+                <div className="bg-white/60 backdrop-blur-xl rounded-[3rem] p-12 border border-white shadow-sm space-y-6">
+                  {languages.map((lang, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-5 rounded-[1.5rem] border border-black/[0.03] bg-white">
+                      <div className="flex items-center gap-4">
+                        <Globe className="h-5 w-5 text-primary/40" />
+                        <div>
+                          <p className="font-black text-sm">{lang.language}</p>
+                          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest capitalize">{lang.proficiency}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => setLanguages(prev => prev.filter((_, i) => i !== idx))} className="p-2 text-muted-foreground/40 hover:text-destructive"><X className="h-4 w-4" /></button>
+                    </div>
+                  ))}
+                  <div className="grid sm:grid-cols-3 gap-4 items-end">
+                    <Input id="edit-lang-name" placeholder="Language *" className="h-14 rounded-2xl bg-white border-black/[0.03] px-5 font-bold" />
+                    <select id="edit-lang-prof" className="h-14 rounded-2xl bg-white border border-black/[0.03] px-5 font-bold text-sm">
+                      {PROFICIENCY_LEVELS.map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
+                    </select>
+                    <Button type="button" onClick={() => {
+                      const language = (document.getElementById("edit-lang-name") as HTMLInputElement)?.value?.trim();
+                      const proficiency = (document.getElementById("edit-lang-prof") as HTMLSelectElement)?.value as Language["proficiency"];
+                      if (!language) return;
+                      setLanguages(prev => [...prev, { language, proficiency }]);
+                      (document.getElementById("edit-lang-name") as HTMLInputElement).value = "";
+                    }} className="h-14 rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 border-0 font-black text-xs uppercase tracking-widest">
+                      <Plus className="h-5 w-5 mr-2" /> Add
+                    </Button>
+                  </div>
+                </div>
+              </section>
+
+              {/* Pricing & Availability */}
+              <section className="space-y-8">
+                <div className="flex items-center gap-4">
+                  <div className="h-px flex-1 bg-black/5" />
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Pricing & Availability</h2>
+                  <div className="h-px flex-1 bg-black/5" />
+                </div>
+                <div className="bg-white/60 backdrop-blur-xl rounded-[3rem] p-12 border border-white shadow-sm space-y-8">
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Hourly Rate (USD)</Label>
+                    <div className="relative">
+                      <Input type="number" min="0" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} placeholder="75" className="h-16 rounded-[1.5rem] bg-white border-black/[0.03] px-6 font-bold text-xl" />
+                      <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-primary/40">$/hr</div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Preferred Pricing Model</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {["hourly", "fixed", "both"].map(model => (
+                        <button key={model} onClick={() => setPreferredPricingModel(model)} className={`p-5 rounded-[1.5rem] border-2 text-xs font-black uppercase tracking-widest transition-all ${preferredPricingModel === model ? "bg-primary text-primary-foreground border-primary" : "bg-white border-black/[0.03] text-muted-foreground hover:border-primary/40"}`}>
+                          {model === "both" ? "Both" : model.charAt(0).toUpperCase() + model.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Availability Status</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {[{ key: "available", label: "Available" }, { key: "limited", label: "Limited" }, { key: "unavailable", label: "Unavailable" }].map(opt => (
+                        <button key={opt.key} onClick={() => setAvailabilityStatus(opt.key)} className={`p-5 rounded-[1.5rem] border-2 text-xs font-black uppercase tracking-widest transition-all ${availabilityStatus === opt.key ? "bg-primary text-primary-foreground border-primary" : "bg-white border-black/[0.03] text-muted-foreground hover:border-primary/40"}`}>
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 ml-1">Typical Response Time</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {["<1h", "<24h", "2-3 days"].map(rt => (
+                        <button key={rt} onClick={() => setResponseTimeExpectation(rt)} className={`p-5 rounded-[1.5rem] border-2 text-xs font-black uppercase tracking-widest transition-all ${responseTimeExpectation === rt ? "bg-primary text-primary-foreground border-primary" : "bg-white border-black/[0.03] text-muted-foreground hover:border-primary/40"}`}>
+                          {rt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Portfolio */}
+              <section className="space-y-8">
+                <div className="flex items-center gap-4">
+                  <div className="h-px flex-1 bg-black/5" />
+                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary whitespace-nowrap">Portfolio</h2>
+                  <div className="h-px flex-1 bg-black/5" />
+                </div>
+                <div className="bg-white/60 backdrop-blur-xl rounded-[3rem] p-12 border border-white shadow-sm space-y-6">
+                  <button onClick={() => setIsPortfolioFormOpen(true)} className="w-full group relative rounded-[2rem] border-2 border-dashed border-black/5 bg-white/40 hover:bg-primary/5 transition-all py-16 flex flex-col items-center gap-4 shadow-sm">
+                    <div className="h-14 w-14 rounded-[1.5rem] bg-white border border-black/[0.03] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                      <Plus className="h-5 w-5 text-primary" />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-[0.2em] text-primary">Add Project</span>
+                  </button>
+                  {portfolio.length > 0 && (
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      {portfolio.map((item) => (
+                        <div key={item.id} className="relative group aspect-video rounded-[2rem] overflow-hidden border border-black/[0.03] shadow-sm bg-white">
+                          {item.image_url ? (
+                            <img src={item.image_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-primary/20"><ImageIcon className="h-16 w-16" /></div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 p-6 flex flex-col justify-between">
+                            <div className="flex justify-end">
+                              <Button size="icon" variant="destructive" onClick={(e) => { e.stopPropagation(); deletePortfolioItem(item); }} className="h-10 w-10 rounded-xl"><Trash2 className="h-5 w-5" /></Button>
+                            </div>
+                            <p className="font-black text-lg text-white tracking-tight truncate">{item.title}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </section>
             </div>
