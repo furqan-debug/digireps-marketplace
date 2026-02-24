@@ -56,22 +56,21 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background flex flex-col font-sans relative">
-        {/* Global Atmospheric Glow */}
+        {/* Subtle background glow */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px] mix-blend-normal animate-pulse-slow" />
-          <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-accent/5 blur-[150px] mix-blend-normal" />
+          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/3 blur-[120px]" />
         </div>
 
-        {/* Floating Command Center Nav */}
+        {/* Floating Nav */}
         <div className="pt-6 px-6 sm:px-8 w-full z-50 sticky top-0">
-          <header className="mx-auto w-full max-w-7xl glass-panel rounded-[2rem] transition-all duration-300 shadow-2xl shadow-black/[0.03]">
-            <div className="px-6 flex h-16 sm:h-20 items-center justify-between gap-4">
+          <header className="mx-auto w-full max-w-7xl glass-panel rounded-2xl transition-all duration-300 shadow-xl shadow-black/[0.03]">
+            <div className="px-6 flex h-16 sm:h-18 items-center justify-between gap-4">
               {/* Logo */}
               <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-glow shadow-elegant group-hover:scale-105 transition-transform duration-300">
                   <Shield className="h-4.5 w-4.5 text-primary-foreground" />
                 </div>
-                <div className="flex flex-col -gap-1">
+                <div className="flex flex-col">
                   <span className="font-display font-bold text-lg leading-none gradient-text">DigiReps</span>
                   <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground/60">Elite Network</span>
                 </div>
@@ -81,7 +80,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
               </Link>
 
               {/* Desktop Nav */}
-              <nav className="hidden md:flex items-center gap-1.5 bg-muted/40 p-1.5 rounded-[1.5rem] border border-border/50 shadow-inner">
+              <nav className="hidden md:flex items-center gap-1.5 bg-muted/40 p-1.5 rounded-2xl border border-border/50 shadow-inner">
                 {nav.map(({ label, to, icon: Icon }) => {
                   const active = location.pathname === to || (to !== "/" && location.pathname.startsWith(to + "/"));
                   return (
@@ -90,8 +89,8 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
                       to={to}
                       className={`relative flex items-center gap-2.5 rounded-xl px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.1em] transition-all duration-300
                       ${active
-                          ? "text-primary bg-white shadow-sm border border-border/40"
-                          : "text-muted-foreground hover:text-foreground hover:bg-white/50"
+                          ? "text-primary bg-card shadow-sm border border-border/40"
+                          : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                         }`}
                     >
                       <Icon className={`h-4 w-4 shrink-0 transition-colors ${active ? "text-primary" : "text-muted-foreground/50"}`} />
@@ -101,13 +100,14 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
                 })}
               </nav>
 
-              {/* Mobile Nav (simplified for now, using the same data) */}
+              {/* Mobile Nav with labels */}
               <div className="md:hidden flex items-center gap-1">
                 {nav.map(({ label, to, icon: Icon }) => {
                   const active = location.pathname === to || location.pathname.startsWith(to + "/");
                   return (
-                    <Link key={to} to={to} className={`p-2 rounded-xl transition-all ${active ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                    <Link key={to} to={to} className={`flex flex-col items-center gap-0.5 p-2 rounded-xl transition-all ${active ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
                       <Icon className="h-5 w-5" />
+                      <span className="text-[8px] font-bold uppercase tracking-wider">{label.split(" ")[0]}</span>
                     </Link>
                   );
                 })}
@@ -115,7 +115,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
 
               {/* User + sign out */}
               <div className="flex items-center gap-3 shrink-0 pl-2 border-l border-border/40">
-                <div className="hidden sm:flex flex-col items-end -gap-1">
+                <div className="hidden sm:flex flex-col items-end">
                   <span className="text-sm font-bold text-foreground leading-none">{profile?.display_name}</span>
                   <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{role}</span>
                 </div>
@@ -148,9 +148,9 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
               <span>© 2026 DigiReps — Elite Marketplace</span>
             </div>
             <div className="flex gap-6">
-              <Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
-              <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
-              <a href="#" className="hover:text-primary transition-colors">Support</a>
+              <Link to="/" className="hover:text-primary transition-colors">Terms of Service</Link>
+              <Link to="/" className="hover:text-primary transition-colors">Privacy Policy</Link>
+              <a href="mailto:support@digireps.com" className="hover:text-primary transition-colors">Support</a>
             </div>
           </div>
         </footer>

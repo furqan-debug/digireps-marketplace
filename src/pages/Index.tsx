@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Shield, Code, Palette, Video, PenTool, Smartphone, ArrowRight, CheckCircle, Star, Zap, Lock } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 
 const services = [
   { name: "Web Development", icon: Code, color: "from-blue-500/20 to-blue-600/10" },
@@ -39,23 +38,21 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
 const Index = () => {
-  const containerRef = useRef(null);
-
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/10 selection:text-primary">
       {/* Navigation */}
       <header className="fixed top-0 left-0 right-0 z-[100] bg-background/60 backdrop-blur-xl border-b border-border/40">
         <div className="container flex h-20 items-center justify-between">
           <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] group-hover:scale-105 transition-all duration-500">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg group-hover:scale-105 transition-all duration-500">
               <Shield className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-2xl font-black tracking-tighter text-foreground uppercase italic">
-              Digi<span className="text-primary not-italic">Reps</span>
+            <span className="font-display text-2xl font-bold tracking-tight text-foreground">
+              Digi<span className="text-primary">Reps</span>
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -71,44 +68,41 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Kinetic Hero */}
-      <section className="relative pt-40 pb-32 lg:pt-56 lg:pb-48 overflow-hidden min-h-[90vh] flex items-center">
-        {/* Advanced Decorative elements */}
+      {/* Hero */}
+      <section className="relative pt-40 pb-24 lg:pt-48 lg:pb-32 overflow-hidden min-h-[85vh] flex items-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-[800px] h-[800px] rounded-full bg-primary/5 blur-[140px] animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-indigo-500/5 blur-[120px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full border border-primary/10 animate-[spin_100s_linear_infinite] border-dashed" />
+          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[140px]" />
         </div>
 
         <div className="container relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-5xl mx-auto text-center space-y-12 relative"
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] as const }}
+            className="max-w-5xl mx-auto text-center space-y-10 relative"
           >
             <div className="inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 px-6 py-2 shadow-sm">
-              <Star className="h-3.5 w-3.5 fill-primary text-primary animate-pulse" />
-              <span className="font-display text-[10px] font-black uppercase tracking-[0.3em] text-primary">Trusted by top-performing enterprises</span>
+              <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+              <span className="font-display text-[10px] font-bold uppercase tracking-[0.3em] text-primary">Trusted by top-performing enterprises</span>
             </div>
 
-            <h1 className="font-display text-7xl sm:text-8xl lg:text-[10rem] font-black tracking-tighter leading-[0.85] text-foreground uppercase">
-              Marketplace for <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/40 italic">Elite Talent</span>
+            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.9] text-foreground">
+              The Marketplace for <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/50">Elite Talent</span>
             </h1>
 
             <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
               Transform your digital operations. Access a curated network of vetted professionals, secure workflows, and guaranteed results—all in one premium workspace.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-5 justify-center pt-8">
+            <div className="flex flex-col sm:flex-row gap-5 justify-center pt-4">
               <Link to="/auth">
-                <Button size="lg" className="w-full sm:w-auto h-16 gap-3 bg-primary hover:bg-primary/90 text-primary-foreground px-12 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:-translate-y-1 font-display font-black text-xs uppercase tracking-widest border-0">
+                <Button size="lg" className="w-full sm:w-auto h-14 gap-3 bg-primary hover:bg-primary/90 text-primary-foreground px-10 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:-translate-y-1 font-display font-bold text-xs uppercase tracking-widest border-0">
                   Hire Elite Talent <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/auth">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto h-16 bg-background border-2 border-border/60 hover:border-primary/40 hover:bg-primary/5 text-foreground px-12 rounded-2xl transition-all font-display font-black text-xs uppercase tracking-widest">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 bg-background border-2 border-border/60 hover:border-primary/40 hover:bg-primary/5 text-foreground px-10 rounded-2xl transition-all font-display font-bold text-xs uppercase tracking-widest">
                   Join as a Rep
                 </Button>
               </Link>
@@ -130,18 +124,18 @@ const Index = () => {
                 transition={{ delay: 0.1 * i, duration: 0.6 }}
                 className="text-center space-y-2 group"
               >
-                <div className="font-display text-5xl font-black text-foreground tracking-tighter group-hover:text-primary transition-colors">{s.value}</div>
-                <div className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{s.label}</div>
+                <div className="font-display text-4xl sm:text-5xl font-bold text-foreground tracking-tighter group-hover:text-primary transition-colors">{s.value}</div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">{s.label}</div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works - Bento UI */}
-      <section className="container py-40 relative">
-        <div className="text-center mb-24 space-y-6">
-          <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl font-black text-foreground tracking-tighter uppercase italic">Seamless Collaboration</h2>
+      {/* How It Works */}
+      <section className="container py-24 relative">
+        <div className="text-center mb-16 space-y-4">
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-foreground tracking-tight">Seamless Collaboration</h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto font-medium leading-relaxed">Built for clarity and efficiency, from initial brief to final delivery.</p>
         </div>
         <motion.div
@@ -149,16 +143,16 @@ const Index = () => {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
-          className="grid gap-8 md:grid-cols-3 xl:gap-12 max-w-7xl mx-auto"
+          className="grid gap-8 md:grid-cols-3 max-w-7xl mx-auto"
         >
           {steps.map(({ step, title, desc }) => (
-            <motion.div key={step} variants={itemVariants} className="group relative p-12 bg-card border border-border/60 hover:border-primary/40 transition-all duration-500 rounded-[2.5rem] hover:shadow-2xl">
-              <div className="absolute top-0 right-0 p-10 font-display text-8xl font-black text-muted/10 group-hover:text-primary/10 transition-colors pointer-events-none select-none">
+            <motion.div key={step} variants={itemVariants} className="group relative p-10 bg-card border border-border/60 hover:border-primary/40 transition-all duration-500 rounded-3xl hover:shadow-2xl">
+              <div className="absolute top-0 right-0 p-8 font-display text-7xl font-bold text-muted/10 group-hover:text-primary/10 transition-colors pointer-events-none select-none">
                 {step}
               </div>
-              <div className="relative z-10 h-full flex flex-col justify-end pt-16">
-                <h3 className="font-display text-2xl font-black mb-4 tracking-tight group-hover:text-primary transition-colors uppercase italic">{title}</h3>
-                <p className="text-base text-muted-foreground leading-relaxed font-medium">{desc}</p>
+              <div className="relative z-10 h-full flex flex-col justify-end pt-12">
+                <h3 className="font-display text-xl font-bold mb-3 tracking-tight group-hover:text-primary transition-colors">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
               </div>
             </motion.div>
           ))}
@@ -166,10 +160,9 @@ const Index = () => {
       </section>
 
       {/* Benefits */}
-      <section className="bg-[#020617] text-white border-y border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-primary/5 blur-[120px] -translate-x-1/2" />
-        <div className="container relative z-10 py-32">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
+      <section className="bg-foreground text-background border-y border-border/5 relative overflow-hidden">
+        <div className="container relative z-10 py-24">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
             {benefits.map(({ icon: Icon, text }, i) => (
               <motion.div
                 key={text}
@@ -177,22 +170,22 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 * i, duration: 0.5 }}
-                className="flex flex-col items-center text-center gap-8 rounded-[3rem] bg-white/[0.03] border border-white/10 p-10 shadow-lg hover:bg-white/[0.06] transition-all duration-500 group"
+                className="flex flex-col items-center text-center gap-6 rounded-3xl bg-background/[0.03] border border-background/10 p-8 hover:bg-background/[0.06] transition-all duration-500 group"
               >
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-primary/10 border border-primary/20 group-hover:scale-110 transition-transform duration-500">
-                  <Icon className="h-8 w-8 text-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)]" />
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 group-hover:scale-110 transition-transform duration-500">
+                  <Icon className="h-7 w-7 text-primary" />
                 </div>
-                <span className="font-display font-black text-sm uppercase tracking-widest leading-tight">{text}</span>
+                <span className="font-display font-bold text-sm leading-tight">{text}</span>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Service Categories - Dossier Style */}
-      <section className="container py-40 bg-secondary/20 rounded-[4rem] border border-border/40 my-20">
-        <div className="text-center mb-24 space-y-6">
-          <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl font-black text-foreground tracking-tighter uppercase italic">Specialized Expertise</h2>
+      {/* Service Categories */}
+      <section className="container py-24 bg-secondary/20 rounded-3xl border border-border/40 my-16">
+        <div className="text-center mb-16 space-y-4">
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-foreground tracking-tight">Specialized Expertise</h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto font-medium">Curated talent across high-impact digital sectors.</p>
         </div>
         <motion.div
@@ -200,42 +193,41 @@ const Index = () => {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
-          className="grid gap-6 grid-cols-2 lg:grid-cols-5 px-4"
+          className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 px-4"
         >
           {services.map(({ name, icon: Icon, color }) => (
             <motion.div
               key={name}
               variants={itemVariants}
-              className="group flex flex-col items-center gap-10 rounded-[2.5rem] border border-border/60 bg-background p-12 transition-all duration-500 hover:shadow-xl hover:border-primary/40 hover:-translate-y-2 cursor-pointer relative overflow-hidden text-center"
+              className="group flex flex-col items-center gap-8 rounded-3xl border border-border/60 bg-background p-10 transition-all duration-500 hover:shadow-xl hover:border-primary/40 hover:-translate-y-2 cursor-pointer relative overflow-hidden text-center"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              <div className={`relative flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-gradient-to-br ${color} transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-sm`}>
-                <Icon className="h-9 w-9 text-primary" />
+              <div className={`relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${color} transition-all duration-500 group-hover:scale-110 shadow-sm`}>
+                <Icon className="h-8 w-8 text-primary" />
               </div>
-              <span className="relative font-display text-xs font-black uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{name}</span>
+              <span className="relative font-display text-xs font-bold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{name}</span>
             </motion.div>
           ))}
         </motion.div>
       </section>
 
       {/* CTA Banner */}
-      <section className="container pb-40">
+      <section className="container pb-24">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="relative rounded-[4rem] bg-primary py-32 px-12 text-center overflow-hidden flex flex-col items-center"
+          className="relative rounded-3xl bg-primary py-24 px-12 text-center overflow-hidden flex flex-col items-center"
         >
-          <div className="absolute top-0 right-0 w-[50rem] h-[50rem] bg-white/10 blur-[140px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-[40rem] h-[40rem] bg-black/10 blur-[120px] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-background/10 blur-[140px] pointer-events-none" />
 
-          <div className="relative z-10 space-y-12 max-w-4xl">
-            <h2 className="font-display text-6xl sm:text-8xl lg:text-9xl font-black text-primary-foreground tracking-tighter leading-none uppercase">Ready to <br /><span className="italic opacity-50">scale?</span></h2>
-            <p className="text-xl lg:text-2xl text-primary-foreground/80 font-medium max-w-2xl mx-auto">Join the elite network connecting the world's best talent with visionary companies.</p>
+          <div className="relative z-10 space-y-10 max-w-4xl">
+            <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-primary-foreground tracking-tighter leading-none">Ready to scale?</h2>
+            <p className="text-xl text-primary-foreground/80 font-medium max-w-2xl mx-auto">Join the elite network connecting the world's best talent with visionary companies.</p>
             <Link to="/auth" className="inline-block pt-4">
-              <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 px-16 h-20 rounded-2xl shadow-2xl transition-all hover:scale-105 active:scale-100 font-display font-black text-xs uppercase tracking-[0.2em] border-0">
-                Join DigiReps Now <Zap className="h-6 w-6 fill-primary ml-4" />
+              <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 px-12 h-16 rounded-2xl shadow-2xl transition-all hover:scale-105 active:scale-100 font-display font-bold text-xs uppercase tracking-[0.2em] border-0">
+                Join DigiReps Now <Zap className="h-5 w-5 fill-primary ml-3" />
               </Button>
             </Link>
           </div>
@@ -244,40 +236,36 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="bg-card border-t border-border/40">
-        <div className="container py-24">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-20">
-            <div className="md:col-span-2 space-y-8">
+        <div className="container py-20">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
+            <div className="md:col-span-2 space-y-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary">
-                  <Shield className="h-6 w-6 text-primary-foreground" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary">
+                  <Shield className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="font-display text-3xl font-black tracking-tighter text-foreground uppercase italic">Digi<span className="text-primary not-italic">Reps</span></span>
+                <span className="font-display text-2xl font-bold tracking-tight text-foreground">Digi<span className="text-primary">Reps</span></span>
               </div>
-              <p className="text-muted-foreground text-lg leading-relaxed max-w-sm font-medium">The premium standard for digital services. Vetted talent, professional delivery.</p>
+              <p className="text-muted-foreground text-base leading-relaxed max-w-sm font-medium">The premium standard for digital services. Vetted talent, professional delivery.</p>
             </div>
-            <div className="space-y-8">
-              <h4 className="font-display font-black text-xs text-foreground uppercase tracking-[0.3em]">Solution</h4>
-              <nav className="flex flex-col gap-5">
-                <Link to="/auth" className="text-muted-foreground font-bold text-sm hover:text-primary transition-colors">Hire Talent</Link>
-                <Link to="/auth" className="text-muted-foreground font-bold text-sm hover:text-primary transition-colors">Freelancer Portal</Link>
-                <Link to="/auth" className="text-muted-foreground font-bold text-sm hover:text-primary transition-colors">Success Stories</Link>
+            <div className="space-y-6">
+              <h4 className="font-display font-bold text-xs text-foreground uppercase tracking-[0.3em]">Solution</h4>
+              <nav className="flex flex-col gap-4">
+                <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Hire Talent</Link>
+                <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Freelancer Portal</Link>
+                <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Success Stories</Link>
               </nav>
             </div>
-            <div className="space-y-8">
-              <h4 className="font-display font-black text-xs text-foreground uppercase tracking-[0.3em]">Help</h4>
-              <nav className="flex flex-col gap-5">
-                <span className="text-muted-foreground font-bold text-sm hover:text-primary cursor-pointer transition-colors">Terms of Service</span>
-                <span className="text-muted-foreground font-bold text-sm hover:text-primary cursor-pointer transition-colors">Privacy Shield</span>
-                <span className="text-muted-foreground font-bold text-sm hover:text-primary cursor-pointer transition-colors">Contact Support</span>
+            <div className="space-y-6">
+              <h4 className="font-display font-bold text-xs text-foreground uppercase tracking-[0.3em]">Help</h4>
+              <nav className="flex flex-col gap-4">
+                <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Terms of Service</Link>
+                <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Privacy Policy</Link>
+                <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Contact Support</Link>
               </nav>
             </div>
           </div>
-          <div className="border-t border-border/40 pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-muted-foreground font-black text-[10px] uppercase tracking-[0.2em]">
+          <div className="border-t border-border/40 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-muted-foreground font-medium text-xs uppercase tracking-[0.2em]">
             <p>© 2026 DigiReps. All rights reserved.</p>
-            <div className="flex gap-10">
-              <span className="hover:text-primary cursor-pointer transition-colors">Twitter</span>
-              <span className="hover:text-primary cursor-pointer transition-colors">LinkedIn</span>
-            </div>
           </div>
         </div>
       </footer>

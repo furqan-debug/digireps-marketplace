@@ -167,7 +167,7 @@ const Orders = () => {
                 const s = STATUS_BADGE[order.status] ?? STATUS_BADGE.pending;
                 return (
                   <motion.div key={order.id} variants={itemVariants} className="h-full">
-                    <Card className="dossier-card group relative h-full flex flex-col p-8 bg-white border border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant">
+                    <Card className="dossier-card group relative h-full flex flex-col p-8 bg-card border border-border/40 hover:border-primary/30 transition-all hover:shadow-elegant">
                       <div className={`absolute left-0 top-0 bottom-0 w-1 ${s.borderColor?.replace('border-l-', 'bg-')}`} />
                       <div className="flex-1 space-y-6">
                         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -208,7 +208,7 @@ const Orders = () => {
                           onClick={() => navigate(`/orders/${order.id}`)}
                         >
                           <MessageSquare className="h-4 w-4" />
-                          War Room
+                          View Details
                         </Button>
                       </div>
                     </Card>
@@ -219,8 +219,6 @@ const Orders = () => {
           </AnimatePresence>
         )}
 
-        {/* Decorative elements */}
-        <div className="fixed -bottom-48 -left-48 h-[40rem] w-[40rem] rounded-full bg-primary/5 blur-[140px] pointer-events-none" />
       </div>
     </AppShell>
   );

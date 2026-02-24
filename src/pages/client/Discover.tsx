@@ -187,17 +187,15 @@ const Discover = () => {
         </motion.div>
 
         {/* Search Bar - Dossier Style */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }} className="relative">
-          <div className="dossier-card p-2 rounded-[2rem] border-primary/20 bg-primary/5 shadow-inner">
-            <div className="flex items-center gap-4 px-6 bg-white rounded-[1.5rem] border border-border/40 shadow-sm transition-all focus-within:border-primary/50 focus-within:shadow-elegant">
-              <Search className="h-6 w-6 text-primary shrink-0" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search candidates by name, specialization, skills, or biography..."
-                className="h-16 border-0 bg-transparent shadow-none focus-visible:ring-0 text-lg font-medium placeholder:text-muted-foreground/40 font-display"
-              />
-            </div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] as const }} className="relative">
+          <div className="flex items-center gap-4 px-6 bg-card rounded-2xl border border-border/40 shadow-sm transition-all focus-within:border-primary/50 focus-within:shadow-elegant">
+            <Search className="h-5 w-5 text-primary shrink-0" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name, skills, or specialization..."
+              className="h-14 border-0 bg-transparent shadow-none focus-visible:ring-0 text-base font-medium placeholder:text-muted-foreground/40 font-display"
+            />
           </div>
         </motion.div>
 
@@ -246,7 +244,7 @@ const Discover = () => {
               const colorClass = CATEGORY_COLORS[cat.name] ?? "from-primary/20 to-primary/10";
               const active = selectedCategory?.id === cat.id;
               return (
-                <motion.button key={cat.id} variants={itemVariants} onClick={() => handleSelectCategory(cat)} className={`group flex flex-col items-center gap-5 rounded-[2rem] border p-8 transition-all duration-300 ${active ? "border-primary bg-primary text-primary-foreground shadow-elegant scale-[1.02]" : "border-border/40 bg-white hover:border-primary/40 hover:shadow-elegant text-foreground hover:-translate-y-1"}`}>
+                <motion.button key={cat.id} variants={itemVariants} onClick={() => handleSelectCategory(cat)} className={`group flex flex-col items-center gap-5 rounded-2xl border p-8 transition-all duration-300 ${active ? "border-primary bg-primary text-primary-foreground shadow-elegant scale-[1.02]" : "border-border/40 bg-card hover:border-primary/40 hover:shadow-elegant text-foreground hover:-translate-y-1"}`}>
                   <div className={`flex h-16 w-16 items-center justify-center rounded-[1.25rem] transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 ${active ? "bg-white/20" : `bg-primary/5 border border-primary/10 text-primary group-hover:bg-primary group-hover:text-white`}`}>
                     <Icon className="h-8 w-8" />
                   </div>
@@ -298,7 +296,7 @@ const Discover = () => {
                               <div className="flex items-center gap-4">
                                 <div className="relative shrink-0">
                                   <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary to-primary-glow blur-sm opacity-20 group-hover:opacity-60 transition-opacity duration-500" />
-                                  <div className="relative flex h-16 w-16 items-center justify-center rounded-[1.25rem] bg-white border border-primary/20 font-display font-bold text-primary text-2xl shadow-sm z-10">
+                                  <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-card border border-primary/20 font-display font-bold text-primary text-2xl shadow-sm z-10">
                                     {initials}
                                   </div>
                                   {/* Activity status dot */}
@@ -373,8 +371,6 @@ const Discover = () => {
           )}
         </AnimatePresence>
 
-        <div className="fixed -bottom-32 -right-32 h-96 w-96 rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-        <div className="fixed -top-32 -left-32 h-96 w-96 rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
       </div>
     </AppShell>
   );

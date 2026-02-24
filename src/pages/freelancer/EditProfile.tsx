@@ -452,13 +452,13 @@ const EditProfile = () => {
     return (
       <div className="relative group cursor-pointer" onClick={() => avatarFileRef.current?.click()}>
         <input ref={avatarFileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-        <div className={`${dim} ${rounded} bg-white border border-border/40 shadow-sm overflow-hidden group-hover:shadow-elegant transition-all duration-300`}>
+        <div className={`${dim} ${rounded} bg-card border border-border/40 shadow-sm overflow-hidden group-hover:shadow-elegant transition-all duration-300`}>
           {(avatarPreview || avatarUrl) ? (
             <img src={avatarPreview || avatarUrl} alt="Avatar" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
           ) : (
             <div className="h-full w-full bg-primary/5 flex items-center justify-center font-display font-bold text-primary text-5xl">{(displayName || "?")[0]?.toUpperCase()}</div>
           )}
-          {uploadingAvatar && <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
+          {uploadingAvatar && <div className="absolute inset-0 bg-card/60 backdrop-blur-sm flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
         </div>
         <div className="absolute -bottom-3 -right-3 h-12 w-12 rounded-[1.25rem] bg-primary text-primary-foreground shadow-glow flex items-center justify-center group-hover:scale-110 transition-transform"><Plus className="h-6 w-6" /></div>
       </div>
@@ -468,7 +468,7 @@ const EditProfile = () => {
   const WorkExperienceList = () => (
     <div className="space-y-4">
       {workExperience.map((we, idx) => (
-        <div key={idx} className="flex items-start justify-between p-6 rounded-[1.5rem] border border-border/40 bg-white shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
+        <div key={idx} className="flex items-start justify-between p-6 rounded-2xl border border-border/40 bg-card shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
           <div className="space-y-1">
             <p className="font-display text-lg font-bold tracking-tight">{we.title}</p>
             <p className="text-xs font-bold text-muted-foreground">{we.company} · {we.start_year} – {we.is_current ? "Present" : we.end_year}</p>
@@ -504,7 +504,7 @@ const EditProfile = () => {
   const EducationList = () => (
     <div className="space-y-3">
       {education.map((ed, idx) => (
-        <div key={idx} className="flex items-center justify-between p-5 rounded-[1.25rem] border border-border/40 bg-white shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
+        <div key={idx} className="flex items-center justify-between p-5 rounded-xl border border-border/40 bg-card shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
           <div className="flex gap-4 items-center">
             <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-primary/5 text-primary">
               <GraduationCap className="h-5 w-5" />
@@ -534,7 +534,7 @@ const EditProfile = () => {
   const LanguageList = () => (
     <div className="space-y-3">
       {languages.map((lang, idx) => (
-        <div key={idx} className="flex items-center justify-between p-5 rounded-[1.25rem] border border-border/40 bg-white shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
+        <div key={idx} className="flex items-center justify-between p-5 rounded-xl border border-border/40 bg-card shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
           <div className="flex items-center gap-4">
             <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-primary/5 text-primary">
               <Globe className="h-5 w-5" />
@@ -565,7 +565,7 @@ const EditProfile = () => {
   const CertificationList = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {certifications.map((c, i) => (
-        <div key={i} className="flex items-center justify-between p-5 rounded-[1.25rem] bg-white border border-border/40 shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
+        <div key={i} className="flex items-center justify-between p-5 rounded-xl bg-card border border-border/40 shadow-sm hover:shadow-elegant hover:border-primary/30 transition-all">
           <div className="flex items-center gap-4">
             <div className="h-10 w-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary"><Award className="h-5 w-5" /></div>
             <div>
@@ -601,7 +601,7 @@ const EditProfile = () => {
       {portfolio.length > 0 && (
         <div className="grid gap-6 sm:grid-cols-2">
           {portfolio.map(item => (
-            <div key={item.id} className="relative group aspect-video rounded-[1.5rem] overflow-hidden border border-border/40 shadow-sm bg-white hover:shadow-elegant transition-all duration-300">
+            <div key={item.id} className="relative group aspect-video rounded-2xl overflow-hidden border border-border/40 shadow-sm bg-card hover:shadow-elegant transition-all duration-300">
               {item.image_url ? (
                 <img src={item.image_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110" />
               ) : (
@@ -1264,7 +1264,7 @@ const EditProfile = () => {
                       </div>
                     </div>
 
-                    <Button onClick={() => navigate(`/freelancer/${user?.id}`)} variant="ghost" className="w-full h-14 rounded-[1.25rem] border border-border/40 bg-white font-display font-bold uppercase tracking-[0.1em] text-xs mt-4 group hover:border-primary/40 hover:shadow-elegant transition-all duration-300">
+                    <Button onClick={() => window.open(`/client/freelancer/${user?.id}`, '_blank')} variant="ghost" className="w-full h-14 rounded-xl border border-border/40 bg-card font-display font-bold uppercase tracking-[0.1em] text-xs mt-4 group hover:border-primary/40 hover:shadow-elegant transition-all duration-300">
                       View Public Profile <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 group-hover:text-primary transition-all" />
                     </Button>
                   </div>
