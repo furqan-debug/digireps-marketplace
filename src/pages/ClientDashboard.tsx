@@ -57,7 +57,7 @@ const ClientDashboard = () => {
         </motion.div>
 
         {/* The Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[160px]">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[minmax(160px,auto)]">
 
           {/* Main Stats - Span 8 */}
           <motion.div
@@ -118,16 +118,18 @@ const ClientDashboard = () => {
           {/* Quick Action: Messages - Span 4 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }}
-            className="md:col-span-4 row-span-1 border border-border/40 bg-white rounded-[2rem] p-8 flex flex-col justify-between group cursor-pointer hover:border-primary/30 hover:shadow-elegant transition-all duration-500"
+            className="md:col-span-4 row-span-1 border border-border/40 bg-card rounded-[2rem] p-8 flex flex-col justify-between group cursor-pointer hover:border-primary/30 hover:shadow-elegant transition-all duration-500"
             onClick={() => navigate("/client/orders")}
           >
             <div className="flex justify-between items-start">
               <div className="h-10 w-10 text-muted-foreground/40 group-hover:text-primary transition-colors duration-300">
                 <MessageSquare className="h-8 w-8" />
               </div>
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
-                {stats.active > 0 ? stats.active : 0}
-              </span>
+              {stats.active > 0 && (
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+                  {stats.active}
+                </span>
+              )}
             </div>
             <div>
               <h3 className="font-display text-lg font-bold tracking-tight mb-1 text-foreground">Communications</h3>

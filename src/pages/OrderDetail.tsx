@@ -191,7 +191,7 @@ const OrderDetail = () => {
 
         {/* Order Header — Elite Workspace style */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <Card className="dossier-card rounded-[2.5rem] bg-white border border-border/40 overflow-hidden shadow-sm hover:shadow-elegant transition-all">
+          <Card className="dossier-card rounded-3xl bg-card border border-border/40 overflow-hidden shadow-sm hover:shadow-elegant transition-all">
             <CardContent className="p-10">
               <div className="flex flex-col lg:flex-row lg:items-center gap-10">
                 {/* Left: Branding + Info */}
@@ -201,14 +201,14 @@ const OrderDetail = () => {
                       <Badge className={`${statusCfg.className} rounded-xl px-3 py-1 text-[9px] font-bold uppercase tracking-wider border-0 shadow-sm`}>
                         {statusCfg.label}
                       </Badge>
-                      <span className="font-display text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Workspace ID: #{orderId?.slice(-6).toUpperCase()}</span>
+                      <span className="font-display text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Order #{orderId?.slice(-6).toUpperCase()}</span>
                     </div>
                     <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">{order.title}</h1>
                   </div>
 
                   <div className="flex items-center gap-4 text-sm font-bold flex-wrap">
                     <div className="flex flex-col">
-                      <span className="font-display text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-1">Contract Budget</span>
+                      <span className="font-display text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-1">Budget</span>
                       <span className="flex items-center gap-2 text-xl text-primary font-display font-bold">
                         <DollarSign className="h-4 w-4" />{order.budget.toLocaleString()}
                       </span>
@@ -243,7 +243,7 @@ const OrderDetail = () => {
                 {/* Right: Actions Context */}
                 <div className="lg:w-64 space-y-6 flex flex-col items-center lg:items-stretch text-center lg:text-left">
                   <div className="space-y-1">
-                    <span className="font-display text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40">Engagement Phase</span>
+                    <span className="font-display text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40">Next Step</span>
                     {stepLabel ? (
                       <p className="font-display text-sm font-bold text-primary leading-tight">{stepLabel}</p>
                     ) : (
@@ -256,7 +256,7 @@ const OrderDetail = () => {
                     {isFreelancer && order.status === "pending" && (
                       <>
                         <Button size="lg" className="w-full rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant" onClick={() => updateStatus("accepted")} disabled={actionLoading}>
-                          <CheckCircle className="h-4 w-4" /> Accept Proposal
+                          <CheckCircle className="h-4 w-4" /> Accept Order
                         </Button>
                         <Button size="lg" variant="outline" className="w-full rounded-2xl border-2 font-bold" onClick={() => updateStatus("refunded")} disabled={actionLoading}>
                           Decline
@@ -270,13 +270,13 @@ const OrderDetail = () => {
                     )}
                     {isFreelancer && order.status === "in_progress" && (
                       <Button size="lg" className="w-full rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant" onClick={() => updateStatus("delivered")} disabled={actionLoading}>
-                        <CheckCircle className="h-4 w-4" /> Finalize & Deliver
+                        <CheckCircle className="h-4 w-4" /> Mark as Delivered
                       </Button>
                     )}
                     {isClient && order.status === "delivered" && (
                       <>
                         <Button size="lg" className="w-full rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant" onClick={() => { updateStatus("completed", "released"); setShowRating(true); }} disabled={actionLoading}>
-                          <CheckCircle className="h-4 w-4" /> Approve Release
+                          <CheckCircle className="h-4 w-4" /> Approve & Pay
                         </Button>
                         <Button size="lg" variant="destructive" className="w-full rounded-2xl border-0 font-bold" onClick={() => updateStatus("disputed")} disabled={actionLoading}>
                           <AlertTriangle className="h-4 w-4" /> Dispute
@@ -285,7 +285,7 @@ const OrderDetail = () => {
                     )}
                     {order.status === "completed" && (
                       <Button size="lg" variant="outline" className="w-full rounded-2xl gap-2 border-2 font-bold" onClick={() => setShowRating(true)}>
-                        <Star className="h-4 w-4" /> Post Review
+                        <Star className="h-4 w-4" /> Leave a Review
                       </Button>
                     )}
                   </div>
@@ -314,8 +314,8 @@ const OrderDetail = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <h3 className="font-display text-2xl font-bold tracking-tight">Post Engagement Review</h3>
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Rate the commercial experience</p>
+                    <h3 className="font-display text-2xl font-bold tracking-tight">Leave a Review</h3>
+                    <p className="text-xs text-muted-foreground font-medium">Rate your experience</p>
                   </div>
                   <button onClick={() => setShowRating(false)} className="h-10 w-10 flex items-center justify-center rounded-xl bg-muted/40 text-muted-foreground hover:text-foreground transition-colors">
                     <X className="h-5 w-5" />
@@ -351,7 +351,7 @@ const OrderDetail = () => {
         </AnimatePresence>
 
         {/* Chat - Elite Interface */}
-        <Card className="dossier-card rounded-[2.5rem] border border-border/40 overflow-hidden shadow-sm hover:shadow-elegant transition-all flex flex-col bg-white">
+        <Card className="dossier-card rounded-3xl border border-border/40 overflow-hidden shadow-sm hover:shadow-elegant transition-all flex flex-col bg-card">
           <CardHeader className="px-8 py-6 border-b border-border/40 bg-muted/5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -359,9 +359,9 @@ const OrderDetail = () => {
                   <MessageSquare className="h-5 w-5" />
                 </div>
                 <div>
-                  <CardTitle className="font-display text-lg font-bold tracking-tight">Secure Command Center</CardTitle>
+                  <CardTitle className="font-display text-lg font-bold tracking-tight">Messages</CardTitle>
                   <div className="flex items-center gap-1.5 font-display text-[9px] font-bold text-emerald-500 uppercase tracking-widest">
-                    <ShieldCheck className="h-3 w-3" /> Encrypted Protocol Active
+                    <ShieldCheck className="h-3 w-3" /> Secure Channel
                   </div>
                 </div>
               </div>
@@ -376,8 +376,8 @@ const OrderDetail = () => {
                     <Send className="h-8 w-8 text-muted-foreground/20" />
                   </div>
                   <div className="text-center">
-                    <p className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground/40 mb-1">Channel Initialized</p>
-                    <p className="text-sm">Initiate secure communication with your partner.</p>
+                    <p className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground/40 mb-1">No messages yet</p>
+                    <p className="text-sm">Start the conversation with your partner.</p>
                   </div>
                 </div>
               )}
@@ -437,7 +437,7 @@ const OrderDetail = () => {
             <div className="p-6 border-t border-border/40 bg-muted/5">
               <div className="relative group/input flex items-end gap-3 rounded-[2rem] bg-white border border-border/40 p-2 pl-6 pr-2 focus-within:border-primary/40 transition-all focus-within:shadow-elegant">
                 <Textarea
-                  placeholder="Transmission protocol... (No external contact allowed)"
+                  placeholder="Type a message... (Shift+Enter for new line)"
                   value={msgContent}
                   onChange={(e) => setMsgContent(e.target.value)}
                   rows={1}
@@ -454,16 +454,14 @@ const OrderDetail = () => {
                   {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
                 </Button>
               </div>
-              <p className="font-display text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest text-center mt-4">
-                Commercial communication is monitored for security and compliance.
+              <p className="font-display text-[9px] font-medium text-muted-foreground/40 text-center mt-4">
+                All communication is monitored to protect both parties.
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Decorative background elements */}
-        <div className="fixed -bottom-32 -left-32 h-[30rem] w-[30rem] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-        <div className="fixed -top-32 -right-32 h-[30rem] w-[30rem] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
+
       </div>
     </AppShell>
   );

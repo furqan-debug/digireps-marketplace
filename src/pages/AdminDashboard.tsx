@@ -22,7 +22,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("application_status", "pending"),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).in("application_status", ["pending", "submitted"]),
       supabase.from("profiles").select("id", { count: "exact", head: true }),
       supabase.from("orders").select("id", { count: "exact", head: true }),
       supabase.from("violations").select("id", { count: "exact", head: true }),

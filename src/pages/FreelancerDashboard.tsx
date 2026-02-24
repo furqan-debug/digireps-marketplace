@@ -81,7 +81,7 @@ const FreelancerDashboard = () => {
                 {statusCfg.label}
               </Badge>
               {profile && (
-                <Button onClick={() => navigate(`/client/freelancer/${user?.id}`)} variant="outline" className="h-14 px-8 rounded-2xl border-border/50 hover:bg-muted/50 transition-all font-bold text-[11px] uppercase tracking-[0.2em] gap-3">
+                <Button onClick={() => window.open(`/client/freelancer/${user?.id}`, '_blank')} variant="outline" className="h-14 px-8 rounded-2xl border-border/50 hover:bg-muted/50 transition-all font-bold text-[11px] uppercase tracking-[0.2em] gap-3">
                   <Eye className="h-4 w-4" /> View Public Profile
                 </Button>
               )}
@@ -231,7 +231,7 @@ const FreelancerDashboard = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="grid grid-cols-1 gap-4">
               <div
                 onClick={() => navigate("/freelancer/profile")}
-                className="group p-6 rounded-[1.5rem] bg-white border border-border/40 hover:border-primary/30 hover:shadow-elegant cursor-pointer flex items-center justify-between transition-all duration-300"
+                className="group p-6 rounded-2xl bg-card border border-border/40 hover:border-primary/30 hover:shadow-elegant cursor-pointer flex items-center justify-between transition-all duration-300"
               >
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-xl bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors duration-300">
@@ -244,7 +244,7 @@ const FreelancerDashboard = () => {
 
               <div
                 onClick={() => isApproved && navigate("/freelancer/orders")}
-                className={`group p-6 rounded-[1.5rem] bg-white border border-border/40 flex items-center justify-between transition-all duration-300 ${isApproved ? 'hover:border-indigo-500/30 hover:shadow-elegant cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+                className={`group p-6 rounded-2xl bg-card border border-border/40 flex items-center justify-between transition-all duration-300 ${isApproved ? 'hover:border-indigo-500/30 hover:shadow-elegant cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
               >
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-xl bg-indigo-500/5 text-indigo-500 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-colors duration-300">

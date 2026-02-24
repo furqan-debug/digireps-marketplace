@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2, Send, CheckCircle, Shield, Clock, Star, Sparkles, ShieldCheck, Zap, MessageSquare, ArrowRight } from "lucide-react";
+import { ArrowLeft, Loader2, Send, CheckCircle, Shield, Clock, Star, Sparkles, ShieldCheck, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 type Category = { id: string; name: string };
@@ -89,19 +89,14 @@ const SubmitBrief = () => {
 
   return (
     <AppShell>
-      <div className="max-w-6xl mx-auto space-y-12 pb-20">
+      <div className="max-w-6xl mx-auto space-y-10 pb-20">
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
             className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-primary transition-colors"
           >
-            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" /> Retrace Steps
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" /> Back
           </button>
-
-          <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-muted/20 border border-border/20 backdrop-blur-sm">
-            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-[9px] font-bold uppercase tracking-widest text-primary">Mission Configuration</span>
-          </div>
         </div>
 
         <motion.div
@@ -110,117 +105,98 @@ const SubmitBrief = () => {
           transition={{ duration: 0.6 }}
           className="relative"
         >
-          {/* Background Atmosphere Glow */}
-          <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-
-          <div className="space-y-6 relative">
+          <div className="space-y-4 relative">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 border border-primary/20 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-4">
-              <Sparkles className="h-3.5 w-3.5" /> Project Initiation
+              <Sparkles className="h-3.5 w-3.5" /> New Project
             </div>
-            <h1 className="font-display text-5xl sm:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
-              Deploy Engagement
+            <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+              Submit Project Brief
             </h1>
-            <p className="text-muted-foreground/50 text-base sm:text-lg font-medium leading-relaxed max-w-2xl italic">
-              "Drafting a mission-critical strategic brief to align objectives with <strong className="text-primary font-bold">{freelancerName}</strong>'s expertise."
+            <p className="text-muted-foreground text-base font-medium leading-relaxed max-w-2xl">
+              Describe your project requirements for <strong className="text-primary font-bold">{freelancerName}</strong>.
             </p>
           </div>
         </motion.div>
 
         <div className="grid lg:grid-cols-[1fr_380px] gap-12 items-start">
           {/* Form */}
-          <div className="space-y-10">
-            <section className="space-y-8">
-              <div className="flex items-center gap-6">
-                <div className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">01</div>
-                <h2 className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">Brief Parameters</h2>
-                <div className="h-px flex-1 bg-border/40" />
-              </div>
+          <div className="space-y-8">
+            <Card className="dossier-card rounded-3xl border border-border/40 bg-card shadow-xl overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-1 h-full bg-primary/5" />
+              <CardContent className="p-8 sm:p-10 space-y-8">
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Service Category</Label>
+                  <Select value={categoryId} onValueChange={setCategoryId}>
+                    <SelectTrigger className="h-14 rounded-xl bg-muted/20 border-border/10 px-6 font-medium text-sm tracking-tight focus:ring-primary/10 transition-all">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-border/40">
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={c.id} className="rounded-lg focus:bg-primary/5 py-3 font-medium">{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <Card className="dossier-card rounded-[2.5rem] border border-border/40 bg-white shadow-2xl shadow-black/[0.02] overflow-hidden relative">
-                <div className="absolute top-0 left-0 w-1 h-full bg-primary/5" />
-                <CardContent className="p-10 sm:p-14 space-y-12">
-                  <div className="space-y-4">
-                    <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Strategic Service Domain</Label>
-                    <Select value={categoryId} onValueChange={setCategoryId}>
-                      <SelectTrigger className="h-16 rounded-2xl bg-muted/20 border-border/10 px-8 font-bold text-sm tracking-tight focus:ring-primary/10 transition-all">
-                        <SelectValue placeholder="Define category" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-2xl border-border/40 backdrop-blur-3xl">
-                        {categories.map((c) => (
-                          <SelectItem key={c.id} value={c.id} className="rounded-xl focus:bg-primary/5 py-3 font-medium">{c.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Project Title</Label>
+                  <Input id="title" placeholder="e.g. Redesign company website landing page" value={title} onChange={(e) => setTitle(e.target.value)} required className="h-14 rounded-xl bg-muted/20 border-border/10 px-6 font-medium text-sm tracking-tight focus:ring-primary/10 placeholder:text-muted-foreground/30" />
+                </div>
 
-                  <div className="space-y-4">
-                    <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Engagement Title</Label>
-                    <Input id="title" placeholder="e.g. Design Elite Visual Identity for FinTech Series A" value={title} onChange={(e) => setTitle(e.target.value)} required className="h-16 rounded-2xl bg-muted/20 border-border/10 px-8 font-bold text-sm tracking-tight focus:ring-primary/10 placeholder:text-muted-foreground/20" />
-                  </div>
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Project Description</Label>
+                  <Textarea id="description" placeholder="Describe the project goals, deliverables, and any specific requirements..." value={description} onChange={(e) => setDescription(e.target.value)} rows={6} required className="rounded-2xl bg-muted/20 border-border/10 p-6 font-medium text-sm resize-none focus:ring-primary/10 leading-relaxed placeholder:text-muted-foreground/30" />
+                </div>
 
-                  <div className="space-y-4">
-                    <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Operational Scope & Objectives</Label>
-                    <Textarea id="description" placeholder="Articulate the primary objectives, key deliverables, and critical success factors..." value={description} onChange={(e) => setDescription(e.target.value)} rows={8} required className="rounded-3xl bg-muted/20 border-border/10 p-8 font-medium text-sm resize-none focus:ring-primary/10 leading-relaxed placeholder:text-muted-foreground/20 italic" />
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-10">
-                    <div className="space-y-4">
-                      <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Allocated Capital (USD, min $100)</Label>
-                      <div className="relative group">
-                        <span className="absolute left-8 top-1/2 -translate-y-1/2 text-muted-foreground/30 font-bold text-lg pointer-events-none group-focus-within:text-primary transition-colors">$</span>
-                        <Input id="budget" type="number" min="100" step="50" className="pl-14 h-16 rounded-2xl bg-muted/20 border-border/10 px-8 font-bold text-sm tracking-tight focus:ring-primary/10" placeholder="0.00" value={budget} onChange={(e) => setBudget(e.target.value)} required />
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Deployment Deadline</Label>
-                      <div className="relative">
-                        <Input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} min={new Date().toISOString().split("T")[0]} className="h-16 rounded-2xl bg-muted/20 border-border/10 px-8 font-bold text-sm tracking-tight focus:ring-primary/10 appearance-none w-full" />
-                      </div>
+                <div className="grid sm:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Budget (USD, min $100)</Label>
+                    <div className="relative group">
+                      <span className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground/30 font-bold text-lg pointer-events-none group-focus-within:text-primary transition-colors">$</span>
+                      <Input id="budget" type="number" min="100" step="50" className="pl-12 h-14 rounded-xl bg-muted/20 border-border/10 px-6 font-medium text-sm tracking-tight focus:ring-primary/10" placeholder="0.00" value={budget} onChange={(e) => setBudget(e.target.value)} required />
                     </div>
                   </div>
-
-                  <div className="pt-10 border-t border-border/10 space-y-6">
-                    <Button type="submit" onClick={handleSubmit} className="w-full h-20 rounded-[1.5rem] gap-4 bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20 text-[10px] font-bold uppercase tracking-[0.25em]" disabled={isSubmitting}>
-                      {isSubmitting ? (
-                        <><Loader2 className="h-6 w-6 animate-spin" /> Protocol Initiation...</>
-                      ) : (
-                        <><Zap className="h-6 w-6 fill-white" /> Dispatch Project Brief</>
-                      )}
-                    </Button>
-                    <div className="flex flex-col items-center gap-2">
-                      <p className="text-[9px] font-bold text-muted-foreground/30 text-center uppercase tracking-[0.15em]">Security Protocol: 256-bit Encrypted Transaction Chain</p>
-                      <div className="flex items-center gap-1.5 opacity-20 grayscale">
-                        <Shield className="h-3 w-3" />
-                        <span className="text-[8px] font-black uppercase tracking-widest">DigiReps Merchant Escrow Verified</span>
-                      </div>
-                    </div>
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Deadline</Label>
+                    <Input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} min={new Date().toISOString().split("T")[0]} className="h-14 rounded-xl bg-muted/20 border-border/10 px-6 font-medium text-sm tracking-tight focus:ring-primary/10 appearance-none w-full" />
                   </div>
-                </CardContent>
-              </Card>
-            </section>
+                </div>
+
+                <div className="pt-8 border-t border-border/10 space-y-4">
+                  <Button type="submit" onClick={handleSubmit} className="w-full h-16 rounded-2xl gap-3 bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20 text-xs font-bold uppercase tracking-widest" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <><Loader2 className="h-5 w-5 animate-spin" /> Submitting...</>
+                    ) : (
+                      <><Send className="h-5 w-5" /> Submit Brief</>
+                    )}
+                  </Button>
+                  <p className="text-[10px] font-medium text-muted-foreground/40 text-center">
+                    Your payment is protected by DigiReps Escrow until you approve delivery.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Side Info */}
           <div className="lg:sticky lg:top-12 space-y-6">
             <div className="flex items-center gap-6">
-              <div className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">01</div>
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">Target Asset</h2>
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">Freelancer</h2>
               <div className="h-px flex-1 bg-border/40" />
             </div>
 
-            <Card className="dossier-card rounded-[2.5rem] border border-border/40 bg-white overflow-hidden shadow-sm relative">
-              <div className="absolute top-0 right-0 w-16 h-1 w-full bg-primary/10" />
+            <Card className="dossier-card rounded-3xl border border-border/40 bg-card overflow-hidden shadow-sm relative">
               <CardContent className="p-8">
                 <div className="flex items-center gap-5">
-                  <div className="relative h-20 w-20 shrink-0 rounded-2xl bg-muted border-[4px] border-white shadow-lg flex items-center justify-center font-display font-bold text-primary text-3xl overflow-hidden ring-4 ring-primary/5 transition-transform hover:scale-105 duration-500">
+                  <div className="relative h-16 w-16 shrink-0 rounded-2xl bg-muted border-[3px] border-card shadow-lg flex items-center justify-center font-display font-bold text-primary text-2xl overflow-hidden ring-4 ring-primary/5 transition-transform hover:scale-105 duration-500">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
                     {freelancerName[0]?.toUpperCase()}
                   </div>
-                  <div className="space-y-2">
-                    <h3 className="font-display font-bold text-xl tracking-tight leading-tight">{freelancerName}</h3>
+                  <div className="space-y-1">
+                    <h3 className="font-display font-bold text-lg tracking-tight leading-tight">{freelancerName}</h3>
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-500/5 border border-blue-500/10">
                       <ShieldCheck className="h-3 w-3 text-blue-500" />
-                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-600">Verified Elite</span>
+                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-600">Verified</span>
                     </div>
                   </div>
                 </div>
@@ -228,41 +204,33 @@ const SubmitBrief = () => {
             </Card>
 
             <div className="flex items-center gap-6">
-              <div className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">02</div>
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">Governance Protocol</h2>
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">How It Works</h2>
               <div className="h-px flex-1 bg-border/40" />
             </div>
 
-            <Card className="dossier-card rounded-[2.5rem] border border-border/40 bg-white overflow-hidden p-10 shadow-sm">
-              <CardContent className="p-0 space-y-8">
+            <Card className="dossier-card rounded-3xl border border-border/40 bg-card overflow-hidden p-8 shadow-sm">
+              <CardContent className="p-0 space-y-6">
                 {nextSteps.map(({ icon: Icon, text }, i) => (
-                  <div key={i} className="flex gap-6 group">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-muted border border-border/20 text-muted-foreground/40 group-hover:bg-primary group-hover:text-white group-hover:border-primary group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-500">
-                      <Icon className="h-5 w-5" />
+                  <div key={i} className="flex gap-5 group">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted border border-border/20 text-muted-foreground/40 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-500">
+                      <Icon className="h-4 w-4" />
                     </div>
-                    <div className="space-y-1.5 pt-1.5">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground transition-colors group-hover:text-primary">Phase 0{i + 1}</p>
-                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.1em] leading-relaxed group-hover:text-muted-foreground transition-colors">{text}</p>
+                    <div className="space-y-1 pt-1">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">Step {i + 1}</p>
+                      <p className="text-[10px] font-medium text-muted-foreground/60 leading-relaxed">{text}</p>
                     </div>
                   </div>
                 ))}
               </CardContent>
             </Card>
 
-            <div className="flex items-center gap-6">
-              <div className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">03</div>
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">Security Protocol</h2>
-              <div className="h-px flex-1 bg-border/40" />
-            </div>
-
-            <div className="dossier-card p-10 rounded-[2.5rem] bg-white border border-border/40 shadow-sm text-center space-y-4 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-primary/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="h-12 w-12 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto shadow-inner group-hover:scale-110 transition-transform duration-500">
-                <ShieldCheck className="h-6 w-6 text-primary shadow-sm" />
+            <div className="dossier-card p-8 rounded-3xl bg-card border border-border/40 shadow-sm text-center space-y-3 relative overflow-hidden group">
+              <div className="h-10 w-10 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto">
+                <ShieldCheck className="h-5 w-5 text-primary" />
               </div>
-              <div className="space-y-2 relative">
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground">Merchant Escrow Guaranteed</p>
-                <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-[0.1em] leading-relaxed italic px-4">Funds are held in high-security escrow until the final asset delivery is approved by the client.</p>
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground">Escrow Protected</p>
+                <p className="text-[10px] font-medium text-muted-foreground/50 leading-relaxed px-4">Funds are held securely until you approve the final delivery.</p>
               </div>
             </div>
           </div>
