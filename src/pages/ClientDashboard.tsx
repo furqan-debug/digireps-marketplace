@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { Search, FileText, MessageSquare, ArrowRight, Sparkles, TrendingUp, CheckCircle, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Search, FileText, MessageSquare, ArrowRight, Sparkles, TrendingUp, CheckCircle, Clock, AlertCircle, Lightbulb } from "lucide-react";
 import { motion } from "framer-motion";
 
 const ClientDashboard = () => {
   const { profile, user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState({ total: 0, active: 0, completed: 0 });
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [hasDelivery, setHasDelivery] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -18,12 +21,16 @@ const ClientDashboard = () => {
       supabase.from("orders").select("id", { count: "exact", head: true }).eq("client_id", user.id),
       supabase.from("orders").select("id", { count: "exact", head: true }).eq("client_id", user.id).in("status", ["accepted", "in_progress", "delivered"]),
       supabase.from("orders").select("id", { count: "exact", head: true }).eq("client_id", user.id).eq("status", "completed"),
-    ]).then(([total, active, completed]) => {
+      supabase.from("orders").select("id, title, status, created_at, budget").eq("client_id", user.id).order("created_at", { ascending: false }).limit(3),
+      supabase.from("orders").select("id", { count: "exact", head: true }).eq("client_id", user.id).eq("status", "delivered"),
+    ]).then(([total, active, completed, recent, delivered]) => {
       setStats({
         total: total.count ?? 0,
         active: active.count ?? 0,
         completed: completed.count ?? 0,
       });
+      setRecentOrders(recent.data ?? []);
+      setHasDelivery((delivered.count ?? 0) > 0);
     });
   }, [user]);
 
@@ -136,6 +143,57 @@ const ClientDashboard = () => {
               <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground/50">Active Channels &rarr;</p>
             </div>
           </motion.div>
+
+          {/* Recommended Action */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.5 }}
+            className="md:col-span-12">
+            <div className="bg-card border border-border/60 rounded-[2rem] p-8 flex items-center gap-6">
+              <div className="h-12 w-12 shrink-0 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center text-primary">
+                {hasDelivery ? <AlertCircle className="h-6 w-6" /> : <Lightbulb className="h-6 w-6" />}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-display font-bold text-base tracking-tight text-foreground">
+                  {hasDelivery ? "You have a delivery waiting for review" : stats.active === 0 ? "No active projects" : `You have ${stats.active} active project${stats.active > 1 ? 's' : ''}`}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {hasDelivery
+                    ? "A freelancer has submitted their work. Review it and approve to release payment."
+                    : stats.active === 0
+                      ? "Start by browsing our vetted freelancers and submitting a project brief."
+                      : "Keep track of your projects from the orders page."}
+                </p>
+              </div>
+              <Button onClick={() => navigate(hasDelivery ? "/client/orders" : "/client/discover")} variant="outline" className="shrink-0 h-10 px-6 rounded-xl font-bold text-xs uppercase tracking-widest">
+                {hasDelivery ? "Review Now" : stats.active === 0 ? "Find Talent" : "View Orders"} <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Recent Orders */}
+          {recentOrders.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.5 }}
+              className="md:col-span-12">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-display text-xl font-bold tracking-tight">Recent Orders</h2>
+                <Link to="/client/orders" className="text-xs font-bold uppercase tracking-widest text-primary hover:underline">View All</Link>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {recentOrders.map((order) => (
+                  <div key={order.id} onClick={() => navigate(`/orders/${order.id}`)}
+                    className="bg-card border border-border/60 rounded-2xl p-6 cursor-pointer hover:border-primary/30 hover:shadow-elegant transition-all duration-300 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <h4 className="font-display font-bold text-sm text-foreground line-clamp-1">{order.title}</h4>
+                      <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider shrink-0 ml-2">{order.status.replace("_", " ")}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>${order.budget?.toLocaleString()}</span>
+                      <span className="flex items-center gap-1"><ArrowRight className="h-3 w-3" /> View</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
         </div>
       </div>

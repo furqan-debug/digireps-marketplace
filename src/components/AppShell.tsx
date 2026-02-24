@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Shield, LogOut, LayoutDashboard, Search, FileText,
-  User, Users, AlertTriangle, ShieldCheck,
+  User, Users, AlertTriangle, ShieldCheck, Settings, DollarSign,
 } from "lucide-react";
 
 interface NavItem {
@@ -18,11 +18,13 @@ const clientNav: NavItem[] = [
   { label: "Dashboard", to: "/client", icon: LayoutDashboard },
   { label: "Find Talent", to: "/client/discover", icon: Search },
   { label: "My Orders", to: "/client/orders", icon: FileText },
+  { label: "Settings", to: "/client/settings", icon: Settings },
 ];
 
 const freelancerNav: NavItem[] = [
   { label: "Dashboard", to: "/freelancer", icon: LayoutDashboard },
   { label: "My Orders", to: "/freelancer/orders", icon: FileText },
+  { label: "Earnings", to: "/freelancer/earnings", icon: DollarSign },
   { label: "My Profile", to: "/freelancer/profile", icon: User },
 ];
 
@@ -148,8 +150,8 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
               <span>© 2026 DigiReps — Elite Marketplace</span>
             </div>
             <div className="flex gap-6">
-              <Link to="/" className="hover:text-primary transition-colors">Terms of Service</Link>
-              <Link to="/" className="hover:text-primary transition-colors">Privacy Policy</Link>
+              <Link to="/help" className="hover:text-primary transition-colors">Help & FAQ</Link>
+              <Link to="/how-it-works" className="hover:text-primary transition-colors">How It Works</Link>
               <a href="mailto:support@digireps.com" className="hover:text-primary transition-colors">Support</a>
             </div>
           </div>

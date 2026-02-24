@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Briefcase, User, Star, ArrowRight, Clock, Crown, Shield, AlertCircle, Sparkles, Eye, MessageSquare, Ban, Edit } from "lucide-react";
+import { Briefcase, User, Star, ArrowRight, Clock, Crown, Shield, AlertCircle, Sparkles, Eye, MessageSquare, Ban, Edit, DollarSign } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
@@ -33,7 +33,8 @@ const itemVariants = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, 
 const FreelancerDashboard = () => {
   const { profile, user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ totalJobs: 0, avgRating: null as number | null });
+  const [stats, setStats] = useState({ totalJobs: 0, avgRating: null as number | null, totalEarned: 0 });
+  const [recentReviews, setRecentReviews] = useState<any[]>([]);
 
   const status = profile?.application_status as keyof typeof STATUS_CONFIG | null;
   const statusCfg = status ? (STATUS_CONFIG[status] ?? STATUS_CONFIG.onboarding) : STATUS_CONFIG.onboarding;
@@ -49,12 +50,14 @@ const FreelancerDashboard = () => {
   useEffect(() => {
     if (!user || !isApproved) return;
     Promise.all([
-      supabase.from("orders").select("id", { count: "exact", head: true }).eq("freelancer_id", user.id).eq("status", "completed"),
-      supabase.from("ratings").select("rating").eq("reviewee_id", user.id),
+      supabase.from("orders").select("id, budget", { count: "exact" }).eq("freelancer_id", user.id).eq("status", "completed"),
+      supabase.from("ratings").select("rating, review_text, created_at").eq("reviewee_id", user.id).order("created_at", { ascending: false }).limit(3),
     ]).then(([jobs, ratings]) => {
       const ratingData = ratings.data ?? [];
       const avg = ratingData.length > 0 ? ratingData.reduce((s, r) => s + r.rating, 0) / ratingData.length : null;
-      setStats({ totalJobs: jobs.count ?? 0, avgRating: avg });
+      const totalEarned = (jobs.data ?? []).reduce((s, o) => s + (o.budget || 0), 0);
+      setStats({ totalJobs: jobs.count ?? 0, avgRating: avg, totalEarned });
+      setRecentReviews(ratingData);
     });
   }, [user, isApproved]);
 
@@ -167,25 +170,59 @@ const FreelancerDashboard = () => {
 
             {/* Performance Equity Grid (If Approved) */}
             {isApproved && (
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-3 gap-6">
                 <div className="dossier-card p-8 group hover:border-primary/30 transition-colors duration-500">
                   <div className="flex justify-between items-start mb-6">
-                    <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-500">
+                    <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-500">
                       <Briefcase className="h-6 w-6" />
                     </div>
                   </div>
-                  <div className="text-6xl font-display font-bold mb-2 tracking-tighter text-foreground">{stats.totalJobs}</div>
-                  <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Completed Briefs</div>
+                  <div className="text-5xl font-display font-bold mb-2 tracking-tighter text-foreground">{stats.totalJobs}</div>
+                  <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Completed</div>
                 </div>
 
                 <div className="dossier-card p-8 group hover:border-warning/30 transition-colors duration-500">
                   <div className="flex justify-between items-start mb-6">
-                    <div className="h-12 w-12 rounded-2xl bg-warning/10 flex items-center justify-center text-warning group-hover:bg-warning group-hover:text-white transition-colors duration-500">
+                    <div className="h-12 w-12 rounded-2xl bg-warning/10 flex items-center justify-center text-warning group-hover:bg-warning group-hover:text-primary-foreground transition-colors duration-500">
                       <Star className="h-6 w-6" />
                     </div>
                   </div>
-                  <div className="text-6xl font-display font-bold mb-2 tracking-tighter text-foreground">{stats.avgRating != null ? stats.avgRating.toFixed(1) : "5.0"}</div>
-                  <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Client Rating</div>
+                  <div className="text-5xl font-display font-bold mb-2 tracking-tighter text-foreground">{stats.avgRating != null ? stats.avgRating.toFixed(1) : "5.0"}</div>
+                  <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Rating</div>
+                </div>
+
+                <div className="dossier-card p-8 group hover:border-accent/30 transition-colors duration-500 cursor-pointer" onClick={() => navigate("/freelancer/earnings")}>
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="h-12 w-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-primary-foreground transition-colors duration-500">
+                      <DollarSign className="h-6 w-6" />
+                    </div>
+                  </div>
+                  <div className="text-5xl font-display font-bold mb-2 tracking-tighter text-foreground">${stats.totalEarned.toLocaleString()}</div>
+                  <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Total Earned</div>
+                </div>
+              </div>
+            )}
+
+            {/* Recent Reviews */}
+            {isApproved && recentReviews.length > 0 && (
+              <div className="dossier-card p-8 space-y-6">
+                <h3 className="font-display text-lg font-bold tracking-tight">Recent Reviews</h3>
+                <div className="space-y-4">
+                  {recentReviews.map((review, i) => (
+                    <div key={i} className="border-b border-border/20 last:border-0 pb-4 last:pb-0 space-y-2">
+                      <div className="flex items-center gap-1">
+                        {[...Array(review.rating)].map((_, j) => (
+                          <Star key={j} className="h-3.5 w-3.5 fill-warning text-warning" />
+                        ))}
+                        {[...Array(5 - review.rating)].map((_, j) => (
+                          <Star key={j} className="h-3.5 w-3.5 text-border" />
+                        ))}
+                      </div>
+                      {review.review_text && (
+                        <p className="text-sm text-muted-foreground italic line-clamp-2">"{review.review_text}"</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
