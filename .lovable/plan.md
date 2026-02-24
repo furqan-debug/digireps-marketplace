@@ -1,279 +1,159 @@
 
+# Add Depth, Content & Missing Pages
 
-# Production Launch Preparation -- Full UI/UX & Functional Overhaul
+## Overview
 
-## Scope
-
-A complete audit and refinement of every page, component, and interaction in the platform. The goal is to achieve a premium, enterprise-grade experience comparable to Toptal -- clean typography, disciplined spacing, visual depth, and fully functional interactions.
-
----
-
-## Phase 1: Fix Build Error (Immediate)
-
-**File:** `src/pages/Index.tsx` (lines 40-43)
-
-The `itemVariants` animation object uses `ease: [0.22, 1, 0.36, 1]` (array of raw numbers). Framer Motion v12 requires cubic bezier arrays to be typed as tuples. Fix by casting the ease value with `as const`.
+After auditing the platform against Toptal, Upwork, Fiverr, and Freelancer.com, the following gaps were identified. This plan adds 4 new pages and enriches 3 existing pages with meaningful content sections -- making the platform feel complete for both clients and freelancers.
 
 ---
 
-## Phase 2: Landing Page Polish (`src/pages/Index.tsx`)
+## New Pages
 
-Current issues:
-- Overly aggressive typography (10rem headings, uppercase italic everywhere)
-- Too much whitespace between sections (py-40 gaps)
-- Dark benefits section uses hardcoded `#020617` color which breaks dark mode
-- Hero has too many decorative blurs competing for attention
-- Footer links (Terms, Privacy, Support) are non-functional spans
+### 1. How It Works (`/how-it-works`) -- Public Page
 
-Changes:
-- Reduce hero heading to `text-5xl sm:text-6xl lg:text-7xl` -- large but controlled
-- Tone down uppercase/italic to only accent elements
-- Replace `bg-[#020617]` with `bg-foreground` for dark mode compatibility
-- Reduce section padding from `py-40` to `py-24`
-- Simplify background decorations (fewer blur elements)
-- Make footer links actual `Link` components pointing to `/auth` for now
-- Add subtle entrance animations with proper Framer Motion variants
-- Fix service categories grid -- 5 columns doesn't work well on tablet, change to `lg:grid-cols-5 md:grid-cols-3`
+A dedicated public page (accessible without login) that explains the platform process for both audiences. Inspired by Toptal's "Why Toptal" and Fiverr's "How Fiverr Works" pages.
 
----
+**Content sections:**
+- Hero: "How DigiReps Works" with two-path CTA (Hire Talent / Join as Freelancer)
+- **For Clients** -- 4-step visual process:
+  1. Browse vetted talent by category
+  2. Review profiles, portfolios, and ratings
+  3. Submit a project brief with budget and timeline
+  4. Collaborate securely, approve delivery, release payment
+- **For Freelancers** -- 4-step visual process:
+  1. Apply and complete your profile
+  2. Get vetted and approved by the DigiReps team
+  3. Receive project briefs from clients
+  4. Deliver work, get rated, earn payment
+- FAQ accordion section (6-8 common questions)
+- Bottom CTA banner
 
-## Phase 3: Auth Page Refinement (`src/pages/Auth.tsx`)
-
-Current issues:
-- "Forgot?" link does nothing
-- Left panel gradient bleeds awkwardly on some screens
-- Role selector cards could use clearer visual hierarchy
-
-Changes:
-- Remove "Forgot?" link or replace with a toast saying "Contact support to reset password"
-- Refine left panel gradient to be more subtle
-- Add form validation feedback (email format, password length) inline
-- Improve role selector with descriptive subtitle text
+**Route:** `/how-it-works` (public, no auth required)
 
 ---
 
-## Phase 4: AppShell Navigation (`src/components/AppShell.tsx`)
+### 2. Client Settings (`/client/settings`)
 
-Current issues:
-- Mobile nav shows only icons with no labels -- hard to understand
-- Footer links `/terms` and `/privacy` lead to 404
-- The glass-panel nav bar floats but doesn't collapse gracefully on scroll
-- Background decorative blurs add unnecessary DOM weight on every page
+Clients currently have no way to edit their own profile info (name, company, avatar). This page adds that.
 
-Changes:
-- Add labels below mobile nav icons (small text)
-- Remove dead footer links or point them to `/` with a toast
-- Reduce background blurs to a single subtle element
-- Ensure nav sticky behavior works smoothly across all page heights
-- Fix the `-gap-1` typo (should be `gap-0` or removed)
+**Content:**
+- Edit display name
+- Edit company name
+- Upload/change avatar
+- View account email (read-only)
+- View timezone (auto-detected, read-only)
+- Save button
 
----
-
-## Phase 5: Client Dashboard (`src/pages/ClientDashboard.tsx`)
-
-Current issues:
-- Uses hardcoded `bg-white` which breaks dark mode
-- Bento grid `auto-rows-[160px]` causes content overflow on smaller cards
-- "Communications" card count badge shows 0 even when there are no active orders (misleading)
-
-Changes:
-- Replace `bg-white` with `bg-card`
-- Change auto-rows to `auto-rows-[minmax(160px,auto)]`
-- Hide badge count when 0
-- Add loading skeleton state
+**Route:** `/client/settings` (client role required)
+**Nav:** Add "Settings" link to client navigation in AppShell
 
 ---
 
-## Phase 6: Freelancer Dashboard (`src/pages/FreelancerDashboard.tsx`)
+### 3. Freelancer Earnings (`/freelancer/earnings`)
 
-Current issues:
-- "View Public Profile" button navigates to `/client/freelancer/{id}` which requires client role -- will show permission error for freelancers
-- Uses `bg-white` hardcoded (dark mode issue)
-- Sidebar quick actions use `bg-white` instead of `bg-card`
+A page showing the freelancer's financial overview -- completed orders, total earned, and payment history. Data is derived from the existing `orders` table (completed orders with budget values).
 
-Changes:
-- Fix "View Public Profile" route -- either make the route accessible to freelancers or navigate to a preview route
-- Replace all `bg-white` with `bg-card`
-- Add a "Profile Incomplete" progress nudge when completionScore < 80
+**Content:**
+- Summary cards: Total Earned (sum of completed order budgets), Completed Projects count, Average Project Value
+- Payment history table: lists all completed orders with title, client (masked), budget amount, completion date
+- Empty state if no completed orders
 
----
-
-## Phase 7: Discover Page (`src/pages/client/Discover.tsx`)
-
-Current issues:
-- Freelancer cards use `bg-white` (dark mode)
-- Search bar has nested styling that doesn't look clean
-- Category buttons use `bg-white` (dark mode)
-- Card click navigates but the click target is the entire card -- no visual feedback
-
-Changes:
-- Replace `bg-white` with `bg-card` throughout
-- Simplify search bar styling -- remove the outer dossier-card wrapper
-- Add hover cursor and subtle scale on freelancer cards
-- Add avatar images to freelancer cards when available (currently only shows initials)
+**Route:** `/freelancer/earnings` (freelancer role required)
+**Nav:** Add "Earnings" link to freelancer navigation in AppShell
 
 ---
 
-## Phase 8: Freelancer Profile Page (`src/pages/client/FreelancerProfile.tsx`)
+### 4. Help / FAQ (`/help`) -- Public Page
 
-Current issues:
-- "Share" button does nothing
-- Profile card uses `bg-white` (dark mode)
-- Section numbering (01, 02, etc.) is nice but inconsistent if sections are conditionally hidden
-- "Submit Brief" button at bottom works correctly
+A support/FAQ page accessible to everyone. Answers common questions and provides contact info.
 
-Changes:
-- Make "Share" button copy the current URL to clipboard with a toast
-- Replace all `bg-white` with `bg-card`
-- Make section numbers dynamic based on visible sections
-- Add loading skeleton for profile header
+**Content:**
+- Search bar (filters FAQ items client-side)
+- FAQ sections using accordion component:
+  - **For Clients:** How do I hire? What is escrow? How do I dispute?
+  - **For Freelancers:** How do I apply? How long is review? How do I get paid?
+  - **General:** Is my data secure? How do I contact support? What are the fees?
+- Contact support section with email link
 
----
-
-## Phase 9: Submit Brief Page (`src/pages/client/SubmitBrief.tsx`)
-
-Current issues:
-- Overly militaristic language ("Deploy Engagement", "Operational Scope", "Allocated Capital", "Protocol Initiation")
-- "Retrace Steps" back button is confusing
-- "Security Protocol: 256-bit Encrypted Transaction Chain" is fabricated and misleading
-- Submit button text "Dispatch Project Brief" is jargon
-
-Changes:
-- Rename to natural business language:
-  - "Deploy Engagement" -> "Submit Project Brief"
-  - "Operational Scope" -> "Project Description"
-  - "Allocated Capital" -> "Budget"
-  - "Deployment Deadline" -> "Deadline"
-  - "Dispatch Project Brief" -> "Submit Brief"
-  - "Retrace Steps" -> "Back"
-- Remove fake security protocol text
-- Keep the escrow guarantee note but simplify wording
-- Rename "Target Asset" sidebar heading to "Freelancer"
-- Rename "Governance Protocol" to "How It Works"
+**Route:** `/help` (public, no auth required)
 
 ---
 
-## Phase 10: Orders Page (`src/pages/Orders.tsx`)
+## Enriching Existing Pages
 
-Current issues:
-- "War Room" button label is inappropriate for a professional platform
-- Uses `bg-white` in cards (dark mode)
-- Fixed decorative blur at bottom adds unnecessary DOM
+### 5. Landing Page (`src/pages/Index.tsx`) -- Add Depth
 
-Changes:
-- Rename "War Room" to "Open Order" or "View Details"
-- Replace `bg-white` with `bg-card`
-- Remove fixed decorative blur
-- Add empty state illustration
+Currently thin -- just hero, stats, how-it-works, benefits, categories, CTA, and footer. Compared to competitors, it lacks social proof and dual-audience messaging.
+
+**New sections to add (between existing sections):**
+- **Testimonials section** (after benefits): 3 testimonial cards with name, role, quote, and star rating. Uses static placeholder data.
+- **For Clients vs For Freelancers** split section (before CTA): Two-column layout explaining value for each audience, each with its own CTA button.
+- **Trusted By logos** row (after hero stats): Simple row of company name text badges (e.g., "TechCorp", "DesignLab", "StartupXYZ") as placeholder social proof.
 
 ---
 
-## Phase 11: Order Detail Page (`src/pages/OrderDetail.tsx`)
+### 6. Client Dashboard (`src/pages/ClientDashboard.tsx`) -- Add Widgets
 
-Current issues:
-- Chat input area works but message sending uses Edge Function -- need to verify `VITE_SUPABASE_URL` is correctly set
-- "Post Engagement Review" jargon in rating modal
-- Workspace ID shows hash -- fine but label is overly corporate
+Currently shows only stats + 2 action cards. Feels empty compared to Upwork's client home.
 
-Changes:
-- Rename "Post Engagement Review" -> "Leave a Review"
-- Rename "Workspace ID" -> "Order"
-- Rename "Engagement Phase" -> "Next Step"
-- Rename "Contract Budget" -> "Budget"
-- Rename "Accept Proposal" -> "Accept Order"
-- Rename "Finalize & Deliver" -> "Mark as Delivered"
-- Rename "Approve Release" -> "Approve & Pay"
-- Ensure chat scroll behavior works correctly
-- Add typing indicator placeholder
+**New sections:**
+- **Recent Orders** widget: Show last 3 orders with title, status badge, and "View" link. Fetched from Supabase.
+- **Recommended Action** card: Contextual nudge -- "You have 0 active projects. Start by finding talent." or "You have a delivery waiting for review."
 
 ---
 
-## Phase 12: Admin Pages Cleanup
+### 7. Freelancer Dashboard (`src/pages/FreelancerDashboard.tsx`) -- Add Widgets
 
-### Admin Dashboard (`src/pages/AdminDashboard.tsx`)
-- Currently functional and clean. Minor polish only.
-- Fix `pending` count query -- it only checks `application_status = 'pending'` but should also include `'submitted'`
+Currently shows status banners + stats + sidebar. Missing earnings info and reviews.
 
-### Applications (`src/pages/admin/Applications.tsx`)
-- Working correctly after trigger fix. Minor styling polish.
-- Add filter tabs for status types
-
-### Admin Users (`src/pages/admin/AdminUsers.tsx`)
-- Working correctly. Minor polish.
-- Add role filter dropdown
-
-### Admin Orders (`src/pages/admin/AdminOrders.tsx`)
-- Working correctly.
-
-### Violations (`src/pages/admin/Violations.tsx`)
-- Working correctly.
+**New sections (for approved freelancers only):**
+- **Earnings Summary** card: Total earned from completed orders (sum of budgets). Shows in the performance grid.
+- **Recent Reviews** widget: Last 2-3 ratings received, showing star count and review text. Fetched from `ratings` table.
 
 ---
 
-## Phase 13: Edit Profile Flow (`src/pages/freelancer/EditProfile.tsx`)
+## Routing & Navigation Changes
 
-Current issues:
-- "View Public Profile" in edit mode sidebar navigates to `/freelancer/{id}` which is not a valid route (should be `/client/freelancer/{id}`)
-- The file is 1323 lines -- consider extracting shared sub-components but not strictly needed for launch
+### App.tsx -- New Routes
+```text
+/how-it-works     -> HowItWorks (public)
+/help             -> Help (public)
+/client/settings  -> ClientSettings (client role)
+/freelancer/earnings -> FreelancerEarnings (freelancer role)
+```
 
-Changes:
-- Fix "View Public Profile" link in sidebar to use correct route
-- Ensure all wizard steps render correctly
-- Verify portfolio form integration works end-to-end
+### AppShell.tsx -- Nav Updates
+- Client nav: Add "Settings" item with User icon pointing to `/client/settings`
+- Freelancer nav: Add "Earnings" item with DollarSign icon pointing to `/freelancer/earnings`
+- Footer: Update "Terms of Service" and "Privacy Policy" links to point to `/help`
 
----
-
-## Phase 14: Global Dark Mode Compatibility
-
-Every page currently has hardcoded `bg-white` in card components. All instances across the entire codebase must be replaced with `bg-card` for dark mode support.
-
----
-
-## Phase 15: Typography & Spacing System Consistency
-
-Apply consistent spacing and typography rules across all pages:
-- Page headers: `text-3xl sm:text-4xl font-bold`
-- Section headers: `text-sm font-bold uppercase tracking-wider`
-- Body text: `text-sm text-muted-foreground`
-- Card padding: `p-6 sm:p-8`
-- Section gaps: `space-y-8`
-- Border radius: consistent `rounded-2xl` for cards, `rounded-xl` for buttons and inputs
-
----
-
-## Phase 16: Responsive Audit
-
-- Test all grids at mobile (375px), tablet (768px), and desktop (1280px)
-- Fix any overflow issues in the wizard step bar
-- Ensure bento grids stack properly on mobile
-- Verify chat interface is usable on mobile
+### Landing Page Nav
+- Add "How It Works" link in the header nav bar (next to Sign In)
+- Add "How It Works" and "Help" links in the footer
 
 ---
 
 ## Files Changed Summary
 
-| File | Changes |
-|------|---------|
-| `src/pages/Index.tsx` | Fix build error (ease type), reduce heading sizes, fix dark section color, simplify decorations, fix footer links |
-| `src/pages/Auth.tsx` | Fix "Forgot?" link, minor styling |
-| `src/components/AppShell.tsx` | Fix mobile nav, remove dead links, fix typo, reduce background effects |
-| `src/pages/ClientDashboard.tsx` | Dark mode fix (`bg-card`), fix auto-rows, hide 0 badge |
-| `src/pages/FreelancerDashboard.tsx` | Fix "View Public Profile" route, dark mode fixes |
-| `src/pages/client/Discover.tsx` | Dark mode fixes, show avatars, simplify search bar |
-| `src/pages/client/FreelancerProfile.tsx` | Fix "Share" button, dark mode fixes, dynamic section numbers |
-| `src/pages/client/SubmitBrief.tsx` | Replace all jargon with natural language |
-| `src/pages/Orders.tsx` | Rename "War Room", dark mode fixes |
-| `src/pages/OrderDetail.tsx` | Rename jargon labels throughout |
-| `src/pages/AdminDashboard.tsx` | Fix pending count query to include `submitted` |
-| `src/pages/freelancer/EditProfile.tsx` | Fix "View Public Profile" link |
+| File | Action | Description |
+|------|--------|-------------|
+| `src/pages/HowItWorks.tsx` | Create | Public page explaining process for clients and freelancers |
+| `src/pages/Help.tsx` | Create | FAQ and support page with accordion |
+| `src/pages/client/ClientSettings.tsx` | Create | Client profile editing page |
+| `src/pages/freelancer/Earnings.tsx` | Create | Freelancer earnings and payment history |
+| `src/App.tsx` | Edit | Add 4 new routes |
+| `src/components/AppShell.tsx` | Edit | Add Settings and Earnings nav items, update footer links |
+| `src/pages/Index.tsx` | Edit | Add testimonials, dual-audience section, trusted-by logos |
+| `src/pages/ClientDashboard.tsx` | Edit | Add recent orders widget and action nudge |
+| `src/pages/FreelancerDashboard.tsx` | Edit | Add earnings summary and recent reviews widgets |
 
 ---
 
-## What Will NOT Change
+## Technical Notes
 
-- Business logic and database schema (no migrations)
-- Routing structure
-- Auth flow logic
-- Supabase integrations
-- Component library (shadcn/ui components stay as-is)
-
+- All new pages use existing UI components (Card, Badge, Button, Accordion) and the AppShell layout
+- Earnings are calculated from the `orders` table: `SUM(budget) WHERE freelancer_id = user.id AND status = 'completed'`
+- Client Settings updates the `profiles` table (display_name, company fields) using `.eq('user_id', user.id)`
+- FAQ data is hardcoded -- no new database tables needed
+- Testimonials use static placeholder data -- no new tables needed
+- All pages follow existing design patterns (motion animations, dossier-card styling, consistent typography)
