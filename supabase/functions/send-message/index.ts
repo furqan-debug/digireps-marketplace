@@ -16,6 +16,12 @@ const BLOCKED_WORDS    = [
   "discord", "snapchat", "wechat", "signal",
   "viber", "line", "zalo", "kakaotalk",
 ];
+const SOCIAL_ENGINEERING = [
+  "contact me", "reach me", "call me", "text me", "dm me",
+  "message me on", "hit me up", "hmu", "add me",
+  "my number", "my email", "my insta", "my snap",
+  "off platform", "outside the app", "outside platform",
+];
 
 function detectViolation(content: string): string | null {
   if (EMAIL_PATTERN.test(content))   return "email_pattern";
@@ -26,7 +32,29 @@ function detectViolation(content: string): string | null {
   for (const word of BLOCKED_WORDS) {
     if (lower.includes(word)) return `blocked_word:${word}`;
   }
+  for (const phrase of SOCIAL_ENGINEERING) {
+    if (lower.includes(phrase)) return `social_engineering:${phrase}`;
+  }
   return null;
+}
+
+// Check if recent messages + new one form a phone number when concatenated
+function detectSplitPhone(recentContents: string[], newContent: string): boolean {
+  const combined = [...recentContents, newContent]
+    .map(m => m.replace(/\s+/g, ""))
+    .join("");
+  // Extract all digit sequences and concatenate
+  const digits = combined.replace(/[^\d]/g, "");
+  if (digits.length >= 7 && digits.length <= 15) return true;
+  // Also check sliding windows of last N messages
+  for (let i = 0; i < combined.length; i++) {
+    const sub = combined.slice(i);
+    const subDigits = sub.replace(/[^\d]/g, "");
+    if (subDigits.length >= 7 && subDigits.length <= 15 && subDigits.length / sub.length > 0.6) {
+      return true;
+    }
+  }
+  return false;
 }
 
 Deno.serve(async (req) => {
@@ -103,7 +131,6 @@ Deno.serve(async (req) => {
     const violationType = detectViolation(content);
 
     if (violationType) {
-      // Log violation using service-role (violations RLS only allows admin or own user_id)
       await adminClient.from("violations").insert({
         user_id:         user.id,
         order_id:        order_id,
@@ -111,7 +138,6 @@ Deno.serve(async (req) => {
         message_content: content.substring(0, 500),
       });
 
-      // Count total violations (trigger will suspend if >= 3, but return count to caller)
       const { count } = await adminClient
         .from("violations")
         .select("id", { count: "exact", head: true })
@@ -125,6 +151,41 @@ Deno.serve(async (req) => {
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
+    }
+
+    // ── Split-message phone detection ───────────────────────────────────────
+    const { data: recentMsgs } = await adminClient
+      .from("messages")
+      .select("content")
+      .eq("order_id", order_id)
+      .eq("sender_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (recentMsgs && recentMsgs.length > 0) {
+      const recentContents = recentMsgs.map((m: { content: string }) => m.content).reverse();
+      if (detectSplitPhone(recentContents, content)) {
+        await adminClient.from("violations").insert({
+          user_id:         user.id,
+          order_id:        order_id,
+          violation_type:  "split_phone_pattern",
+          message_content: [...recentContents, content].join(" | ").substring(0, 500),
+        });
+
+        const { count } = await adminClient
+          .from("violations")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id);
+
+        return new Response(
+          JSON.stringify({
+            blocked:   true,
+            message:   "Sharing contact info is against platform rules.",
+            violation_count: count ?? 0,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
     }
 
     // ── Save message ────────────────────────────────────────────────────────
