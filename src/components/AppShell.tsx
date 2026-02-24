@@ -7,7 +7,7 @@ import {
   LogOut, LayoutDashboard, Search, FileText,
   User, Users, AlertTriangle, ShieldCheck, Settings, DollarSign,
 } from "lucide-react";
-import logoIcon from "@/assets/logo-icon.png";
+import logoNav from "@/assets/logo-nav.png";
 
 interface NavItem {
   label: string;
@@ -70,11 +70,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
             <div className="px-6 flex h-16 sm:h-18 items-center justify-between gap-4">
               {/* Logo */}
               <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-                <img src={logoIcon} alt="DigiReps" className="h-9 w-9 rounded-xl shadow-elegant group-hover:scale-105 transition-transform duration-300" />
-                <div className="flex flex-col">
-                  <span className="font-display font-bold text-lg leading-none gradient-text">DigiReps</span>
-                  <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground/60">Elite Network</span>
-                </div>
+                <img src={logoNav} alt="DigiReps" className="h-7 brightness-0 dark:brightness-100 group-hover:scale-105 transition-transform duration-300" />
                 {role === "admin" && (
                   <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 hidden sm:flex border-primary/30 text-primary uppercase tracking-tighter ml-1">Admin</Badge>
                 )}
@@ -145,7 +141,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
         <footer className="border-t border-border/40 bg-card/40 py-8">
           <div className="container flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-muted-foreground">
             <div className="flex items-center gap-2">
-              <img src={logoIcon} alt="DigiReps" className="h-4 w-4 rounded-sm" />
+              <img src={logoNav} alt="DigiReps" className="h-4 brightness-0 dark:brightness-100" />
               <span>© 2026 DigiReps — Elite Marketplace</span>
             </div>
             <div className="flex gap-6">
