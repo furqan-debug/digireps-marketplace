@@ -16,6 +16,12 @@ const BLOCKED_WORDS    = [
   "discord", "snapchat", "wechat", "signal",
   "viber", "line", "zalo", "kakaotalk",
 ];
+const SOCIAL_ENGINEERING = [
+  "contact me", "reach me", "call me", "text me", "dm me",
+  "message me on", "hit me up", "hmu", "add me",
+  "my number", "my email", "my insta", "my snap",
+  "off platform", "outside the app", "outside platform",
+];
 
 function detectViolation(content: string): string | null {
   if (EMAIL_PATTERN.test(content))   return "email_pattern";
@@ -26,7 +32,34 @@ function detectViolation(content: string): string | null {
   for (const word of BLOCKED_WORDS) {
     if (lower.includes(word)) return `blocked_word:${word}`;
   }
+  for (const phrase of SOCIAL_ENGINEERING) {
+    if (lower.includes(phrase)) return `social_engineering:${phrase}`;
+  }
   return null;
+}
+
+// Check if recent messages are being used to split a phone number
+// Only flags when the NEW message is also digit-heavy (intentional splitting)
+function detectSplitPhone(recentContents: string[], newContent: string): boolean {
+  // The current message must itself be short and digit-heavy to be part of a split
+  const trimmedNew = newContent.trim();
+  if (trimmedNew.length > 20) return false;
+  const newDigits = (trimmedNew.match(/\d/g) || []).length;
+  if (trimmedNew.length === 0 || newDigits / trimmedNew.length < 0.5) return false;
+
+  // Gather digit-heavy recent messages
+  const digitHeavyRecent = recentContents.filter(m => {
+    const trimmed = m.trim();
+    if (trimmed.length > 20) return false;
+    const digitCount = (trimmed.match(/\d/g) || []).length;
+    return trimmed.length > 0 && digitCount / trimmed.length > 0.5;
+  });
+
+  // Need at least 1 recent digit-heavy message + current one
+  if (digitHeavyRecent.length < 1) return false;
+
+  const combinedDigits = [...digitHeavyRecent, trimmedNew].join("").replace(/[^\d]/g, "");
+  return combinedDigits.length >= 7 && combinedDigits.length <= 15;
 }
 
 Deno.serve(async (req) => {
@@ -103,7 +136,6 @@ Deno.serve(async (req) => {
     const violationType = detectViolation(content);
 
     if (violationType) {
-      // Log violation using service-role (violations RLS only allows admin or own user_id)
       await adminClient.from("violations").insert({
         user_id:         user.id,
         order_id:        order_id,
@@ -111,7 +143,6 @@ Deno.serve(async (req) => {
         message_content: content.substring(0, 500),
       });
 
-      // Count total violations (trigger will suspend if >= 3, but return count to caller)
       const { count } = await adminClient
         .from("violations")
         .select("id", { count: "exact", head: true })
@@ -125,6 +156,41 @@ Deno.serve(async (req) => {
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
+    }
+
+    // ── Split-message phone detection ───────────────────────────────────────
+    const { data: recentMsgs } = await adminClient
+      .from("messages")
+      .select("content")
+      .eq("order_id", order_id)
+      .eq("sender_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (recentMsgs && recentMsgs.length > 0) {
+      const recentContents = recentMsgs.map((m: { content: string }) => m.content).reverse();
+      if (detectSplitPhone(recentContents, content)) {
+        await adminClient.from("violations").insert({
+          user_id:         user.id,
+          order_id:        order_id,
+          violation_type:  "split_phone_pattern",
+          message_content: [...recentContents, content].join(" | ").substring(0, 500),
+        });
+
+        const { count } = await adminClient
+          .from("violations")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id);
+
+        return new Response(
+          JSON.stringify({
+            blocked:   true,
+            message:   "Sharing contact info is against platform rules.",
+            violation_count: count ?? 0,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
     }
 
     // ── Save message ────────────────────────────────────────────────────────
