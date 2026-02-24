@@ -32,7 +32,7 @@ export const Hero = () => (
 
         <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.9] text-foreground">
           The Marketplace for <br className="hidden sm:block" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-glow to-primary/70 animate-pulse-slow">Elite Talent</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-glow to-accent animate-pulse-slow">Elite Talent</span>
         </h1>
 
         <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">

@@ -19,7 +19,7 @@ export const LandingNav = () => (
           <Button variant="ghost" className="font-display font-bold text-xs uppercase tracking-widest hover:bg-primary/5 hover:text-primary transition-colors h-11 px-6 rounded-xl">Sign In</Button>
         </Link>
         <Link to="/auth">
-          <Button className="h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl px-8 shadow-md hover-lift font-display font-bold text-xs uppercase tracking-widest border-0 btn-glow transition-all duration-300">
+          <Button className="h-11 bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl px-8 shadow-md hover-lift font-display font-bold text-xs uppercase tracking-widest border-0 btn-glow transition-all duration-300">
             Get Started
           </Button>
         </Link>

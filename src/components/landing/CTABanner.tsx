@@ -10,7 +10,7 @@ export const CTABanner = () => (
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.8 }}
-      className="relative rounded-[3rem] bg-gradient-to-br from-primary via-primary-glow to-primary py-24 px-12 text-center overflow-hidden flex flex-col items-center shadow-2xl relative z-10 box-border border-4 border-background/20"
+      className="relative rounded-[3rem] bg-gradient-to-br from-foreground via-primary to-primary-glow py-24 px-12 text-center overflow-hidden flex flex-col items-center shadow-2xl relative z-10 box-border border-4 border-background/20"
     >
       <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-background/20 blur-[120px] pointer-events-none" />
       <div className="absolute -bottom-1/2 -left-1/4 w-[50rem] h-[50rem] bg-background/10 blur-[130px] pointer-events-none" />
