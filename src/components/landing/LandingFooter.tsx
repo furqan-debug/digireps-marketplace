@@ -7,7 +7,7 @@ export const LandingFooter = () => (
     <div className="container relative z-10 py-20">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
         <div className="md:col-span-2 space-y-8">
-          <img src={logoFullWhite} alt="DigiReps" className="h-10 brightness-0 dark:brightness-100" />
+          <img src={logoFullWhite} alt="DigiReps" className="h-10 invert dark:invert-0" />
           <p className="text-muted-foreground text-lg leading-relaxed max-w-md font-medium">The premium standard for digital services. Vetted professional talent, managed delivery.</p>
         </div>
         <div className="space-y-6">
