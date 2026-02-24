@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Code, Palette, Video, PenTool, Smartphone, ArrowRight, CheckCircle, Star, Zap, Lock } from "lucide-react";
+import { Shield, Code, Palette, Video, PenTool, Smartphone, ArrowRight, CheckCircle, Star, Zap, Lock, Quote, Users, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
 
 const services = [
@@ -31,6 +31,14 @@ const benefits = [
   { icon: Star, text: "Quality-controlled delivery" },
 ];
 
+const trustedBy = ["TechCorp", "DesignLab", "StartupXYZ", "MediaPro", "CloudBase", "InnoVate"];
+
+const testimonials = [
+  { name: "Sarah Chen", role: "CTO, TechCorp", quote: "DigiReps connected us with a senior developer who delivered our platform redesign in half the expected timeline. The vetting process ensures top quality.", rating: 5 },
+  { name: "Marcus Johnson", role: "Freelance Designer", quote: "Since joining DigiReps, I've had a steady stream of premium clients. The escrow system gives me confidence that I'll always be paid for my work.", rating: 5 },
+  { name: "Elena Rodriguez", role: "Product Manager, StartupXYZ", quote: "The brief submission process is seamless. We've hired three freelancers through DigiReps and every experience has been exceptional.", rating: 5 },
+];
+
 const containerVariants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.1 } },
@@ -56,6 +64,9 @@ const Index = () => {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <Link to="/how-it-works">
+              <Button variant="ghost" className="font-display font-bold text-xs uppercase tracking-widest hover:bg-primary/5 hover:text-primary transition-colors h-11 px-6 rounded-xl hidden sm:inline-flex">How It Works</Button>
+            </Link>
             <Link to="/auth">
               <Button variant="ghost" className="font-display font-bold text-xs uppercase tracking-widest hover:bg-primary/5 hover:text-primary transition-colors h-11 px-6 rounded-xl">Sign In</Button>
             </Link>
@@ -129,6 +140,20 @@ const Index = () => {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Trusted By */}
+      <section className="container py-12">
+        <div className="text-center mb-8">
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/50">Trusted by teams at</p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+          {trustedBy.map((name) => (
+            <span key={name} className="font-display text-lg sm:text-xl font-bold text-muted-foreground/20 hover:text-muted-foreground/40 transition-colors cursor-default tracking-tight">
+              {name}
+            </span>
+          ))}
         </div>
       </section>
 
@@ -211,6 +236,74 @@ const Index = () => {
         </motion.div>
       </section>
 
+      {/* Testimonials */}
+      <section className="container py-24">
+        <div className="text-center mb-16 space-y-4">
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-foreground tracking-tight">What People Say</h2>
+          <p className="text-muted-foreground text-lg max-w-xl mx-auto font-medium">Hear from clients and freelancers who use DigiReps.</p>
+        </div>
+        <motion.div variants={containerVariants} initial="hidden" whileInView="show" viewport={{ once: true }} className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
+          {testimonials.map((t, i) => (
+            <motion.div key={i} variants={itemVariants} className="bg-card border border-border/60 rounded-3xl p-8 space-y-6 hover:border-primary/30 hover:shadow-xl transition-all duration-500">
+              <Quote className="h-8 w-8 text-primary/20" />
+              <p className="text-sm text-muted-foreground leading-relaxed italic">"{t.quote}"</p>
+              <div className="flex items-center gap-1">
+                {[...Array(t.rating)].map((_, j) => (
+                  <Star key={j} className="h-4 w-4 fill-warning text-warning" />
+                ))}
+              </div>
+              <div className="border-t border-border/40 pt-4">
+                <p className="font-display font-bold text-sm text-foreground">{t.name}</p>
+                <p className="text-xs text-muted-foreground">{t.role}</p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </section>
+
+      {/* For Clients vs For Freelancers */}
+      <section className="container py-24">
+        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
+            className="bg-card border border-border/60 rounded-3xl p-10 space-y-6 hover:border-primary/30 transition-colors duration-500">
+            <div className="h-14 w-14 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center text-primary">
+              <Briefcase className="h-7 w-7" />
+            </div>
+            <h3 className="font-display text-2xl font-bold tracking-tight">For Clients</h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3 text-sm text-muted-foreground"><CheckCircle className="h-4 w-4 text-accent shrink-0 mt-0.5" /> Access pre-vetted, top 1% freelancers</li>
+              <li className="flex items-start gap-3 text-sm text-muted-foreground"><CheckCircle className="h-4 w-4 text-accent shrink-0 mt-0.5" /> Secure escrow payments for every project</li>
+              <li className="flex items-start gap-3 text-sm text-muted-foreground"><CheckCircle className="h-4 w-4 text-accent shrink-0 mt-0.5" /> On-platform communication and delivery</li>
+              <li className="flex items-start gap-3 text-sm text-muted-foreground"><CheckCircle className="h-4 w-4 text-accent shrink-0 mt-0.5" /> Quality-controlled results with ratings</li>
+            </ul>
+            <Link to="/auth">
+              <Button className="h-12 px-8 rounded-xl bg-primary text-primary-foreground font-display font-bold text-xs uppercase tracking-widest border-0 gap-2 mt-2">
+                Hire Talent <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
+            className="bg-foreground text-background rounded-3xl p-10 space-y-6">
+            <div className="h-14 w-14 rounded-2xl bg-background/10 border border-background/20 flex items-center justify-center text-background">
+              <Users className="h-7 w-7" />
+            </div>
+            <h3 className="font-display text-2xl font-bold tracking-tight">For Freelancers</h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3 text-sm text-background/70"><CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" /> Get matched with premium clients</li>
+              <li className="flex items-start gap-3 text-sm text-background/70"><CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" /> Guaranteed payments through escrow</li>
+              <li className="flex items-start gap-3 text-sm text-background/70"><CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" /> Build your reputation with verified reviews</li>
+              <li className="flex items-start gap-3 text-sm text-background/70"><CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" /> Track earnings and grow your career</li>
+            </ul>
+            <Link to="/auth">
+              <Button className="h-12 px-8 rounded-xl bg-background text-foreground hover:bg-background/90 font-display font-bold text-xs uppercase tracking-widest border-0 gap-2 mt-2">
+                Join as Freelancer <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA Banner */}
       <section className="container pb-24">
         <motion.div
@@ -248,19 +341,18 @@ const Index = () => {
               <p className="text-muted-foreground text-base leading-relaxed max-w-sm font-medium">The premium standard for digital services. Vetted talent, professional delivery.</p>
             </div>
             <div className="space-y-6">
-              <h4 className="font-display font-bold text-xs text-foreground uppercase tracking-[0.3em]">Solution</h4>
+              <h4 className="font-display font-bold text-xs text-foreground uppercase tracking-[0.3em]">Platform</h4>
               <nav className="flex flex-col gap-4">
+                <Link to="/how-it-works" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">How It Works</Link>
                 <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Hire Talent</Link>
                 <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Freelancer Portal</Link>
-                <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Success Stories</Link>
               </nav>
             </div>
             <div className="space-y-6">
-              <h4 className="font-display font-bold text-xs text-foreground uppercase tracking-[0.3em]">Help</h4>
+              <h4 className="font-display font-bold text-xs text-foreground uppercase tracking-[0.3em]">Support</h4>
               <nav className="flex flex-col gap-4">
-                <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Terms of Service</Link>
-                <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Privacy Policy</Link>
-                <Link to="/auth" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Contact Support</Link>
+                <Link to="/help" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Help & FAQ</Link>
+                <a href="mailto:support@digireps.com" className="text-muted-foreground font-medium text-sm hover:text-primary transition-colors">Contact Support</a>
               </nav>
             </div>
           </div>

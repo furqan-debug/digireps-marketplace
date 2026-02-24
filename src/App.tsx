@@ -27,6 +27,7 @@ import OrderDetail from "./pages/OrderDetail";
 // Freelancer
 import FreelancerDashboard from "./pages/FreelancerDashboard";
 import EditProfile from "./pages/freelancer/EditProfile";
+import Earnings from "./pages/freelancer/Earnings";
 
 // Admin
 import AdminDashboard from "./pages/AdminDashboard";
@@ -34,6 +35,13 @@ import Applications from "./pages/admin/Applications";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminOrders from "./pages/admin/AdminOrders";
 import Violations from "./pages/admin/Violations";
+
+// New public pages
+import HowItWorks from "./pages/HowItWorks";
+import Help from "./pages/Help";
+
+// Client settings
+import ClientSettings from "./pages/client/ClientSettings";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +56,8 @@ const App = () => (
             {/* Public */}
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/help" element={<Help />} />
 
             {/* Role redirect */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -58,6 +68,7 @@ const App = () => (
             <Route path="/client/freelancer/:freelancerId" element={<ProtectedRoute allowedRoles={["client"]}><FreelancerProfile /></ProtectedRoute>} />
             <Route path="/client/brief/:freelancerId" element={<ProtectedRoute allowedRoles={["client"]}><SubmitBrief /></ProtectedRoute>} />
             <Route path="/client/orders" element={<ProtectedRoute allowedRoles={["client"]}><Orders /></ProtectedRoute>} />
+            <Route path="/client/settings" element={<ProtectedRoute allowedRoles={["client"]}><ClientSettings /></ProtectedRoute>} />
 
             {/* Shared: Order detail + chat */}
             <Route path="/orders/:orderId" element={<ProtectedRoute allowedRoles={["client", "freelancer", "admin"]}><OrderDetail /></ProtectedRoute>} />
@@ -66,6 +77,7 @@ const App = () => (
             <Route path="/freelancer" element={<ProtectedRoute allowedRoles={["freelancer"]}><FreelancerDashboard /></ProtectedRoute>} />
             <Route path="/freelancer/profile" element={<ProtectedRoute allowedRoles={["freelancer"]}><EditProfile /></ProtectedRoute>} />
             <Route path="/freelancer/orders" element={<ProtectedRoute allowedRoles={["freelancer"]}><Orders /></ProtectedRoute>} />
+            <Route path="/freelancer/earnings" element={<ProtectedRoute allowedRoles={["freelancer"]}><Earnings /></ProtectedRoute>} />
 
             {/* Admin */}
             <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
