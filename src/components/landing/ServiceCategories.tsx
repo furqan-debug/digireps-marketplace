@@ -26,13 +26,14 @@ export const ServiceCategories = () => (
         <motion.div
           key={name}
           variants={itemVariants}
-          className="group flex flex-col items-center gap-8 rounded-3xl border border-border/60 bg-background p-10 transition-all duration-500 hover:shadow-xl hover:border-primary/40 hover:-translate-y-2 cursor-pointer relative overflow-hidden text-center"
+          className="group flex flex-col items-center gap-8 rounded-3xl surface border border-border/60 p-10 transition-all duration-500 hover:shadow-elegant hover:border-primary/40 hover:-translate-y-2 cursor-pointer relative overflow-hidden text-center"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <div className={`relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${color} transition-all duration-500 group-hover:scale-110 shadow-sm`}>
-            <Icon className="h-8 w-8 text-primary" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute inset-0 bg-gradient-to-tl from-background via-transparent to-transparent opacity-0 group-hover:opacity-50 transition-opacity duration-700" />
+          <div className={`relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${color} transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-sm`}>
+            <Icon className="h-8 w-8 text-primary group-hover:animate-pulse" />
           </div>
-          <span className="relative font-display text-xs font-bold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{name}</span>
+          <span className="relative font-display text-xs font-bold uppercase tracking-widest text-foreground group-hover:gradient-text transition-colors">{name}</span>
         </motion.div>
       ))}
     </motion.div>

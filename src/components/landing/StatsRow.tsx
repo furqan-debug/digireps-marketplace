@@ -8,7 +8,8 @@ const stats = [
 ];
 
 export const StatsRow = () => (
-  <section className="bg-secondary/30 border-y border-border/40 backdrop-blur-sm">
+  <section className="relative border-y border-border/40 glass z-20">
+    <div className="absolute inset-0 bg-secondary/30 pointer-events-none" />
     <div className="container py-16">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
         {stats.map((s, i) => (
@@ -20,8 +21,8 @@ export const StatsRow = () => (
             transition={{ delay: 0.1 * i, duration: 0.6 }}
             className="text-center space-y-2 group"
           >
-            <div className="font-display text-4xl sm:text-5xl font-bold text-foreground tracking-tighter group-hover:text-primary transition-colors">{s.value}</div>
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">{s.label}</div>
+            <div className="font-display text-4xl sm:text-5xl font-bold text-foreground tracking-tighter group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary-glow transition-all duration-300">{s.value}</div>
+            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] group-hover:text-foreground transition-colors">{s.label}</div>
           </motion.div>
         ))}
       </div>
