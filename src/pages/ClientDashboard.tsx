@@ -33,7 +33,7 @@ const ClientDashboard = () => {
   return (
     <AppShell>
       <div className="max-w-7xl mx-auto space-y-12 pb-20">
-        <ClientDashboardHeader firstName={firstName} />
+        <ClientDashboardHeader firstName={firstName} avatarUrl={profile?.avatar_url} displayName={profile?.display_name} />
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[minmax(160px,auto)]">
           <ClientStatsGrid stats={stats} />
           <RecommendedAction hasDelivery={hasDelivery} activeCount={stats.active} />

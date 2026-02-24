@@ -45,6 +45,7 @@ type Freelancer = {
   freelancer_level: "verified" | "pro" | "elite" | null;
   last_active_at: string | null;
   certifications: any[] | null;
+  avatar_url: string | null;
   avg_rating?: number;
 };
 
@@ -100,7 +101,7 @@ const Discover = () => {
 
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, user_id, display_name, country, bio, skills, experience_years, freelancer_level, last_active_at, certifications, headline" as any)
+      .select("id, user_id, display_name, country, bio, skills, experience_years, freelancer_level, last_active_at, certifications, headline, avatar_url" as any)
       .in("user_id", ids)
       .eq("application_status", "approved")
       .eq("is_suspended", false)
@@ -296,9 +297,13 @@ const Discover = () => {
                               <div className="flex items-center gap-4">
                                 <div className="relative shrink-0">
                                   <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary to-primary-glow blur-sm opacity-20 group-hover:opacity-60 transition-opacity duration-500" />
-                                  <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-card border border-primary/20 font-display font-bold text-primary text-2xl shadow-sm z-10">
-                                    {initials}
-                                  </div>
+                                                  <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-card border border-primary/20 font-display font-bold text-primary text-2xl shadow-sm z-10 overflow-hidden">
+                                                    {f.avatar_url ? (
+                                                      <img src={f.avatar_url} alt={f.display_name} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                      initials
+                                                    )}
+                                                  </div>
                                   {/* Activity status dot */}
                                   <div className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full ${activity.color} border-2 border-white z-20`} title={activity.label} />
                                   <div className="absolute -top-2 -left-2 flex h-7 w-7 items-center justify-center rounded-xl bg-white border border-border/60 shadow-sm z-20 group-hover:scale-110 transition-transform duration-300">
