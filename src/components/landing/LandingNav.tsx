@@ -6,7 +6,7 @@ export const LandingNav = () => (
   <header className="fixed top-0 left-0 right-0 z-[100] glass border-b border-border/40 transition-all duration-300 shadow-sm">
     <div className="container flex h-20 items-center justify-between">
       <Link to="/" className="group cursor-pointer hover-lift">
-        <img src={logoNav} alt="DigiReps" className="h-9 brightness-0 dark:brightness-100 group-hover:scale-105 transition-all duration-500" />
+        <img src={logoNav} alt="DigiReps" className="h-9 group-hover:scale-105 transition-all duration-500" />
       </Link>
       <div className="flex items-center gap-3">
         <Link to="/how-it-works">
