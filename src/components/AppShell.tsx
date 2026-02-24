@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
-  Shield, LogOut, LayoutDashboard, Search, FileText,
+  LogOut, LayoutDashboard, Search, FileText,
   User, Users, AlertTriangle, ShieldCheck, Settings, DollarSign,
 } from "lucide-react";
+import logoIcon from "@/assets/logo-icon.png";
 
 interface NavItem {
   label: string;
@@ -69,9 +70,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
             <div className="px-6 flex h-16 sm:h-18 items-center justify-between gap-4">
               {/* Logo */}
               <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-glow shadow-elegant group-hover:scale-105 transition-transform duration-300">
-                  <Shield className="h-4.5 w-4.5 text-primary-foreground" />
-                </div>
+                <img src={logoIcon} alt="DigiReps" className="h-9 w-9 rounded-xl shadow-elegant group-hover:scale-105 transition-transform duration-300" />
                 <div className="flex flex-col">
                   <span className="font-display font-bold text-lg leading-none gradient-text">DigiReps</span>
                   <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground/60">Elite Network</span>
@@ -146,7 +145,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
         <footer className="border-t border-border/40 bg-card/40 py-8">
           <div className="container flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-muted-foreground">
             <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-primary/40" />
+              <img src={logoIcon} alt="DigiReps" className="h-4 w-4 rounded-sm" />
               <span>© 2026 DigiReps — Elite Marketplace</span>
             </div>
             <div className="flex gap-6">

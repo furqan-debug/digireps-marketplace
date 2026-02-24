@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, CheckCircle, Search, Briefcase } from "lucide-react";
+import { CheckCircle, Search, Briefcase } from "lucide-react";
+import logoIcon from "@/assets/logo-icon.png";
 import { motion } from "framer-motion";
 
 const trustPoints = [
@@ -77,9 +78,7 @@ const Auth = () => {
         </div>
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-glow shadow-elegant">
-            <Shield className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <img src={logoIcon} alt="DigiReps" className="h-12 w-12 rounded-2xl shadow-elegant" />
           <span className="font-display text-2xl font-bold tracking-tight">Digi<span className="text-primary">Reps</span></span>
         </div>
 
@@ -120,9 +119,7 @@ const Auth = () => {
         >
           {/* Mobile logo */}
           <div className="flex items-center gap-3 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-glow shadow-elegant">
-              <Shield className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src={logoIcon} alt="DigiReps" className="h-10 w-10 rounded-2xl shadow-elegant" />
             <span className="font-display text-2xl font-bold tracking-tight text-foreground">DigiReps</span>
           </div>
 
