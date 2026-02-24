@@ -1,16 +1,13 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import logoIcon from "@/assets/logo-icon.png";
+import logoNav from "@/assets/logo-nav.png";
 
 export const LandingNav = () => (
   <header className="fixed top-0 left-0 right-0 z-[100] glass border-b border-border/40 transition-all duration-300 shadow-sm">
     <div className="container flex h-20 items-center justify-between">
-      <div className="flex items-center gap-3 group cursor-pointer hover-lift">
-        <img src={logoIcon} alt="DigiReps" className="h-11 w-11 rounded-2xl shadow-md group-hover:shadow-glow group-hover:scale-105 transition-all duration-500" />
-        <span className="font-display text-2xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors duration-300">
-          Digi<span className="text-primary group-hover:text-primary-glow transition-colors duration-300">Reps</span>
-        </span>
-      </div>
+      <Link to="/" className="group cursor-pointer hover-lift">
+        <img src={logoNav} alt="DigiReps" className="h-9 brightness-0 dark:brightness-100 group-hover:scale-105 transition-all duration-500" />
+      </Link>
       <div className="flex items-center gap-3">
         <Link to="/how-it-works">
           <Button variant="ghost" className="font-display font-bold text-xs uppercase tracking-widest hover:bg-primary/5 hover:text-primary transition-colors h-11 px-6 rounded-xl hidden sm:inline-flex">How It Works</Button>
