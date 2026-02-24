@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Shield } from "lucide-react";
+import logoFullWhite from "@/assets/logo-full-white.png";
 
 export const LandingFooter = () => (
   <footer className="relative bg-background border-t border-border/40 overflow-hidden">
@@ -7,12 +7,7 @@ export const LandingFooter = () => (
     <div className="container relative z-10 py-20">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
         <div className="md:col-span-2 space-y-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-glow shadow-md">
-              <Shield className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="font-display text-3xl font-bold tracking-tight text-foreground">Digi<span className="text-primary">Reps</span></span>
-          </div>
+          <img src={logoFullWhite} alt="DigiReps" className="h-10 brightness-0 dark:brightness-100" />
           <p className="text-muted-foreground text-lg leading-relaxed max-w-md font-medium">The premium standard for digital services. Vetted professional talent, managed delivery.</p>
         </div>
         <div className="space-y-6">

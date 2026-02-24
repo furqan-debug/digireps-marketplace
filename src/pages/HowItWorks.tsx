@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Search, UserCheck, FileText, CreditCard, ClipboardList, CheckCircle, Star, MessageSquare, ArrowRight } from "lucide-react";
+import { Search, UserCheck, FileText, CreditCard, ClipboardList, CheckCircle, Star, MessageSquare, ArrowRight } from "lucide-react";
+import logoIcon from "@/assets/logo-icon.png";
 import { motion } from "framer-motion";
 import {
   Accordion,
@@ -44,9 +45,7 @@ const HowItWorks = () => {
       <header className="fixed top-0 left-0 right-0 z-[100] bg-background/60 backdrop-blur-xl border-b border-border/40">
         <div className="container flex h-20 items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group cursor-pointer">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg group-hover:scale-105 transition-all duration-500">
-              <Shield className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src={logoIcon} alt="DigiReps" className="h-11 w-11 rounded-2xl shadow-lg group-hover:scale-105 transition-all duration-500" />
             <span className="font-display text-2xl font-bold tracking-tight text-foreground">
               Digi<span className="text-primary">Reps</span>
             </span>
@@ -185,7 +184,7 @@ const HowItWorks = () => {
         <div className="container py-12">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-muted-foreground font-medium text-xs uppercase tracking-[0.2em]">
             <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-primary/40" />
+              <img src={logoIcon} alt="DigiReps" className="h-4 w-4 rounded-sm" />
               <span>© 2026 DigiReps. All rights reserved.</span>
             </div>
             <div className="flex gap-6">
