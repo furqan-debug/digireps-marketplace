@@ -62,9 +62,13 @@ const ClientSettings = () => {
           
           {/* Avatar */}
           <div className="flex items-center gap-6">
-            <div className="h-20 w-20 flex items-center justify-center rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 text-primary text-2xl font-bold">
-              {initials}
-            </div>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-3xl object-cover border border-primary/20 shadow-sm" />
+            ) : (
+              <div className="h-20 w-20 flex items-center justify-center rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 text-primary text-2xl font-bold">
+                {initials}
+              </div>
+            )}
             <div>
               <p className="font-display font-bold text-lg">{displayName || "Your Name"}</p>
               <p className="text-sm text-muted-foreground">{user?.email}</p>

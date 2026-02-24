@@ -53,6 +53,7 @@ const FreelancerDashboard = () => {
       <div className="max-w-7xl mx-auto space-y-12 pb-20">
         <FreelancerDashboardHeader
           displayName={profile?.display_name || ""}
+          avatarUrl={profile?.avatar_url}
           userId={user?.id}
           statusLabel={statusCfg.label}
           statusClassName={statusCfg.className}
