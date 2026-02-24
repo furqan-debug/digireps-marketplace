@@ -38,23 +38,23 @@ function detectViolation(content: string): string | null {
   return null;
 }
 
-// Check if recent messages + new one form a phone number when concatenated
+// Check if recent messages are being used to split a phone number
+// Only flags when individual messages are predominantly digits (intentional splitting)
 function detectSplitPhone(recentContents: string[], newContent: string): boolean {
-  const combined = [...recentContents, newContent]
-    .map(m => m.replace(/\s+/g, ""))
-    .join("");
-  // Extract all digit sequences and concatenate
-  const digits = combined.replace(/[^\d]/g, "");
-  if (digits.length >= 7 && digits.length <= 15) return true;
-  // Also check sliding windows of last N messages
-  for (let i = 0; i < combined.length; i++) {
-    const sub = combined.slice(i);
-    const subDigits = sub.replace(/[^\d]/g, "");
-    if (subDigits.length >= 7 && subDigits.length <= 15 && subDigits.length / sub.length > 0.6) {
-      return true;
-    }
-  }
-  return false;
+  // Only consider messages that are short and mostly digits (like "055" or "123 4")
+  const allMsgs = [...recentContents, newContent];
+  const digitHeavy = allMsgs.filter(m => {
+    const trimmed = m.trim();
+    if (trimmed.length > 20) return false; // long messages aren't digit-splitting
+    const digitCount = (trimmed.match(/\d/g) || []).length;
+    return trimmed.length > 0 && digitCount / trimmed.length > 0.5;
+  });
+
+  // Need at least 2 digit-heavy messages to consider it splitting
+  if (digitHeavy.length < 2) return false;
+
+  const combinedDigits = digitHeavy.join("").replace(/[^\d]/g, "");
+  return combinedDigits.length >= 7 && combinedDigits.length <= 15;
 }
 
 Deno.serve(async (req) => {
