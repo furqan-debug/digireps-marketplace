@@ -70,7 +70,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
             <div className="px-6 flex h-16 sm:h-18 items-center justify-between gap-4">
               {/* Logo */}
               <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-                <img src={logoNav} alt="DigiReps" className="h-7 brightness-0 dark:brightness-100 group-hover:scale-105 transition-transform duration-300" />
+                <img src={logoNav} alt="DigiReps" className="h-7 group-hover:scale-105 transition-transform duration-300" />
                 {role === "admin" && (
                   <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 hidden sm:flex border-primary/30 text-primary uppercase tracking-tighter ml-1">Admin</Badge>
                 )}
@@ -141,7 +141,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
         <footer className="border-t border-border/40 bg-card/40 py-8">
           <div className="container flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-muted-foreground">
             <div className="flex items-center gap-2">
-              <img src={logoNav} alt="DigiReps" className="h-4 brightness-0 dark:brightness-100" />
+              <img src={logoNav} alt="DigiReps" className="h-4" />
               <span>© 2026 DigiReps — Elite Marketplace</span>
             </div>
             <div className="flex gap-6">
