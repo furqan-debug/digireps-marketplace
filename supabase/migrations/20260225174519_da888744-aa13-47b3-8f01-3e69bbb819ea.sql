@@ -1,0 +1,1 @@
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS escrow_transaction_id text DEFAULT NULL;
