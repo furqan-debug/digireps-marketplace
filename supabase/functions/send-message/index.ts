@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// ── Anti-bypass patterns ─────────────────────────────────────────────────────
+// ──────────────────────────────────────── Anti-bypass patterns ─────────────────────────────────────────────────────
 const EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/i;
 const PHONE_PATTERN = /(\+?\d[\s-.]?){7,15}/;
 const URL_PATTERN = /https?:\/\/|www\.[^\s]+|[^\s]+\.(com|net|org|io|co|app|dev|me)/i;
