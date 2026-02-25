@@ -23,7 +23,7 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
 const FreelancerDashboard = () => {
   const { profile, user } = useAuth();
   const [stats, setStats] = useState({ totalJobs: 0, avgRating: null as number | null, totalEarned: 0 });
-  const [recentReviews, setRecentReviews] = useState<any[]>([]);
+  const [recentReviews, setRecentReviews] = useState<Record<string, unknown>[]>([]);
 
   const status = profile?.application_status as keyof typeof STATUS_CONFIG | null;
   const statusCfg = status ? (STATUS_CONFIG[status] ?? STATUS_CONFIG.onboarding) : STATUS_CONFIG.onboarding;
@@ -31,8 +31,8 @@ const FreelancerDashboard = () => {
   const isSuspended = status === "suspended" || profile?.is_suspended;
   const isRevisionRequired = status === "revision_required";
   const level = profile?.freelancer_level ?? "verified";
-  const completionScore = (profile as any)?.profile_completion_score ?? 0;
-  const adminFeedback = (profile as any)?.admin_feedback;
+  const completionScore = (profile as unknown as { profile_completion_score?: number })?.profile_completion_score ?? 0;
+  const adminFeedback = (profile as unknown as { admin_feedback?: string })?.admin_feedback;
 
   useEffect(() => {
     if (!user || !isApproved) return;

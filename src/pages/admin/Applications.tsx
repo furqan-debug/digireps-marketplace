@@ -27,19 +27,19 @@ type Applicant = {
   freelancer_level: "verified" | "pro" | "elite" | null;
   is_suspended: boolean;
   profile_completion_score: number;
-  work_experience: any[];
-  languages: any[];
+  work_experience: Record<string, unknown>[];
+  languages: Record<string, unknown>[];
   admin_feedback: string | null;
 };
 
 const STATUS_BADGE: Record<string, { className: string; label: string }> = {
-  pending:            { className: "bg-warning/15 text-warning border-warning/30", label: "Pending" },
-  submitted:          { className: "bg-blue-500/15 text-blue-600 border-blue-500/30", label: "Submitted" },
-  under_review:       { className: "bg-indigo-500/15 text-indigo-600 border-indigo-500/30", label: "Under Review" },
-  revision_required:  { className: "bg-amber-500/15 text-amber-600 border-amber-500/30", label: "Revision Required" },
-  approved:           { className: "bg-success/15 text-success border-success/30", label: "Approved" },
-  rejected:           { className: "bg-destructive/10 text-destructive border-destructive/30", label: "Rejected" },
-  suspended:          { className: "bg-destructive/15 text-destructive border-destructive/40", label: "Suspended" },
+  pending: { className: "bg-warning/15 text-warning border-warning/30", label: "Pending" },
+  submitted: { className: "bg-blue-500/15 text-blue-600 border-blue-500/30", label: "Submitted" },
+  under_review: { className: "bg-indigo-500/15 text-indigo-600 border-indigo-500/30", label: "Under Review" },
+  revision_required: { className: "bg-amber-500/15 text-amber-600 border-amber-500/30", label: "Revision Required" },
+  approved: { className: "bg-success/15 text-success border-success/30", label: "Approved" },
+  rejected: { className: "bg-destructive/10 text-destructive border-destructive/30", label: "Rejected" },
+  suspended: { className: "bg-destructive/15 text-destructive border-destructive/40", label: "Suspended" },
 };
 
 const containerVariants = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
@@ -57,7 +57,7 @@ const Applications = () => {
   const fetchApplicants = () => {
     supabase
       .from("profiles")
-      .select("id, user_id, display_name, headline, country, bio, skills, experience_years, hourly_rate, application_status, freelancer_level, is_suspended, profile_completion_score, work_experience, languages, admin_feedback" as any)
+      .select("id, user_id, display_name, headline, country, bio, skills, experience_years, hourly_rate, application_status, freelancer_level, is_suspended, profile_completion_score, work_experience, languages, admin_feedback" as string)
       .not("application_status", "is", null)
       .order("application_status", { ascending: true })
       .order("created_at", { ascending: false })
@@ -71,7 +71,7 @@ const Applications = () => {
 
   const updateStatus = async (userId: string, status: AppStatus, feedback?: string) => {
     setActioning(userId);
-    const updateData: any = { application_status: status };
+    const updateData: Record<string, unknown> = { application_status: status };
     if (feedback !== undefined) updateData.admin_feedback = feedback;
     if (status === "suspended") updateData.is_suspended = true;
     if (status === "approved") updateData.is_suspended = false;

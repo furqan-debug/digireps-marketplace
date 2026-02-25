@@ -10,7 +10,7 @@ import { RecentOrdersWidget } from "@/components/dashboard/client/RecentOrdersWi
 const ClientDashboard = () => {
   const { profile, user } = useAuth();
   const [stats, setStats] = useState({ total: 0, active: 0, completed: 0 });
-  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [recentOrders, setRecentOrders] = useState<Record<string, unknown>[]>([]);
   const [hasDelivery, setHasDelivery] = useState(false);
 
   useEffect(() => {

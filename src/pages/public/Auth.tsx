@@ -45,8 +45,8 @@ const Auth = () => {
     try {
       await signIn(loginEmail, loginPassword);
       toast({ title: "Welcome back!" });
-    } catch (error: any) {
-      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+    } catch (error) {
+      toast({ title: "Login failed", description: error instanceof Error ? error.message : "An unknown error occurred", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -62,8 +62,8 @@ const Auth = () => {
     try {
       await signUp(signupEmail, signupPassword, signupName, signupRole);
       toast({ title: "Account created!", description: "Check your email to verify your account." });
-    } catch (error: any) {
-      toast({ title: "Signup failed", description: error.message, variant: "destructive" });
+    } catch (error) {
+      toast({ title: "Signup failed", description: error instanceof Error ? error.message : "An unknown error occurred", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }

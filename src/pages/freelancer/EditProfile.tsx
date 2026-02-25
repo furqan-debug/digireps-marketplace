@@ -33,7 +33,7 @@ type PortfolioItem = {
   image_url: string | null;
   role?: string | null;
   skills_deliverables?: string[];
-  project_data?: any[];
+  project_data?: Record<string, unknown>[];
 };
 type WorkExperience = { title: string; company: string; description: string; start_year: number; end_year: number | null; is_current: boolean };
 type Education = { degree: string; institution: string; year: number };
@@ -259,15 +259,15 @@ const EditProfile = () => {
         bio: bio.trim(),
         experience_years: experienceYears ? parseInt(experienceYears) : null,
         skills,
-        certifications: certifications as any,
-        work_experience: workExperience as any,
-        education: education as any,
-        languages: languages as any,
+        certifications: certifications as unknown as Record<string, unknown>[],
+        work_experience: workExperience as unknown as Record<string, unknown>[],
+        education: education as unknown as Record<string, unknown>[],
+        languages: languages as unknown as Record<string, unknown>[],
         hourly_rate: hourlyRate ? parseFloat(hourlyRate) : null,
         availability_status: availabilityStatus,
         preferred_pricing_model: preferredPricingModel || null,
         response_time_expectation: responseTimeExpectation || null,
-      } as any).eq("user_id", user.id);
+      } as Record<string, unknown>).eq("user_id", user.id);
 
       if (profErr) throw profErr;
 
@@ -282,8 +282,8 @@ const EditProfile = () => {
 
       await refreshProfile();
       if (!silent) toast({ title: "Profile saved!" });
-    } catch (error: any) {
-      toast({ title: "Failed to save profile", description: error.message, variant: "destructive" });
+    } catch (error) {
+      toast({ title: "Failed to save profile", description: error instanceof Error ? error.message : "An unknown error occurred", variant: "destructive" });
       throw error;
     } finally {
       setSaving(false);
@@ -312,7 +312,7 @@ const EditProfile = () => {
       // Now update status in same query (Bug #2: user_id, not id)
       const { error } = await supabase
         .from("profiles")
-        .update({ application_status: "submitted" } as any)
+        .update({ application_status: "submitted" } as Record<string, unknown>)
         .eq("user_id", user.id);
 
       if (error) throw error;
@@ -325,8 +325,8 @@ const EditProfile = () => {
         setShowCelebration(false);
         navigate("/freelancer/dashboard", { state: { celebration: true } });
       }, 3000);
-    } catch (error: any) {
-      toast({ title: "Submission failed", description: error.message, variant: "destructive" });
+    } catch (error) {
+      toast({ title: "Submission failed", description: error instanceof Error ? error.message : "An unknown error occurred", variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -378,7 +378,7 @@ const EditProfile = () => {
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(fileName);
     const newAvatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
-    await supabase.from("profiles").update({ avatar_url: newAvatarUrl } as any).eq("user_id", user.id);
+    await supabase.from("profiles").update({ avatar_url: newAvatarUrl } as Record<string, unknown>).eq("user_id", user.id);
     setAvatarUrl(newAvatarUrl);
     setAvatarPreview(null);
     setTempAvatarFile(null);

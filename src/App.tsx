@@ -7,38 +7,39 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Public
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound";
+// Public
+import Index from "./pages/public/Index";
+import Auth from "./pages/public/Auth";
+import NotFound from "./pages/public/NotFound";
 
 // Shared redirector
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/shared/Dashboard";
 
 // Client
-import ClientDashboard from "./pages/ClientDashboard";
+import ClientDashboard from "./pages/client/ClientDashboard";
 import Discover from "./pages/client/Discover";
 import FreelancerProfile from "./pages/client/FreelancerProfile";
 import SubmitBrief from "./pages/client/SubmitBrief";
 
 // Shared (client + freelancer)
-import Orders from "./pages/Orders";
-import OrderDetail from "./pages/OrderDetail";
+import Orders from "./pages/shared/Orders";
+import OrderDetail from "./pages/shared/OrderDetail";
 
 // Freelancer
-import FreelancerDashboard from "./pages/FreelancerDashboard";
+import FreelancerDashboard from "./pages/freelancer/FreelancerDashboard";
 import EditProfile from "./pages/freelancer/EditProfile";
 import Earnings from "./pages/freelancer/Earnings";
 
 // Admin
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import Applications from "./pages/admin/Applications";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminOrders from "./pages/admin/AdminOrders";
 import Violations from "./pages/admin/Violations";
 
 // New public pages
-import HowItWorks from "./pages/HowItWorks";
-import Help from "./pages/Help";
+import HowItWorks from "./pages/public/HowItWorks";
+import Help from "./pages/public/Help";
 
 // Client settings
 import ClientSettings from "./pages/client/ClientSettings";

@@ -110,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const beat = () =>
       supabase
         .from("profiles")
-        .update({ last_active_at: new Date().toISOString() } as any)
+        .update({ last_active_at: new Date().toISOString() } as Record<string, unknown>)
         .eq("user_id", user.id)
         .then();
 

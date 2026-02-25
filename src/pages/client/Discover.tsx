@@ -44,7 +44,7 @@ type Freelancer = {
   experience_years: number | null;
   freelancer_level: "verified" | "pro" | "elite" | null;
   last_active_at: string | null;
-  certifications: any[] | null;
+  certifications: { verified?: boolean;[key: string]: unknown }[] | null;
   avatar_url: string | null;
   avg_rating?: number;
 };
@@ -101,7 +101,7 @@ const Discover = () => {
 
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, user_id, display_name, country, bio, skills, experience_years, freelancer_level, last_active_at, certifications, headline, avatar_url" as any)
+      .select("id, user_id, display_name, country, bio, skills, experience_years, freelancer_level, last_active_at, certifications, headline, avatar_url")
       .in("user_id", ids)
       .eq("application_status", "approved")
       .eq("is_suspended", false)
@@ -109,12 +109,13 @@ const Discover = () => {
       .limit(50);
 
     const withRatings = await Promise.all(
-      (profiles ?? []).map(async (p: any) => {
+      ((profiles as unknown as { user_id?: string;[key: string]: unknown }[]) ?? []).map(async (p) => {
+        if (!p.user_id) return p as unknown as Freelancer;
         const { data: ratings } = await supabase.from("ratings").select("rating").eq("reviewee_id", p.user_id);
         const avg = ratings && ratings.length > 0
-          ? ratings.reduce((s: number, r: any) => s + r.rating, 0) / ratings.length
+          ? ratings.reduce((s: number, r: { rating?: number }) => s + (r.rating ?? 0), 0) / ratings.length
           : null;
-        return { ...p, avg_rating: avg ?? undefined } as Freelancer;
+        return { ...p, avg_rating: avg ?? undefined } as unknown as Freelancer;
       })
     );
 
@@ -287,7 +288,7 @@ const Discover = () => {
                     const LvlIcon = lvlCfg.icon;
                     const initials = f.display_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
                     const activity = getActivityStatus(f.last_active_at);
-                    const hasCerts = (f.certifications ?? []).some((c: any) => c.verified);
+                    const hasCerts = (f.certifications ?? []).some((c: { verified?: boolean;[key: string]: unknown }) => c.verified);
 
                     return (
                       <motion.div key={f.id} variants={itemVariants}>
@@ -297,13 +298,13 @@ const Discover = () => {
                               <div className="flex items-center gap-4">
                                 <div className="relative shrink-0">
                                   <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary to-primary-glow blur-sm opacity-20 group-hover:opacity-60 transition-opacity duration-500" />
-                                                  <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-card border border-primary/20 font-display font-bold text-primary text-2xl shadow-sm z-10 overflow-hidden">
-                                                    {f.avatar_url ? (
-                                                      <img src={f.avatar_url} alt={f.display_name} className="h-full w-full object-cover" />
-                                                    ) : (
-                                                      initials
-                                                    )}
-                                                  </div>
+                                  <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-card border border-primary/20 font-display font-bold text-primary text-2xl shadow-sm z-10 overflow-hidden">
+                                    {f.avatar_url ? (
+                                      <img src={f.avatar_url} alt={f.display_name} className="h-full w-full object-cover" />
+                                    ) : (
+                                      initials
+                                    )}
+                                  </div>
                                   {/* Activity status dot */}
                                   <div className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full ${activity.color} border-2 border-white z-20`} title={activity.label} />
                                   <div className="absolute -top-2 -left-2 flex h-7 w-7 items-center justify-center rounded-xl bg-white border border-border/60 shadow-sm z-20 group-hover:scale-110 transition-transform duration-300">

@@ -1,3 +1,4 @@
+// @ts-ignore
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -7,10 +8,10 @@ const corsHeaders = {
 };
 
 // ── Anti-bypass patterns ─────────────────────────────────────────────────────
-const EMAIL_PATTERN    = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/i;
-const PHONE_PATTERN    = /(\+?\d[\s\-.]?){7,15}/;
-const URL_PATTERN      = /https?:\/\/|www\.[^\s]+|[^\s]+\.(com|net|org|io|co|app|dev|me)/i;
-const BLOCKED_WORDS    = [
+const EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/i;
+const PHONE_PATTERN = /(\+?\d[\s-.]?){7,15}/;
+const URL_PATTERN = /https?:\/\/|www\.[^\s]+|[^\s]+\.(com|net|org|io|co|app|dev|me)/i;
+const BLOCKED_WORDS = [
   "gmail", "yahoo", "hotmail", "outlook",
   "whatsapp", "telegram", "instagram", "skype",
   "discord", "snapchat", "wechat", "signal",
@@ -24,9 +25,9 @@ const SOCIAL_ENGINEERING = [
 ];
 
 function detectViolation(content: string): string | null {
-  if (EMAIL_PATTERN.test(content))   return "email_pattern";
-  if (PHONE_PATTERN.test(content))   return "phone_pattern";
-  if (URL_PATTERN.test(content))     return "url_pattern";
+  if (EMAIL_PATTERN.test(content)) return "email_pattern";
+  if (PHONE_PATTERN.test(content)) return "phone_pattern";
+  if (URL_PATTERN.test(content)) return "url_pattern";
 
   const lower = content.toLowerCase();
   for (const word of BLOCKED_WORDS) {
@@ -62,7 +63,8 @@ function detectSplitPhone(recentContents: string[], newContent: string): boolean
   return combinedDigits.length >= 7 && combinedDigits.length <= 15;
 }
 
-Deno.serve(async (req) => {
+// @ts-ignore
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -76,9 +78,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseUrl  = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey   = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const anonKey      = Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!;
+    // @ts-ignore
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    // @ts-ignore
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // @ts-ignore
+    const anonKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!;
 
     // User-scoped client (respects RLS)
     const userClient = createClient(supabaseUrl, anonKey, {
@@ -137,9 +142,9 @@ Deno.serve(async (req) => {
 
     if (violationType) {
       await adminClient.from("violations").insert({
-        user_id:         user.id,
-        order_id:        order_id,
-        violation_type:  violationType,
+        user_id: user.id,
+        order_id: order_id,
+        violation_type: violationType,
         message_content: content.substring(0, 500),
       });
 
@@ -150,8 +155,8 @@ Deno.serve(async (req) => {
 
       return new Response(
         JSON.stringify({
-          blocked:   true,
-          message:   "Sharing contact info is against platform rules.",
+          blocked: true,
+          message: "Sharing contact info is against platform rules.",
           violation_count: count ?? 0,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -171,9 +176,9 @@ Deno.serve(async (req) => {
       const recentContents = recentMsgs.map((m: { content: string }) => m.content).reverse();
       if (detectSplitPhone(recentContents, content)) {
         await adminClient.from("violations").insert({
-          user_id:         user.id,
-          order_id:        order_id,
-          violation_type:  "split_phone_pattern",
+          user_id: user.id,
+          order_id: order_id,
+          violation_type: "split_phone_pattern",
           message_content: [...recentContents, content].join(" | ").substring(0, 500),
         });
 
@@ -184,8 +189,8 @@ Deno.serve(async (req) => {
 
         return new Response(
           JSON.stringify({
-            blocked:   true,
-            message:   "Sharing contact info is against platform rules.",
+            blocked: true,
+            message: "Sharing contact info is against platform rules.",
             violation_count: count ?? 0,
           }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -199,7 +204,7 @@ Deno.serve(async (req) => {
       .insert({
         order_id,
         sender_id: user.id,
-        content:   content.trim(),
+        content: content.trim(),
       })
       .select()
       .single();

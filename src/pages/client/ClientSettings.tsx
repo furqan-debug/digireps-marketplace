@@ -20,7 +20,7 @@ const ClientSettings = () => {
   useEffect(() => {
     if (profile) {
       setDisplayName(profile.display_name || "");
-      setCompany((profile as any).company || "");
+      setCompany((profile as unknown as { company?: string }).company || "");
     }
   }, [profile]);
 
@@ -59,7 +59,7 @@ const ClientSettings = () => {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}
           className="bg-card border border-border/60 rounded-3xl p-8 sm:p-10 space-y-8">
-          
+
           {/* Avatar */}
           <div className="flex items-center gap-6">
             {profile?.avatar_url ? (

@@ -30,11 +30,11 @@ type Profile = {
   is_suspended?: boolean;
   created_at?: string;
   last_active_at: string | null;
-  certifications: any[] | null;
+  certifications: { verified?: boolean; name?: string; issuer?: string; year?: number;[k: string]: unknown }[] | null;
   hourly_rate?: number | null;
-  work_experience?: any[];
-  education?: any[];
-  languages?: any[];
+  work_experience?: { title?: string; company?: string; description?: string; start_year?: number; end_year?: number | null; is_current?: boolean;[k: string]: unknown }[];
+  education?: { degree?: string; institution?: string; year?: number;[k: string]: unknown }[];
+  languages?: { language?: string; proficiency?: string;[k: string]: unknown }[];
   availability_status?: string | null;
   response_time_expectation?: string | null;
   profile_completion_score?: number;
@@ -46,7 +46,7 @@ type PortfolioItem = {
   title: string;
   description: string | null;
   image_url: string;
-  project_data?: any[];
+  project_data?: Record<string, unknown>[];
 };
 
 type Rating = {
