@@ -140,6 +140,36 @@ const OrderDetail = () => {
     }
   };
 
+  const escrowAction = async (action: string) => {
+    if (!orderId) return;
+    setActionLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/escrow`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ action, order_id: orderId }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        toast({ title: "Escrow error", description: data.error || "Something went wrong", variant: "destructive" });
+      } else {
+        // Refresh order state
+        const { data: updated } = await supabase.from("orders").select("*").eq("id", orderId).single();
+        if (updated) setOrder(updated as Order);
+        toast({ title: action === "create_transaction" ? "Escrow funded successfully" : "Funds released successfully" });
+        if (action === "release_funds") setShowRating(true);
+      }
+    } catch (err: any) {
+      toast({ title: "Escrow error", description: err.message, variant: "destructive" });
+    }
+    setActionLoading(false);
+  };
+
   const submitRating = async () => {
     if (!user || !order) return;
     setSubmittingRating(true);
@@ -264,7 +294,7 @@ const OrderDetail = () => {
                       </>
                     )}
                     {isClient && order.status === "accepted" && (
-                      <Button size="lg" className="w-full rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant" onClick={() => updateStatus("in_progress", "held")} disabled={actionLoading}>
+                      <Button size="lg" className="w-full rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant" onClick={() => escrowAction("create_transaction")} disabled={actionLoading}>
                         <DollarSign className="h-4 w-4" /> Fund Escrow & Start
                       </Button>
                     )}
@@ -275,7 +305,7 @@ const OrderDetail = () => {
                     )}
                     {isClient && order.status === "delivered" && (
                       <>
-                        <Button size="lg" className="w-full rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant" onClick={() => { updateStatus("completed", "released"); setShowRating(true); }} disabled={actionLoading}>
+                        <Button size="lg" className="w-full rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary-glow border-0 text-primary-foreground hover:scale-[1.02] transition-transform shadow-elegant" onClick={() => escrowAction("release_funds")} disabled={actionLoading}>
                           <CheckCircle className="h-4 w-4" /> Approve & Pay
                         </Button>
                         <Button size="lg" variant="destructive" className="w-full rounded-2xl border-0 font-bold" onClick={() => updateStatus("disputed")} disabled={actionLoading}>
