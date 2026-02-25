@@ -85,6 +85,7 @@ export type Database = {
           deadline: string | null
           description: string
           escrow_status: Database["public"]["Enums"]["escrow_status"]
+          escrow_transaction_id: string | null
           freelancer_id: string
           id: string
           status: Database["public"]["Enums"]["order_status"]
@@ -100,6 +101,7 @@ export type Database = {
           deadline?: string | null
           description?: string
           escrow_status?: Database["public"]["Enums"]["escrow_status"]
+          escrow_transaction_id?: string | null
           freelancer_id: string
           id?: string
           status?: Database["public"]["Enums"]["order_status"]
@@ -115,6 +117,7 @@ export type Database = {
           deadline?: string | null
           description?: string
           escrow_status?: Database["public"]["Enums"]["escrow_status"]
+          escrow_transaction_id?: string | null
           freelancer_id?: string
           id?: string
           status?: Database["public"]["Enums"]["order_status"]
