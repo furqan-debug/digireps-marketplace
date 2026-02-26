@@ -36,6 +36,8 @@ import Applications from "./pages/admin/Applications";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminOrders from "./pages/admin/AdminOrders";
 import Violations from "./pages/admin/Violations";
+import AdminDisputes from "./pages/admin/AdminDisputes";
+import PlatformSettings from "./pages/admin/PlatformSettings";
 
 // New public pages
 import HowItWorks from "./pages/public/HowItWorks";
@@ -86,6 +88,8 @@ const App = () => (
             <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["admin"]}><AdminUsers /></ProtectedRoute>} />
             <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={["admin"]}><AdminOrders /></ProtectedRoute>} />
             <Route path="/admin/violations" element={<ProtectedRoute allowedRoles={["admin"]}><Violations /></ProtectedRoute>} />
+            <Route path="/admin/disputes" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDisputes /></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={["admin"]}><PlatformSettings /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
