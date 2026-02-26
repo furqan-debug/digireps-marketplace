@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      disputes: {
+        Row: {
+          admin_resolution: string | null
+          created_at: string
+          id: string
+          opened_by: string
+          order_id: string | null
+          reason: string
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          admin_resolution?: string | null
+          created_at?: string
+          id?: string
+          opened_by: string
+          order_id?: string | null
+          reason: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          admin_resolution?: string | null
+          created_at?: string
+          id?: string
+          opened_by?: string
+          order_id?: string | null
+          reason?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       freelancer_services: {
         Row: {
           category_id: string
@@ -48,6 +89,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          is_read: boolean | null
           order_id: string
           sender_id: string
         }
@@ -55,6 +97,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          is_read?: boolean | null
           order_id: string
           sender_id: string
         }
@@ -62,12 +105,51 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          is_read?: boolean | null
           order_id?: string
           sender_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "messages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_milestones: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string | null
+          id: string
+          order_id: string
+          status: string
+          title: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          order_id: string
+          status?: string
+          title: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          order_id?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_milestones_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
@@ -133,6 +215,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      platform_settings: {
+        Row: {
+          commission_rate: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          commission_rate?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          commission_rate?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       portfolio_items: {
         Row: {
