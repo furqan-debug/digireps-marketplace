@@ -71,21 +71,27 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Check suspension
-    const { data: profile } = await adminClient
+    // Check suspension via userClient (RLS should allow reading own profile)
+    const { data: profile, error: profileErr } = await userClient
       .from("profiles").select("is_suspended").eq("user_id", user.id).single();
-    if (profile?.is_suspended) {
-      return new Response(JSON.stringify({ error: "Your account has been suspended." }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+
+    if (profileErr) {
+      return new Response(JSON.stringify({ error: `Profile lookup failed: ${profileErr.message}` }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Check role
-    const { data: roleData } = await adminClient
-      .from("user_roles").select("role").eq("user_id", user.id).single();
-    if (roleData?.role !== "client") {
-      return new Response(JSON.stringify({ error: "Only clients can post projects." }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (profile?.is_suspended) {
+      return new Response(JSON.stringify({ error: "Your account has been suspended." }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check role securely from JWT metadata
+    const role = user.user_metadata?.role;
+    if (role !== "client") {
+      return new Response(JSON.stringify({ error: `Only clients can post projects. Your Role: ${role || 'None'}` }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -129,8 +135,8 @@ Deno.serve(async (req: Request) => {
       }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Insert project
-    const { data: project, error: insertErr } = await adminClient
+    // Insert project (using userClient so it attributes correctly and respects RLS)
+    const { data: project, error: insertErr } = await userClient
       .from("projects").insert({
         client_id: user.id,
         category_id,
@@ -143,8 +149,8 @@ Deno.serve(async (req: Request) => {
 
     if (insertErr) {
       console.error("Project insert error:", insertErr);
-      return new Response(JSON.stringify({ error: "Failed to post project." }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ error: `Failed to post project: ${insertErr.message}` }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 

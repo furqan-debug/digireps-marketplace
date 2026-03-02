@@ -19,8 +19,8 @@ type Category = { id: string; name: string };
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/i;
 const PHONE_RE = /(\+?\d[\s-.]?){7,15}/;
 const URL_RE = /https?:\/\/|www\.[^\s]+|[^\s]+\.(com|net|org|io|co|app|dev|me)/i;
-const BLOCKED = ["gmail","yahoo","hotmail","outlook","whatsapp","telegram","instagram","skype","discord","snapchat","wechat","signal"];
-const SOCIAL = ["contact me","reach me","call me","text me","dm me","message me on","hit me up","hmu","add me","my number","my email","my insta","my snap","off platform","outside the app","outside platform"];
+const BLOCKED = ["gmail", "yahoo", "hotmail", "outlook", "whatsapp", "telegram", "instagram", "skype", "discord", "snapchat", "wechat", "signal"];
+const SOCIAL = ["contact me", "reach me", "call me", "text me", "dm me", "message me on", "hit me up", "hmu", "add me", "my number", "my email", "my insta", "my snap", "off platform", "outside the app", "outside platform"];
 
 function hasContactInfo(text: string): boolean {
   if (EMAIL_RE.test(text) || PHONE_RE.test(text) || URL_RE.test(text)) return true;
@@ -87,6 +87,11 @@ const PostProject = () => {
 
     if (error) {
       toast({ title: "Failed to post project", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    if (data?.error) {
+      toast({ title: "Database Error", description: data.error, variant: "destructive" });
       return;
     }
 
