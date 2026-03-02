@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   LogOut, LayoutDashboard, Search, FileText,
-  User, Users, AlertTriangle, ShieldCheck, Settings, DollarSign,
+  User, Users, AlertTriangle, ShieldCheck, Settings, DollarSign, Scale,
 } from "lucide-react";
 import logoNav from "@/assets/logo-nav.png";
 
@@ -34,7 +34,9 @@ const adminNav: NavItem[] = [
   { label: "Applications", to: "/admin/applications", icon: ShieldCheck },
   { label: "Users", to: "/admin/users", icon: Users },
   { label: "Orders", to: "/admin/orders", icon: FileText },
+  { label: "Disputes", to: "/admin/disputes", icon: Scale },
   { label: "Violations", to: "/admin/violations", icon: AlertTriangle },
+  { label: "Settings", to: "/admin/settings", icon: Settings },
 ];
 
 export const AppShell = ({ children }: { children: React.ReactNode }) => {
@@ -56,6 +58,9 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
     ? profile.display_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
     : "?";
 
+  const isActive = (to: string) =>
+    location.pathname === to || (to !== "/" && location.pathname.startsWith(to + "/"));
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background flex flex-col font-sans relative">
@@ -64,27 +69,27 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/3 blur-[120px]" />
         </div>
 
-        {/* Floating Nav */}
-        <div className="pt-6 px-6 sm:px-8 w-full z-50 sticky top-0">
+        {/* Desktop Floating Nav */}
+        <div className="pt-6 px-6 sm:px-8 w-full z-50 sticky top-0 hidden md:block">
           <header className="mx-auto w-full max-w-7xl glass-panel rounded-2xl transition-all duration-300 shadow-xl shadow-black/[0.03]">
             <div className="px-6 flex h-16 sm:h-18 items-center justify-between gap-4">
               {/* Logo */}
               <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
                 <img src={logoNav} alt="DigiReps" className="h-7 group-hover:scale-105 transition-transform duration-300" />
                 {role === "admin" && (
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 hidden sm:flex border-primary/30 text-primary uppercase tracking-tighter ml-1">Admin</Badge>
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-primary/30 text-primary uppercase tracking-tighter ml-1">Admin</Badge>
                 )}
               </Link>
 
               {/* Desktop Nav */}
-              <nav className="hidden md:flex items-center gap-1.5 bg-muted/40 p-1.5 rounded-2xl border border-border/50 shadow-inner">
+              <nav className="flex items-center gap-1 bg-muted/40 p-1.5 rounded-2xl border border-border/50 shadow-inner overflow-x-auto">
                 {nav.map(({ label, to, icon: Icon }) => {
-                  const active = location.pathname === to || (to !== "/" && location.pathname.startsWith(to + "/"));
+                  const active = isActive(to);
                   return (
                     <Link
                       key={to}
                       to={to}
-                      className={`relative flex items-center gap-2.5 rounded-xl px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.1em] transition-all duration-300
+                      className={`relative flex items-center gap-2 rounded-xl px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] transition-all duration-300 whitespace-nowrap
                       ${active
                           ? "text-primary bg-card shadow-sm border border-border/40"
                           : "text-muted-foreground hover:text-foreground hover:bg-card/50"
@@ -97,27 +102,13 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
                 })}
               </nav>
 
-              {/* Mobile Nav with labels */}
-              <div className="md:hidden flex items-center gap-1">
-                {nav.map(({ label, to, icon: Icon }) => {
-                  const active = location.pathname === to || location.pathname.startsWith(to + "/");
-                  return (
-                    <Link key={to} to={to} className={`flex flex-col items-center gap-0.5 p-2 rounded-xl transition-all ${active ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
-                      <Icon className="h-5 w-5" />
-                      <span className="text-[8px] font-bold uppercase tracking-wider">{label.split(" ")[0]}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-
               {/* User + sign out */}
               <div className="flex items-center gap-3 shrink-0 pl-2 border-l border-border/40">
-                <div className="hidden sm:flex flex-col items-end">
+                <div className="flex flex-col items-end">
                   <span className="text-sm font-bold text-foreground leading-none">{profile?.display_name}</span>
                   <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{role}</span>
                 </div>
 
-                {/* Avatar circle */}
                 <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-primary-glow/10 border border-primary/20 text-primary text-sm font-bold shadow-sm">
                   {initials}
                 </div>
@@ -135,10 +126,51 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           </header>
         </div>
 
-        {/* Page content */}
-        <main className="flex-1 w-full max-w-7xl mx-auto px-6 sm:px-8 py-10 relative z-10">{children}</main>
+        {/* Mobile Top Bar (minimal) */}
+        <div className="md:hidden sticky top-0 z-50 glass border-b border-border/40 px-4 py-3 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <img src={logoNav} alt="DigiReps" className="h-6" />
+            {role === "admin" && (
+              <Badge variant="outline" className="text-[9px] px-1 py-0 h-3.5 border-primary/30 text-primary uppercase tracking-tighter">Admin</Badge>
+            )}
+          </Link>
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 flex items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary-glow/10 border border-primary/20 text-primary text-xs font-bold">
+              {initials}
+            </div>
+            <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-8 w-8 rounded-xl text-muted-foreground hover:text-destructive">
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
 
-        <footer className="border-t border-border/40 bg-card/40 py-8">
+        {/* Page content — add bottom padding on mobile for tab bar */}
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-24 md:pb-10 relative z-10">{children}</main>
+
+        {/* Mobile Bottom Tab Bar */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/40 safe-area-bottom">
+          <div className="flex items-stretch justify-around px-1 py-1">
+            {nav.map(({ label, to, icon: Icon }) => {
+              const active = isActive(to);
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`flex flex-col items-center justify-center gap-0.5 py-2 px-2 min-w-0 flex-1 rounded-xl transition-all duration-200
+                    ${active
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground"
+                    }`}
+                >
+                  <Icon className={`h-5 w-5 shrink-0 ${active ? "text-primary" : ""}`} />
+                  <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{label.split(" ")[0]}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        <footer className="hidden md:block border-t border-border/40 bg-card/40 py-8">
           <div className="container flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-muted-foreground">
             <div className="flex items-center gap-2">
               <img src={logoNav} alt="DigiReps" className="h-4" />
