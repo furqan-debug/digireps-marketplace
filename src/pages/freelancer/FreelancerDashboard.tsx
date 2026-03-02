@@ -50,35 +50,55 @@ const FreelancerDashboard = () => {
 
   return (
     <AppShell>
-      <div className="max-w-7xl mx-auto space-y-12 pb-20">
-        <FreelancerDashboardHeader
-          displayName={profile?.display_name || ""}
-          avatarUrl={profile?.avatar_url}
-          userId={user?.id}
-          statusLabel={statusCfg.label}
-          statusClassName={statusCfg.className}
-          hasProfile={!!profile}
-        />
+      <div className="max-w-7xl mx-auto space-y-12 pb-20 relative px-4 sm:px-6 lg:px-8 pt-6">
+        {/* Dynamic Background Effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background pointer-events-none -z-10" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[minmax(160px,auto)]">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <FreelancerDashboardHeader
+            displayName={profile?.display_name || ""}
+            avatarUrl={profile?.avatar_url}
+            userId={user?.id}
+            statusLabel={statusCfg.label}
+            statusClassName={statusCfg.className}
+            hasProfile={!!profile}
+          />
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 auto-rows-[minmax(160px,auto)] relative z-10">
           {/* Main Status Area - Span 8 */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }} className="md:col-span-8 flex flex-col gap-6">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.6 }} className="md:col-span-8 flex flex-col gap-8">
             <StatusBanners
               status={status}
               isSuspended={!!isSuspended}
               isRevisionRequired={isRevisionRequired}
               adminFeedback={adminFeedback}
             />
-            {isApproved && <PerformanceGrid totalJobs={stats.totalJobs} avgRating={stats.avgRating} totalEarned={stats.totalEarned} />}
-            {isApproved && <RecentReviews reviews={recentReviews} />}
+            {isApproved && (
+              <div className="bg-card/40 backdrop-blur-xl border border-border/60 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-[2.5rem] p-6 lg:p-8 overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+                <PerformanceGrid totalJobs={stats.totalJobs} avgRating={stats.avgRating} totalEarned={stats.totalEarned} />
+              </div>
+            )}
+            {isApproved && (
+              <div className="bg-card/40 backdrop-blur-xl border border-border/60 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-[2.5rem] p-6 lg:p-8">
+                <RecentReviews reviews={recentReviews} />
+              </div>
+            )}
           </motion.div>
 
           {/* Sidebar */}
-          <FreelancerSidebar level={level} completionScore={completionScore} isApproved={isApproved} />
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.6 }} className="md:col-span-4 h-full">
+            <div className="sticky top-24 h-full">
+              <div className="bg-card/40 backdrop-blur-xl border border-border/60 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-[2.5rem] p-6 h-full relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent opacity-30 pointer-events-none" />
+                <FreelancerSidebar level={level} completionScore={completionScore} isApproved={isApproved} />
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
-
-      <div className="fixed inset-0 bg-[radial-gradient(45%_40%_at_50%_0%,rgba(var(--primary),0.02)_0%,transparent_100%)] pointer-events-none" />
     </AppShell>
   );
 };
