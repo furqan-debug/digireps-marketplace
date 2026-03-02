@@ -63,15 +63,15 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background flex flex-col font-sans relative">
+      <div className="min-h-screen flex flex-col font-sans relative bg-background">
         {/* Subtle background glow */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="fixed inset-0 pointer-events-none z-0">
           <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/3 blur-[120px]" />
         </div>
 
-        {/* Desktop Fixed Nav */}
-        <div className="fixed top-0 left-0 right-0 w-full z-[100] hidden md:block glass shadow-sm border-b border-white/10 dark:border-white/5 transition-all duration-300">
-          <header className="mx-auto w-full max-w-7xl px-6 sm:px-8">
+        {/* Desktop Sticky Nav */}
+        <div className="sticky top-0 z-[100] hidden md:block glass shadow-sm border-b border-white/10 dark:border-white/5 transition-all duration-300">
+          <header className="mx-auto w-full max-w-7xl px-6 sm:px-8 bg-background/40">
             <div className="flex h-16 sm:h-20 items-center justify-between gap-4">
               {/* Logo */}
               <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
@@ -91,7 +91,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
                       to={to}
                       className={`relative flex items-center gap-2 rounded-xl px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] transition-all duration-300 whitespace-nowrap
                       ${active
-                          ? "text-primary bg-card shadow-sm border border-border/40"
+                          ? "text-primary bg-card border border-border/40 shadow-sm"
                           : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                         }`}
                     >
@@ -126,8 +126,8 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           </header>
         </div>
 
-        {/* Mobile Top Bar (minimal) */}
-        <div className="md:hidden fixed top-0 left-0 right-0 w-full z-[100] glass border-b border-border/40 px-4 py-3 flex items-center justify-between shadow-sm">
+        {/* Mobile Top Bar (minimal) sticky */}
+        <div className="md:hidden sticky top-0 z-[100] glass border-b border-border/40 px-4 py-3 flex items-center justify-between shadow-sm bg-background/40">
           <Link to="/" className="flex items-center gap-2">
             <img src={logoNav} alt="DigiReps" className="h-6" />
             {role === "admin" && (
@@ -144,8 +144,8 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
 
-        {/* Page content — add top padding for fixed nav and bottom padding on mobile for tab bar */}
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-24 md:pt-[104px] pb-24 md:pb-10 relative z-10">{children}</main>
+        {/* Page content */}
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-24 md:pb-10 relative z-10">{children}</main>
 
         {/* Mobile Bottom Tab Bar */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/40 safe-area-bottom">
@@ -170,7 +170,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           </div>
         </nav>
 
-        <footer className="hidden md:block border-t border-border/40 bg-card/40 py-8">
+        <footer className="hidden md:block border-t border-border/40 bg-card/40 py-8 mt-auto">
           <div className="container flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-muted-foreground">
             <div className="flex items-center gap-2">
               <img src={logoNav} alt="DigiReps" className="h-4" />
