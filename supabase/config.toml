@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.escrow]
 verify_jwt = false
+
+[functions.post-project]
+verify_jwt = false
+
+[functions.submit-bid]
+verify_jwt = false

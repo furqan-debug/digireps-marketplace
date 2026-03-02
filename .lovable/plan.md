@@ -1,62 +1,86 @@
 
 
-## UI/UX Polish Plan
+## Plan: Project Marketplace (Post & Bid)
 
-Your app already has a strong premium design foundation (glass effects, gradient tokens, Plus Jakarta Sans headings, framer-motion animations). Here's what will take it from "good" to "production-ready."
-
----
-
-### 1. Landing Page Refinements
-- **LandingNav**: Add scroll-based background opacity (transparent at top, solid on scroll). Add a mobile hamburger menu (currently nav links are hidden on small screens).
-- **Hero**: Add a subtle animated mockup/illustration or floating UI cards below the CTA to show the product in action (social proof visual).
-- **ServiceCategories**: Cards are too tall on mobile (padding p-10 is excessive). Reduce to p-6 and shrink icon sizes on small screens.
-- **Testimonials**: Add avatar photos (or richer gradient avatars) and a subtle card rotation/parallax on hover.
-
-### 2. AppShell Navigation
-- **Mobile nav**: Current mobile nav shows tiny icon+label columns that get cramped with 4+ items. Convert to a proper bottom tab bar with fixed positioning.
-- **Admin nav**: Missing the Disputes and Settings links in the nav array — they exist as routes but aren't in `adminNav`.
-- **Breadcrumbs**: Add contextual breadcrumbs below the nav on inner pages (e.g., "Orders > Order #A1B2C3").
-
-### 3. Dashboard Pages
-- **ClientDashboard / FreelancerDashboard**: Add skeleton loading states instead of blank space while data loads. Add welcome animation on first visit.
-- **Stats cards**: Add micro-animations (count-up numbers) when stats load.
-- **Empty states**: Improve empty states with illustrations and clear CTAs (e.g., "No orders yet — Find Talent").
-
-### 4. Discover Page
-- **Category cards**: Add a count badge showing how many freelancers are in each category.
-- **Freelancer cards**: The cards are information-dense. Add a hover preview card (popover) with quick stats.
-- **Loading skeleton**: Replace the single spinner with skeleton card placeholders.
-
-### 5. OrderDetail Page
-- **Layout**: The page is very long (700+ lines, single column). Split into a two-column layout on desktop: left for order details/milestones/disputes, right for the chat panel.
-- **Chat bubbles**: Improve message styling with proper speech bubble shapes, timestamps grouped by day, and typing indicators.
-- **Milestone section**: Add a visual timeline/stepper component instead of a flat list.
-- **Action buttons**: Group contextual actions into a sticky bottom bar on mobile.
-
-### 6. Global Polish
-- **Page transitions**: Add route-level fade transitions using framer-motion's `AnimatePresence`.
-- **Toast notifications**: Ensure all toasts use consistent styling (some use `toast()`, some use `sonner`).
-- **Loading states**: Standardize all loading spinners to use skeleton screens instead of centered spinners.
-- **Responsive audit**: Several pages use `text-7xl` headings and large padding that breaks on small screens.
-
-### 7. Admin Pages
-- **AdminDisputes**: Add filter tabs (Open / Resolved / All) and search.
-- **PlatformSettings**: Add visual confirmation (save animation) and setting descriptions.
-- **Consistent admin layout**: Ensure all admin pages follow the same header/content pattern.
+### Overview
+Add a public project board where clients post project briefs and approved freelancers browse and submit bids/comments. All text inputs are scanned for contact info using the same anti-bypass patterns from the existing `send-message` Edge Function.
 
 ---
 
-### Technical Approach
-- All changes are frontend-only (React components + Tailwind CSS)
-- No database or backend changes needed
-- Will use existing framer-motion, Radix UI, and design tokens
-- Changes will be broken into focused batches to keep each edit manageable
+### Step 1 — Database: `projects` table (migration)
+```sql
+CREATE TABLE public.projects (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  category_id uuid NOT NULL REFERENCES service_categories(id),
+  title text NOT NULL,
+  description text NOT NULL,
+  budget numeric NOT NULL CHECK (budget >= 100),
+  deadline timestamptz,
+  status text NOT NULL DEFAULT 'open',  -- open, closed, awarded
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+CREATE INDEX idx_projects_client ON projects(client_id);
+CREATE INDEX idx_projects_category ON projects(category_id);
+CREATE INDEX idx_projects_status ON projects(status);
+```
+RLS: Anyone authenticated can read open projects. Clients insert/update their own. No delete (admin only).
 
-### Suggested Implementation Order
-1. Fix AppShell (mobile nav + missing admin links) — highest impact
-2. Landing page mobile fixes + scroll nav
-3. OrderDetail two-column layout + chat improvements
-4. Loading skeletons across all pages
-5. Dashboard animations and empty states
-6. Admin page filters and polish
+### Step 2 — Database: `project_bids` table (migration)
+```sql
+CREATE TABLE public.project_bids (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  freelancer_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  amount numeric NOT NULL CHECK (amount >= 100),
+  message text NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  UNIQUE(project_id, freelancer_id)
+);
+CREATE INDEX idx_bids_project ON project_bids(project_id);
+CREATE INDEX idx_bids_freelancer ON project_bids(freelancer_id);
+```
+RLS: Approved freelancers can insert their own bid. Project owner + bid owner + admin can view. No edit/delete (admin only).
+
+### Step 3 — Edge Function: `submit-bid`
+Reuses the same anti-bypass detection logic from `send-message` to scan both the bid message and project descriptions before saving. Blocks and logs violations if contact info is detected.
+
+### Step 4 — Edge Function: `post-project`
+Scans project title and description for contact info before inserting into the `projects` table. Blocks if violations detected.
+
+### Step 5 — Frontend: Client "Post a Project" page
+- New page at `/client/projects/new` with form: title, description, category, budget ($100 min), deadline
+- Styled consistently with existing `SubmitBrief` page design
+- Add "Post Project" link to `clientNav` in AppShell
+
+### Step 6 — Frontend: Project Board (browse page)
+- New page at `/freelancer/projects` — lists all open projects with category filter, search, and sort
+- Each card shows: title, budget, category, deadline, bid count, client first name
+- Add "Projects" link to `freelancerNav` in AppShell
+
+### Step 7 — Frontend: Project Detail + Bid submission
+- New page at `/projects/:projectId` (shared route, accessible to client owner + freelancers)
+- Shows full project details, existing bids (visible to project owner), and bid form (for freelancers)
+- Freelancer bid form: amount + message, submitted via `submit-bid` Edge Function
+- Client view: sees all bids with freelancer name/level/rating, can click to view profile or "Award" (creates an order and closes the project)
+
+### Step 8 — Add nav links
+- Client nav: add "Post Project" item
+- Freelancer nav: add "Projects" item
+
+---
+
+### Safety enforcement
+- **Post-project Edge Function**: scans title + description for emails, phones, URLs, blocked words, social engineering phrases
+- **Submit-bid Edge Function**: scans bid message with identical patterns
+- Both log violations to the existing `violations` table and count toward the 3-strike suspension
+- Client-side validation also rejects obvious patterns before submission (defense in depth)
+- No freelancer contact info is exposed on bid cards (only display name, level, rating)
+
+### Technical approach
+- 2 new database tables with RLS
+- 2 new Edge Functions (reusing anti-bypass logic)
+- 3 new frontend pages + nav updates
+- Types auto-regenerate after migration
 
