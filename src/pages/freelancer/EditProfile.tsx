@@ -76,9 +76,9 @@ function calculateCompleteness(data: {
 // ─── Section wrapper for edit mode ───
 const SectionHeader = ({ title }: { title: string }) => (
   <div className="flex items-center gap-4 mb-4">
-    <div className="h-px flex-1 bg-border/40" />
+    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border/40 to-transparent" />
     <h2 className="font-display text-sm font-bold uppercase tracking-[0.2em] text-primary whitespace-nowrap">{title}</h2>
-    <div className="h-px flex-1 bg-border/40" />
+    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border/40 to-transparent" />
   </div>
 );
 
@@ -1193,51 +1193,54 @@ const EditProfile = () => {
             {/* Live Preview Sidebar */}
             <div className="lg:sticky lg:top-12 space-y-6">
               <SectionHeader title="Live Preview" />
-              <Card className="dossier-card relative rounded-[2rem] border-0 bg-white shadow-elegant overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-                <div className="h-32 bg-gradient-to-br from-primary via-primary/80 to-primary-glow" />
-                <CardContent className="px-8 pb-10">
-                  <div className="-mt-16 mb-6 relative z-10 flex justify-center">
+              <Card className="relative rounded-[2.5rem] border border-border/60 bg-card/40 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -mr-32 -mt-32 pointer-events-none" />
+                <div className="h-32 bg-gradient-to-r from-primary via-primary/80 to-accent relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                </div>
+                <CardContent className="px-8 pb-10 relative z-10">
+                  <div className="-mt-16 mb-6 flex justify-center">
                     <div className="inline-block relative">
-                      <div className="h-32 w-32 rounded-[1.5rem] bg-white border-4 border-white shadow-md overflow-hidden">
+                      <div className="h-32 w-32 rounded-[2rem] bg-card border-[6px] border-card shadow-xl overflow-hidden relative group-hover:scale-105 transition-transform duration-500">
                         {(avatarPreview || avatarUrl) ? (
                           <img src={avatarPreview || avatarUrl} alt="Preview" className="w-full h-full object-cover" style={{ transform: `scale(${zoom})`, objectPosition: `${position.x}% ${position.y}%` }} />
                         ) : (
-                          <div className="h-full w-full bg-primary/10 flex items-center justify-center font-display font-black text-primary text-3xl">{(displayName || "?")[0]}</div>
+                          <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center font-display font-black text-primary text-4xl">{(displayName || "?")[0]?.toUpperCase()}</div>
                         )}
                       </div>
-                      <div className={`absolute bottom-0 right-0 h-7 w-7 rounded-xl ${activityStatus.color} border-4 border-card shadow-lg`} />
+                      <div className={`absolute bottom-1 right-1 h-6 w-6 rounded-full ${activityStatus.color} border-[3px] border-card shadow-md`} />
                     </div>
                   </div>
 
                   <div className="space-y-6 text-center">
-                    <div className="space-y-1">
-                      <h3 className="font-display text-2xl font-bold tracking-tight">{displayName || "Your Name"}</h3>
-                      <p className="font-bold text-muted-foreground text-sm">{headline || "Professional Headline"}</p>
-                      <div className="flex items-center justify-center gap-3 pt-2 font-display text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">
-                        <span className="flex items-center gap-1"><Globe className="h-3 w-3" />{country || "Location"}</span>
-                        <span className="h-1 w-1 rounded-full bg-border/40" />
-                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{timezone}</span>
+                    <div className="space-y-1.5">
+                      <h3 className="font-display text-2xl font-bold tracking-tight text-foreground drop-shadow-sm">{displayName || "Your Name"}</h3>
+                      <p className="font-medium text-primary text-sm">{headline || "Professional Headline"}</p>
+                      <div className="flex items-center justify-center gap-3 pt-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                        <span className="flex items-center gap-1.5"><Globe className="h-3.5 w-3.5" />{country || "Location"}</span>
+                        <span className="h-1 w-1 rounded-full bg-border/60" />
+                        <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{timezone}</span>
                       </div>
                     </div>
 
                     {/* Preview stats */}
                     <div className="grid grid-cols-2 gap-3 text-center">
-                      <div className="p-4 rounded-[1.25rem] bg-muted/20 border border-border/40">
-                        <p className="font-display text-xl font-bold text-primary">{workExperience.length}</p>
-                        <p className="font-display text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Experience</p>
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-muted/30 to-muted/10 border border-border/40 hover:border-border/80 transition-colors">
+                        <p className="font-display text-2xl font-bold text-foreground drop-shadow-sm">{workExperience.length}</p>
+                        <p className="font-display text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mt-1">Experience</p>
                       </div>
-                      <div className="p-4 rounded-[1.25rem] bg-muted/20 border border-border/40">
-                        <p className="font-display text-xl font-bold text-primary">{languages.length}</p>
-                        <p className="font-display text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Languages</p>
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-muted/30 to-muted/10 border border-border/40 hover:border-border/80 transition-colors">
+                        <p className="font-display text-2xl font-bold text-foreground drop-shadow-sm">{languages.length}</p>
+                        <p className="font-display text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mt-1">Languages</p>
                       </div>
-                      <div className="p-4 rounded-[1.25rem] bg-muted/20 border border-border/40">
-                        <p className="font-display text-xl font-bold text-primary">{hourlyRate ? `$${hourlyRate}` : "—"}</p>
-                        <p className="font-display text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Per Hour</p>
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-muted/30 to-muted/10 border border-border/40 hover:border-border/80 transition-colors">
+                        <p className="font-display text-2xl font-bold text-accent drop-shadow-sm">{hourlyRate ? `$${hourlyRate}` : "—"}</p>
+                        <p className="font-display text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mt-1">Per Hour</p>
                       </div>
-                      <div className="p-4 rounded-[1.25rem] bg-muted/20 border border-border/40">
-                        <p className="font-display text-xl font-bold text-primary capitalize">{availabilityStatus}</p>
-                        <p className="font-display text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Status</p>
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-muted/30 to-muted/10 border border-border/40 hover:border-border/80 transition-colors">
+                        <p className="font-display text-base font-bold text-primary capitalize mt-1 truncate">{availabilityStatus}</p>
+                        <p className="font-display text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mt-1">Status</p>
                       </div>
                     </div>
 
@@ -1246,7 +1249,7 @@ const EditProfile = () => {
                         <h4 className="font-display text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Categories</h4>
                         <div className="flex flex-wrap gap-2">
                           {selectedCategories.map(id => (
-                            <Badge key={id} className="bg-muted text-foreground border border-border/40 rounded-lg px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest hover:border-primary/30 transition-colors">
+                            <Badge key={id} className="bg-primary/5 text-primary border border-primary/20 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest hover:bg-primary/10 transition-colors">
                               {allCategories.find(c => c.id === id)?.name}
                             </Badge>
                           ))}
@@ -1254,18 +1257,18 @@ const EditProfile = () => {
                       </div>
                     )}
 
-                    <div className="pt-6 border-t border-border/40">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="font-display text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Profile Strength</span>
-                        <span className="font-display text-[10px] font-bold text-primary">{completeness}%</span>
+                    <div className="pt-6 border-t border-border/40 bg-card/20 -mx-8 px-8 pb-2 rounded-b-[2.5rem]">
+                      <div className="flex items-center justify-between mb-3 text-sm">
+                        <span className="font-bold text-muted-foreground flex items-center gap-2"><Sparkles className="h-4 w-4 text-accent" /> Profile Strength</span>
+                        <span className="font-black text-foreground">{completeness}%</span>
                       </div>
-                      <div className="h-3 rounded-full bg-muted/50 overflow-hidden border border-border/50">
-                        <motion.div initial={{ width: 0 }} animate={{ width: `${completeness}%` }} className="h-full bg-gradient-to-r from-primary to-primary-glow" />
+                      <div className="h-2.5 rounded-full bg-muted overflow-hidden">
+                        <motion.div initial={{ width: 0 }} animate={{ width: `${completeness}%` }} className="h-full bg-gradient-to-r from-primary to-accent" />
                       </div>
                     </div>
 
-                    <Button onClick={() => window.open(`/client/freelancer/${user?.id}`, '_blank')} variant="ghost" className="w-full h-14 rounded-xl border border-border/40 bg-card font-display font-bold uppercase tracking-[0.1em] text-xs mt-4 group hover:border-primary/40 hover:shadow-elegant transition-all duration-300">
-                      View Public Profile <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 group-hover:text-primary transition-all" />
+                    <Button onClick={() => window.open(`/client/freelancer/${user?.id}`, '_blank')} className="w-full h-14 rounded-2xl bg-foreground text-background font-display font-bold uppercase tracking-[0.1em] text-xs mt-6 group hover:bg-primary hover:text-primary-foreground hover:shadow-lg transition-all duration-300 border-0">
+                      View Public Profile <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </div>
                 </CardContent>
