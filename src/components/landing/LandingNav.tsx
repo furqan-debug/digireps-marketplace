@@ -16,11 +16,10 @@ export const LandingNav = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] border-b transition-all duration-500 ${
-        scrolled
-          ? "glass border-border/40 shadow-sm"
-          : "bg-transparent border-transparent shadow-none"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-[100] border-b transition-all duration-500 ${scrolled
+        ? "glass border-border/40 shadow-sm"
+        : "bg-transparent border-transparent shadow-none"
+        }`}
     >
       <div className="container flex h-20 items-center justify-between">
         <Link to="/" className="group cursor-pointer hover-lift">
