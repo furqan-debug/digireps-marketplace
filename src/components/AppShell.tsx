@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import {
   LogOut, LayoutDashboard, Search, FileText,
   User, Users, AlertTriangle, ShieldCheck, Settings, DollarSign, Scale,
+  FolderPlus, Briefcase,
 } from "lucide-react";
 import logoNav from "@/assets/logo-nav.png";
 
@@ -18,12 +19,14 @@ interface NavItem {
 const clientNav: NavItem[] = [
   { label: "Dashboard", to: "/client", icon: LayoutDashboard },
   { label: "Find Talent", to: "/client/discover", icon: Search },
+  { label: "Projects", to: "/client/projects", icon: FolderPlus },
   { label: "My Orders", to: "/client/orders", icon: FileText },
   { label: "Settings", to: "/client/settings", icon: Settings },
 ];
 
 const freelancerNav: NavItem[] = [
   { label: "Dashboard", to: "/freelancer", icon: LayoutDashboard },
+  { label: "Projects", to: "/freelancer/projects", icon: Briefcase },
   { label: "My Orders", to: "/freelancer/orders", icon: FileText },
   { label: "Earnings", to: "/freelancer/earnings", icon: DollarSign },
   { label: "My Profile", to: "/freelancer/profile", icon: User },

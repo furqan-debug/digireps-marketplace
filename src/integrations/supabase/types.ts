@@ -384,6 +384,88 @@ export type Database = {
         }
         Relationships: []
       }
+      project_bids: {
+        Row: {
+          amount: number
+          created_at: string | null
+          freelancer_id: string
+          id: string
+          message: string
+          project_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          freelancer_id: string
+          id?: string
+          message: string
+          project_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          freelancer_id?: string
+          id?: string
+          message?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_bids_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          budget: number
+          category_id: string
+          client_id: string
+          created_at: string | null
+          deadline: string | null
+          description: string
+          id: string
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          budget: number
+          category_id: string
+          client_id: string
+          created_at?: string | null
+          deadline?: string | null
+          description: string
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          budget?: number
+          category_id?: string
+          client_id?: string
+          created_at?: string | null
+          deadline?: string | null
+          description?: string
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ratings: {
         Row: {
           created_at: string
