@@ -1,73 +1,62 @@
 
 
-## Plan: Database Indexes + Advanced Features
+## UI/UX Polish Plan
 
-### Step 1 — Add performance indexes (migration)
-Create indexes on all frequently queried foreign keys:
-- `orders(client_id)`, `orders(freelancer_id)`, `orders(category_id)`, `orders(status)`
-- `messages(order_id)`, `messages(sender_id)`
-- `ratings(reviewee_id)`, `ratings(reviewer_id)`, `ratings(order_id)`
-- `profiles(user_id)` — already unique, but confirm index exists
-- `violations(user_id)`, `violations(order_id)`
-- `freelancer_services(freelancer_id)`, `freelancer_services(category_id)`
-- `portfolio_items(freelancer_id)`
+Your app already has a strong premium design foundation (glass effects, gradient tokens, Plus Jakarta Sans headings, framer-motion animations). Here's what will take it from "good" to "production-ready."
 
-### Step 2 — Add `is_read` to messages (migration)
-- `ALTER TABLE messages ADD COLUMN is_read boolean DEFAULT false`
-- Update types will auto-regenerate
-- Update OrderDetail chat UI to show unread indicators and mark messages as read when viewed
+---
 
-### Step 3 — Create `order_milestones` table (migration)
-```sql
-CREATE TABLE public.order_milestones (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id uuid NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  title text NOT NULL,
-  amount numeric NOT NULL,
-  due_date timestamptz,
-  status text DEFAULT 'pending',
-  created_at timestamptz DEFAULT now()
-);
-```
-- Add RLS: participants + admin can view; client creates; participants update status
-- Wire into OrderDetail page with milestone progress UI
+### 1. Landing Page Refinements
+- **LandingNav**: Add scroll-based background opacity (transparent at top, solid on scroll). Add a mobile hamburger menu (currently nav links are hidden on small screens).
+- **Hero**: Add a subtle animated mockup/illustration or floating UI cards below the CTA to show the product in action (social proof visual).
+- **ServiceCategories**: Cards are too tall on mobile (padding p-10 is excessive). Reduce to p-6 and shrink icon sizes on small screens.
+- **Testimonials**: Add avatar photos (or richer gradient avatars) and a subtle card rotation/parallax on hover.
 
-### Step 4 — Create `disputes` table (migration)
-```sql
-CREATE TABLE public.disputes (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id uuid REFERENCES orders(id) ON DELETE CASCADE,
-  opened_by uuid NOT NULL,
-  reason text NOT NULL,
-  admin_resolution text,
-  status text DEFAULT 'open',
-  created_at timestamptz DEFAULT now(),
-  resolved_at timestamptz
-);
-```
-- Add RLS: participants + admin can view; participants can open; admin resolves
-- Add dispute UI in OrderDetail for clients to open disputes and admin to resolve
+### 2. AppShell Navigation
+- **Mobile nav**: Current mobile nav shows tiny icon+label columns that get cramped with 4+ items. Convert to a proper bottom tab bar with fixed positioning.
+- **Admin nav**: Missing the Disputes and Settings links in the nav array — they exist as routes but aren't in `adminNav`.
+- **Breadcrumbs**: Add contextual breadcrumbs below the nav on inner pages (e.g., "Orders > Order #A1B2C3").
 
-### Step 5 — Create `platform_settings` table (migration)
-Single-row settings table for global commission rate and other platform config:
-```sql
-CREATE TABLE public.platform_settings (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  commission_rate numeric NOT NULL DEFAULT 10.00,
-  updated_at timestamptz DEFAULT now()
-);
-```
-- Lock `commission_rate` on orders table via a trigger that copies from `platform_settings` on INSERT (preventing manual override)
-- Admin-only RLS
+### 3. Dashboard Pages
+- **ClientDashboard / FreelancerDashboard**: Add skeleton loading states instead of blank space while data loads. Add welcome animation on first visit.
+- **Stats cards**: Add micro-animations (count-up numbers) when stats load.
+- **Empty states**: Improve empty states with illustrations and clear CTAs (e.g., "No orders yet — Find Talent").
 
-### Step 6 — Update frontend components
-- **OrderDetail**: Add milestone section, dispute button, unread message badges
-- **Admin pages**: Add dispute management view, platform settings page
-- **Types**: Will auto-update after migrations
+### 4. Discover Page
+- **Category cards**: Add a count badge showing how many freelancers are in each category.
+- **Freelancer cards**: The cards are information-dense. Add a hover preview card (popover) with quick stats.
+- **Loading skeleton**: Replace the single spinner with skeleton card placeholders.
 
-### What is NOT needed (already exists)
-- ON DELETE rules — all present
-- Unique constraints on ratings and freelancer_services — already exist
-- Updated_at triggers — already on profiles and orders
-- Soft delete — current RLS already restricts deletion to admin-only, which is equivalent protection
+### 5. OrderDetail Page
+- **Layout**: The page is very long (700+ lines, single column). Split into a two-column layout on desktop: left for order details/milestones/disputes, right for the chat panel.
+- **Chat bubbles**: Improve message styling with proper speech bubble shapes, timestamps grouped by day, and typing indicators.
+- **Milestone section**: Add a visual timeline/stepper component instead of a flat list.
+- **Action buttons**: Group contextual actions into a sticky bottom bar on mobile.
+
+### 6. Global Polish
+- **Page transitions**: Add route-level fade transitions using framer-motion's `AnimatePresence`.
+- **Toast notifications**: Ensure all toasts use consistent styling (some use `toast()`, some use `sonner`).
+- **Loading states**: Standardize all loading spinners to use skeleton screens instead of centered spinners.
+- **Responsive audit**: Several pages use `text-7xl` headings and large padding that breaks on small screens.
+
+### 7. Admin Pages
+- **AdminDisputes**: Add filter tabs (Open / Resolved / All) and search.
+- **PlatformSettings**: Add visual confirmation (save animation) and setting descriptions.
+- **Consistent admin layout**: Ensure all admin pages follow the same header/content pattern.
+
+---
+
+### Technical Approach
+- All changes are frontend-only (React components + Tailwind CSS)
+- No database or backend changes needed
+- Will use existing framer-motion, Radix UI, and design tokens
+- Changes will be broken into focused batches to keep each edit manageable
+
+### Suggested Implementation Order
+1. Fix AppShell (mobile nav + missing admin links) — highest impact
+2. Landing page mobile fixes + scroll nav
+3. OrderDetail two-column layout + chat improvements
+4. Loading skeletons across all pages
+5. Dashboard animations and empty states
+6. Admin page filters and polish
 
