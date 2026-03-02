@@ -52,7 +52,7 @@ function detectSplitPhone(recentContents: string[], newContent: string): boolean
   const digitHeavyRecent = recentContents.filter(m => {
     const trimmed = m.trim();
     if (trimmed.length > 20) return false;
-    const digitCount = (trimmed.match(/\d/g) || []).length;
+    const digitCount = (trimmed.match(/\d/g) || []).length; 
     return trimmed.length > 0 && digitCount / trimmed.length > 0.5;
   });
 
