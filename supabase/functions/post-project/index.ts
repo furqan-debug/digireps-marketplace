@@ -87,14 +87,6 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Check role securely from JWT metadata
-    const role = user.user_metadata?.role;
-    if (role !== "client") {
-      return new Response(JSON.stringify({ error: `Only clients can post projects. Your Role: ${role || 'None'}` }), {
-        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const { title, description, category_id, budget, deadline } = await req.json();
 
     if (!title?.trim() || !description?.trim() || !category_id || !budget) {
