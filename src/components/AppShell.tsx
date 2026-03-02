@@ -69,10 +69,10 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/3 blur-[120px]" />
         </div>
 
-        {/* Desktop Floating Nav */}
-        <div className="pt-6 px-6 sm:px-8 w-full z-50 sticky top-0 hidden md:block">
-          <header className="mx-auto w-full max-w-7xl glass-panel rounded-2xl transition-all duration-300 shadow-xl shadow-black/[0.03]">
-            <div className="px-6 flex h-16 sm:h-18 items-center justify-between gap-4">
+        {/* Desktop Fixed Nav */}
+        <div className="fixed top-0 left-0 right-0 w-full z-[100] hidden md:block glass shadow-sm border-b border-white/10 dark:border-white/5 transition-all duration-300">
+          <header className="mx-auto w-full max-w-7xl px-6 sm:px-8">
+            <div className="flex h-16 sm:h-20 items-center justify-between gap-4">
               {/* Logo */}
               <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
                 <img src={logoNav} alt="DigiReps" className="h-7 group-hover:scale-105 transition-transform duration-300" />
@@ -127,7 +127,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         {/* Mobile Top Bar (minimal) */}
-        <div className="md:hidden sticky top-0 z-50 glass border-b border-border/40 px-4 py-3 flex items-center justify-between">
+        <div className="md:hidden fixed top-0 left-0 right-0 w-full z-[100] glass border-b border-border/40 px-4 py-3 flex items-center justify-between shadow-sm">
           <Link to="/" className="flex items-center gap-2">
             <img src={logoNav} alt="DigiReps" className="h-6" />
             {role === "admin" && (
@@ -144,8 +144,8 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
 
-        {/* Page content — add bottom padding on mobile for tab bar */}
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-24 md:pb-10 relative z-10">{children}</main>
+        {/* Page content — add top padding for fixed nav and bottom padding on mobile for tab bar */}
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-24 md:pt-[104px] pb-24 md:pb-10 relative z-10">{children}</main>
 
         {/* Mobile Bottom Tab Bar */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/40 safe-area-bottom">
